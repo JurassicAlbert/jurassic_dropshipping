@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+
+import 'app_database_storage_io.dart' if (dart.library.html) 'app_database_storage_web.dart' as storage;
 
 part 'app_database.g.dart';
 
@@ -94,16 +91,8 @@ class UserRulesTable extends Table {
   UserRulesTable,
 ])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(storage.openAppDatabaseConnection());
 
   @override
   int get schemaVersion => 1;
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'jurassic_dropshipping.db'));
-    return NativeDatabase.createInBackground(file);
-  });
 }

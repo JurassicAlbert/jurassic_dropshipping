@@ -36,6 +36,11 @@
 - **Stubs**: [lib/services/sources/temu_stub_source.dart](lib/services/sources/temu_stub_source.dart), [lib/services/targets/amazon_stub_target.dart](lib/services/targets/amazon_stub_target.dart).
 - **Docs**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DECISION_LOGIC.md](docs/DECISION_LOGIC.md), [docs/ADDING_A_MARKETPLACE.md](docs/ADDING_A_MARKETPLACE.md). README updated.
 
+### Web panel
+- **Platform**: Flutter web added (`web/`). Same app runs in the browser with all features (dashboard, products, orders, approval, decision log, settings).
+- **Database**: Conditional DB connection: [lib/data/database/app_database_storage_io.dart](lib/data/database/app_database_storage_io.dart) (native SQLite), [app_database_storage_web.dart](lib/data/database/app_database_storage_web.dart) (Drift WASM). `web/sqlite3.wasm` and `web/drift_worker.js` from sqlite3/drift releases.
+- **Shell**: Responsive layout: NavigationRail on width ≥ 600px (desktop/web), drawer on small screens.
+
 ---
 
 ## Agent steps (what was done in order)
