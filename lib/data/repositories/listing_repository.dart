@@ -48,6 +48,13 @@ class ListingRepository {
     return row != null ? _rowToListing(row) : null;
   }
 
+  Future<Listing?> getByTargetListingId(String targetPlatformId, String targetListingId) async {
+    final row = await (_db.select(_db.listings)
+          ..where((t) => t.targetPlatformId.equals(targetPlatformId) & t.targetListingId.equals(targetListingId)))
+        .getSingleOrNull();
+    return row != null ? _rowToListing(row) : null;
+  }
+
   Future<void> insert(Listing listing) async {
     await _db.into(_db.listings).insert(
       ListingsCompanion.insert(
