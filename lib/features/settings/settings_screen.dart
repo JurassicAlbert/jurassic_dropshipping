@@ -16,7 +16,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _markupController = TextEditingController();
   final _cjEmailController = TextEditingController();
   final _cjApiKeyController = TextEditingController();
+  final _allegroClientIdController = TextEditingController();
+  final _allegroClientSecretController = TextEditingController();
   bool _rulesLoaded = false;
+  bool _allegroConnecting = false;
 
   @override
   void dispose() {
@@ -25,6 +28,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _markupController.dispose();
     _cjEmailController.dispose();
     _cjApiKeyController.dispose();
+    _allegroClientIdController.dispose();
+    _allegroClientSecretController.dispose();
     super.dispose();
   }
 
@@ -79,7 +84,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               );
               await ref.read(rulesRepositoryProvider).save(updated);
               ref.invalidate(rulesProvider);
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rules saved.')));
+              if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rules saved.')));
             },
             child: const Text('Save rules'),
           ),
@@ -107,13 +112,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               await storage.write(SecureKeys.cjApiKey, apiKey);
               final client = ref.read(cjClientProvider);
               final ok = await client.ensureToken(email: email, apiKey: apiKey);
-              if (mounted) {
+              if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(ok ? 'CJ connected.' : 'CJ token failed.')),
                 );
               }
             },
             child: const Text('Save CJ credentials'),
+          ),
+          const SizedBox(height: 24),
+          const Text('Allegro', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _allegroClientIdController,
+            decoration: const InputDecoration(labelText: 'Client ID', border: OutlineInputBorder()),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _allegroClientSecretController,
+            obscureText: true,
+            decoration: const InputDecoration(labelText: 'Client Secret', border: OutlineInputBorder()),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: _allegroConnecting
+                ? null
+                : () async {
+                    final clientId = _allegroClientIdController.text.trim();
+                    final clientSecret = _allegroClientSecretController.text.trim();
+                    if (clientId.isEmpty || clientSecret.isEmpty) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Enter Client ID and Client Secret first.')),
+                        );
+                      }
+                      return;
+                    }
+                    final storage = ref.read(secureStorageProvider);
+                    await storage.write(SecureKeys.allegroClientId, clientId);
+                    await storage.write(SecureKeys.allegroClientSecret, clientSecret);
+
+                    setState(() => _allegroConnecting = true);
+                    final oauth = ref.read(allegroOAuthProvider);
+                    final ok = await oauth.authorize();
+                    setState(() => _allegroConnecting = false);
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(ok ? 'Allegro connected!' : 'Allegro OAuth failed.')),
+                      );
+                    }
+                  },
+            child: _allegroConnecting
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Text('Connect Allegro (OAuth)'),
           ),
         ],
       ),
