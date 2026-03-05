@@ -1043,6 +1043,28 @@ class $ListingsTable extends Listings
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _promisedMinDaysMeta = const VerificationMeta(
+    'promisedMinDays',
+  );
+  @override
+  late final GeneratedColumn<int> promisedMinDays = GeneratedColumn<int>(
+    'promised_min_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _promisedMaxDaysMeta = const VerificationMeta(
+    'promisedMaxDays',
+  );
+  @override
+  late final GeneratedColumn<int> promisedMaxDays = GeneratedColumn<int>(
+    'promised_max_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1077,6 +1099,8 @@ class $ListingsTable extends Listings
     sourceCost,
     decisionLogId,
     marketplaceAccountId,
+    promisedMinDays,
+    promisedMaxDays,
     createdAt,
     publishedAt,
   ];
@@ -1176,6 +1200,24 @@ class $ListingsTable extends Listings
         ),
       );
     }
+    if (data.containsKey('promised_min_days')) {
+      context.handle(
+        _promisedMinDaysMeta,
+        promisedMinDays.isAcceptableOrUnknown(
+          data['promised_min_days']!,
+          _promisedMinDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('promised_max_days')) {
+      context.handle(
+        _promisedMaxDaysMeta,
+        promisedMaxDays.isAcceptableOrUnknown(
+          data['promised_max_days']!,
+          _promisedMaxDaysMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1242,6 +1284,14 @@ class $ListingsTable extends Listings
         DriftSqlType.string,
         data['${effectivePrefix}marketplace_account_id'],
       ),
+      promisedMinDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}promised_min_days'],
+      ),
+      promisedMaxDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}promised_max_days'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1270,6 +1320,8 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
   final double sourceCost;
   final String? decisionLogId;
   final String? marketplaceAccountId;
+  final int? promisedMinDays;
+  final int? promisedMaxDays;
   final DateTime createdAt;
   final DateTime? publishedAt;
   const ListingRow({
@@ -1283,6 +1335,8 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     required this.sourceCost,
     this.decisionLogId,
     this.marketplaceAccountId,
+    this.promisedMinDays,
+    this.promisedMaxDays,
     required this.createdAt,
     this.publishedAt,
   });
@@ -1304,6 +1358,12 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     }
     if (!nullToAbsent || marketplaceAccountId != null) {
       map['marketplace_account_id'] = Variable<String>(marketplaceAccountId);
+    }
+    if (!nullToAbsent || promisedMinDays != null) {
+      map['promised_min_days'] = Variable<int>(promisedMinDays);
+    }
+    if (!nullToAbsent || promisedMaxDays != null) {
+      map['promised_max_days'] = Variable<int>(promisedMaxDays);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || publishedAt != null) {
@@ -1330,6 +1390,12 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
       marketplaceAccountId: marketplaceAccountId == null && nullToAbsent
           ? const Value.absent()
           : Value(marketplaceAccountId),
+      promisedMinDays: promisedMinDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(promisedMinDays),
+      promisedMaxDays: promisedMaxDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(promisedMaxDays),
       createdAt: Value(createdAt),
       publishedAt: publishedAt == null && nullToAbsent
           ? const Value.absent()
@@ -1355,6 +1421,8 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
       marketplaceAccountId: serializer.fromJson<String?>(
         json['marketplaceAccountId'],
       ),
+      promisedMinDays: serializer.fromJson<int?>(json['promisedMinDays']),
+      promisedMaxDays: serializer.fromJson<int?>(json['promisedMaxDays']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       publishedAt: serializer.fromJson<DateTime?>(json['publishedAt']),
     );
@@ -1373,6 +1441,8 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
       'sourceCost': serializer.toJson<double>(sourceCost),
       'decisionLogId': serializer.toJson<String?>(decisionLogId),
       'marketplaceAccountId': serializer.toJson<String?>(marketplaceAccountId),
+      'promisedMinDays': serializer.toJson<int?>(promisedMinDays),
+      'promisedMaxDays': serializer.toJson<int?>(promisedMaxDays),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'publishedAt': serializer.toJson<DateTime?>(publishedAt),
     };
@@ -1389,6 +1459,8 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     double? sourceCost,
     Value<String?> decisionLogId = const Value.absent(),
     Value<String?> marketplaceAccountId = const Value.absent(),
+    Value<int?> promisedMinDays = const Value.absent(),
+    Value<int?> promisedMaxDays = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> publishedAt = const Value.absent(),
   }) => ListingRow(
@@ -1408,6 +1480,12 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     marketplaceAccountId: marketplaceAccountId.present
         ? marketplaceAccountId.value
         : this.marketplaceAccountId,
+    promisedMinDays: promisedMinDays.present
+        ? promisedMinDays.value
+        : this.promisedMinDays,
+    promisedMaxDays: promisedMaxDays.present
+        ? promisedMaxDays.value
+        : this.promisedMaxDays,
     createdAt: createdAt ?? this.createdAt,
     publishedAt: publishedAt.present ? publishedAt.value : this.publishedAt,
   );
@@ -1435,6 +1513,12 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
       marketplaceAccountId: data.marketplaceAccountId.present
           ? data.marketplaceAccountId.value
           : this.marketplaceAccountId,
+      promisedMinDays: data.promisedMinDays.present
+          ? data.promisedMinDays.value
+          : this.promisedMinDays,
+      promisedMaxDays: data.promisedMaxDays.present
+          ? data.promisedMaxDays.value
+          : this.promisedMaxDays,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       publishedAt: data.publishedAt.present
           ? data.publishedAt.value
@@ -1455,6 +1539,8 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
           ..write('sourceCost: $sourceCost, ')
           ..write('decisionLogId: $decisionLogId, ')
           ..write('marketplaceAccountId: $marketplaceAccountId, ')
+          ..write('promisedMinDays: $promisedMinDays, ')
+          ..write('promisedMaxDays: $promisedMaxDays, ')
           ..write('createdAt: $createdAt, ')
           ..write('publishedAt: $publishedAt')
           ..write(')'))
@@ -1473,6 +1559,8 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     sourceCost,
     decisionLogId,
     marketplaceAccountId,
+    promisedMinDays,
+    promisedMaxDays,
     createdAt,
     publishedAt,
   );
@@ -1490,6 +1578,8 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
           other.sourceCost == this.sourceCost &&
           other.decisionLogId == this.decisionLogId &&
           other.marketplaceAccountId == this.marketplaceAccountId &&
+          other.promisedMinDays == this.promisedMinDays &&
+          other.promisedMaxDays == this.promisedMaxDays &&
           other.createdAt == this.createdAt &&
           other.publishedAt == this.publishedAt);
 }
@@ -1505,6 +1595,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
   final Value<double> sourceCost;
   final Value<String?> decisionLogId;
   final Value<String?> marketplaceAccountId;
+  final Value<int?> promisedMinDays;
+  final Value<int?> promisedMaxDays;
   final Value<DateTime> createdAt;
   final Value<DateTime?> publishedAt;
   const ListingsCompanion({
@@ -1518,6 +1610,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     this.sourceCost = const Value.absent(),
     this.decisionLogId = const Value.absent(),
     this.marketplaceAccountId = const Value.absent(),
+    this.promisedMinDays = const Value.absent(),
+    this.promisedMaxDays = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.publishedAt = const Value.absent(),
   });
@@ -1532,6 +1626,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     required double sourceCost,
     this.decisionLogId = const Value.absent(),
     this.marketplaceAccountId = const Value.absent(),
+    this.promisedMinDays = const Value.absent(),
+    this.promisedMaxDays = const Value.absent(),
     required DateTime createdAt,
     this.publishedAt = const Value.absent(),
   }) : localId = Value(localId),
@@ -1552,6 +1648,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     Expression<double>? sourceCost,
     Expression<String>? decisionLogId,
     Expression<String>? marketplaceAccountId,
+    Expression<int>? promisedMinDays,
+    Expression<int>? promisedMaxDays,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? publishedAt,
   }) {
@@ -1567,6 +1665,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
       if (decisionLogId != null) 'decision_log_id': decisionLogId,
       if (marketplaceAccountId != null)
         'marketplace_account_id': marketplaceAccountId,
+      if (promisedMinDays != null) 'promised_min_days': promisedMinDays,
+      if (promisedMaxDays != null) 'promised_max_days': promisedMaxDays,
       if (createdAt != null) 'created_at': createdAt,
       if (publishedAt != null) 'published_at': publishedAt,
     });
@@ -1583,6 +1683,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     Value<double>? sourceCost,
     Value<String?>? decisionLogId,
     Value<String?>? marketplaceAccountId,
+    Value<int?>? promisedMinDays,
+    Value<int?>? promisedMaxDays,
     Value<DateTime>? createdAt,
     Value<DateTime?>? publishedAt,
   }) {
@@ -1597,6 +1699,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
       sourceCost: sourceCost ?? this.sourceCost,
       decisionLogId: decisionLogId ?? this.decisionLogId,
       marketplaceAccountId: marketplaceAccountId ?? this.marketplaceAccountId,
+      promisedMinDays: promisedMinDays ?? this.promisedMinDays,
+      promisedMaxDays: promisedMaxDays ?? this.promisedMaxDays,
       createdAt: createdAt ?? this.createdAt,
       publishedAt: publishedAt ?? this.publishedAt,
     );
@@ -1637,6 +1741,12 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
         marketplaceAccountId.value,
       );
     }
+    if (promisedMinDays.present) {
+      map['promised_min_days'] = Variable<int>(promisedMinDays.value);
+    }
+    if (promisedMaxDays.present) {
+      map['promised_max_days'] = Variable<int>(promisedMaxDays.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1659,6 +1769,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
           ..write('sourceCost: $sourceCost, ')
           ..write('decisionLogId: $decisionLogId, ')
           ..write('marketplaceAccountId: $marketplaceAccountId, ')
+          ..write('promisedMinDays: $promisedMinDays, ')
+          ..write('promisedMaxDays: $promisedMaxDays, ')
           ..write('createdAt: $createdAt, ')
           ..write('publishedAt: $publishedAt')
           ..write(')'))
@@ -1814,6 +1926,28 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _promisedDeliveryMinMeta =
+      const VerificationMeta('promisedDeliveryMin');
+  @override
+  late final GeneratedColumn<DateTime> promisedDeliveryMin =
+      GeneratedColumn<DateTime>(
+        'promised_delivery_min',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _promisedDeliveryMaxMeta =
+      const VerificationMeta('promisedDeliveryMax');
+  @override
+  late final GeneratedColumn<DateTime> promisedDeliveryMax =
+      GeneratedColumn<DateTime>(
+        'promised_delivery_max',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _approvedAtMeta = const VerificationMeta(
     'approvedAt',
   );
@@ -1851,6 +1985,8 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
     trackingNumber,
     decisionLogId,
     marketplaceAccountId,
+    promisedDeliveryMin,
+    promisedDeliveryMax,
     approvedAt,
     createdAt,
   ];
@@ -1981,6 +2117,24 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         ),
       );
     }
+    if (data.containsKey('promised_delivery_min')) {
+      context.handle(
+        _promisedDeliveryMinMeta,
+        promisedDeliveryMin.isAcceptableOrUnknown(
+          data['promised_delivery_min']!,
+          _promisedDeliveryMinMeta,
+        ),
+      );
+    }
+    if (data.containsKey('promised_delivery_max')) {
+      context.handle(
+        _promisedDeliveryMaxMeta,
+        promisedDeliveryMax.isAcceptableOrUnknown(
+          data['promised_delivery_max']!,
+          _promisedDeliveryMaxMeta,
+        ),
+      );
+    }
     if (data.containsKey('approved_at')) {
       context.handle(
         _approvedAtMeta,
@@ -2056,6 +2210,14 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         DriftSqlType.string,
         data['${effectivePrefix}marketplace_account_id'],
       ),
+      promisedDeliveryMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}promised_delivery_min'],
+      ),
+      promisedDeliveryMax: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}promised_delivery_max'],
+      ),
       approvedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}approved_at'],
@@ -2087,6 +2249,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
   final String? trackingNumber;
   final String? decisionLogId;
   final String? marketplaceAccountId;
+  final DateTime? promisedDeliveryMin;
+  final DateTime? promisedDeliveryMax;
   final DateTime? approvedAt;
   final DateTime createdAt;
   const OrderRow({
@@ -2103,6 +2267,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     this.trackingNumber,
     this.decisionLogId,
     this.marketplaceAccountId,
+    this.promisedDeliveryMin,
+    this.promisedDeliveryMax,
     this.approvedAt,
     required this.createdAt,
   });
@@ -2129,6 +2295,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     }
     if (!nullToAbsent || marketplaceAccountId != null) {
       map['marketplace_account_id'] = Variable<String>(marketplaceAccountId);
+    }
+    if (!nullToAbsent || promisedDeliveryMin != null) {
+      map['promised_delivery_min'] = Variable<DateTime>(promisedDeliveryMin);
+    }
+    if (!nullToAbsent || promisedDeliveryMax != null) {
+      map['promised_delivery_max'] = Variable<DateTime>(promisedDeliveryMax);
     }
     if (!nullToAbsent || approvedAt != null) {
       map['approved_at'] = Variable<DateTime>(approvedAt);
@@ -2160,6 +2332,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       marketplaceAccountId: marketplaceAccountId == null && nullToAbsent
           ? const Value.absent()
           : Value(marketplaceAccountId),
+      promisedDeliveryMin: promisedDeliveryMin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(promisedDeliveryMin),
+      promisedDeliveryMax: promisedDeliveryMax == null && nullToAbsent
+          ? const Value.absent()
+          : Value(promisedDeliveryMax),
       approvedAt: approvedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(approvedAt),
@@ -2190,6 +2368,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       marketplaceAccountId: serializer.fromJson<String?>(
         json['marketplaceAccountId'],
       ),
+      promisedDeliveryMin: serializer.fromJson<DateTime?>(
+        json['promisedDeliveryMin'],
+      ),
+      promisedDeliveryMax: serializer.fromJson<DateTime?>(
+        json['promisedDeliveryMax'],
+      ),
       approvedAt: serializer.fromJson<DateTime?>(json['approvedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -2211,6 +2395,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       'trackingNumber': serializer.toJson<String?>(trackingNumber),
       'decisionLogId': serializer.toJson<String?>(decisionLogId),
       'marketplaceAccountId': serializer.toJson<String?>(marketplaceAccountId),
+      'promisedDeliveryMin': serializer.toJson<DateTime?>(promisedDeliveryMin),
+      'promisedDeliveryMax': serializer.toJson<DateTime?>(promisedDeliveryMax),
       'approvedAt': serializer.toJson<DateTime?>(approvedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -2230,6 +2416,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     Value<String?> trackingNumber = const Value.absent(),
     Value<String?> decisionLogId = const Value.absent(),
     Value<String?> marketplaceAccountId = const Value.absent(),
+    Value<DateTime?> promisedDeliveryMin = const Value.absent(),
+    Value<DateTime?> promisedDeliveryMax = const Value.absent(),
     Value<DateTime?> approvedAt = const Value.absent(),
     DateTime? createdAt,
   }) => OrderRow(
@@ -2254,6 +2442,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     marketplaceAccountId: marketplaceAccountId.present
         ? marketplaceAccountId.value
         : this.marketplaceAccountId,
+    promisedDeliveryMin: promisedDeliveryMin.present
+        ? promisedDeliveryMin.value
+        : this.promisedDeliveryMin,
+    promisedDeliveryMax: promisedDeliveryMax.present
+        ? promisedDeliveryMax.value
+        : this.promisedDeliveryMax,
     approvedAt: approvedAt.present ? approvedAt.value : this.approvedAt,
     createdAt: createdAt ?? this.createdAt,
   );
@@ -2290,6 +2484,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       marketplaceAccountId: data.marketplaceAccountId.present
           ? data.marketplaceAccountId.value
           : this.marketplaceAccountId,
+      promisedDeliveryMin: data.promisedDeliveryMin.present
+          ? data.promisedDeliveryMin.value
+          : this.promisedDeliveryMin,
+      promisedDeliveryMax: data.promisedDeliveryMax.present
+          ? data.promisedDeliveryMax.value
+          : this.promisedDeliveryMax,
       approvedAt: data.approvedAt.present
           ? data.approvedAt.value
           : this.approvedAt,
@@ -2313,6 +2513,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
           ..write('trackingNumber: $trackingNumber, ')
           ..write('decisionLogId: $decisionLogId, ')
           ..write('marketplaceAccountId: $marketplaceAccountId, ')
+          ..write('promisedDeliveryMin: $promisedDeliveryMin, ')
+          ..write('promisedDeliveryMax: $promisedDeliveryMax, ')
           ..write('approvedAt: $approvedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -2334,6 +2536,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     trackingNumber,
     decisionLogId,
     marketplaceAccountId,
+    promisedDeliveryMin,
+    promisedDeliveryMax,
     approvedAt,
     createdAt,
   );
@@ -2354,6 +2558,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
           other.trackingNumber == this.trackingNumber &&
           other.decisionLogId == this.decisionLogId &&
           other.marketplaceAccountId == this.marketplaceAccountId &&
+          other.promisedDeliveryMin == this.promisedDeliveryMin &&
+          other.promisedDeliveryMax == this.promisedDeliveryMax &&
           other.approvedAt == this.approvedAt &&
           other.createdAt == this.createdAt);
 }
@@ -2372,6 +2578,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
   final Value<String?> trackingNumber;
   final Value<String?> decisionLogId;
   final Value<String?> marketplaceAccountId;
+  final Value<DateTime?> promisedDeliveryMin;
+  final Value<DateTime?> promisedDeliveryMax;
   final Value<DateTime?> approvedAt;
   final Value<DateTime> createdAt;
   const OrdersCompanion({
@@ -2388,6 +2596,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     this.trackingNumber = const Value.absent(),
     this.decisionLogId = const Value.absent(),
     this.marketplaceAccountId = const Value.absent(),
+    this.promisedDeliveryMin = const Value.absent(),
+    this.promisedDeliveryMax = const Value.absent(),
     this.approvedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
@@ -2405,6 +2615,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     this.trackingNumber = const Value.absent(),
     this.decisionLogId = const Value.absent(),
     this.marketplaceAccountId = const Value.absent(),
+    this.promisedDeliveryMin = const Value.absent(),
+    this.promisedDeliveryMax = const Value.absent(),
     this.approvedAt = const Value.absent(),
     required DateTime createdAt,
   }) : localId = Value(localId),
@@ -2430,6 +2642,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     Expression<String>? trackingNumber,
     Expression<String>? decisionLogId,
     Expression<String>? marketplaceAccountId,
+    Expression<DateTime>? promisedDeliveryMin,
+    Expression<DateTime>? promisedDeliveryMax,
     Expression<DateTime>? approvedAt,
     Expression<DateTime>? createdAt,
   }) {
@@ -2449,6 +2663,10 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
       if (decisionLogId != null) 'decision_log_id': decisionLogId,
       if (marketplaceAccountId != null)
         'marketplace_account_id': marketplaceAccountId,
+      if (promisedDeliveryMin != null)
+        'promised_delivery_min': promisedDeliveryMin,
+      if (promisedDeliveryMax != null)
+        'promised_delivery_max': promisedDeliveryMax,
       if (approvedAt != null) 'approved_at': approvedAt,
       if (createdAt != null) 'created_at': createdAt,
     });
@@ -2468,6 +2686,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     Value<String?>? trackingNumber,
     Value<String?>? decisionLogId,
     Value<String?>? marketplaceAccountId,
+    Value<DateTime?>? promisedDeliveryMin,
+    Value<DateTime?>? promisedDeliveryMax,
     Value<DateTime?>? approvedAt,
     Value<DateTime>? createdAt,
   }) {
@@ -2485,6 +2705,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
       trackingNumber: trackingNumber ?? this.trackingNumber,
       decisionLogId: decisionLogId ?? this.decisionLogId,
       marketplaceAccountId: marketplaceAccountId ?? this.marketplaceAccountId,
+      promisedDeliveryMin: promisedDeliveryMin ?? this.promisedDeliveryMin,
+      promisedDeliveryMax: promisedDeliveryMax ?? this.promisedDeliveryMax,
       approvedAt: approvedAt ?? this.approvedAt,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -2536,6 +2758,16 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
         marketplaceAccountId.value,
       );
     }
+    if (promisedDeliveryMin.present) {
+      map['promised_delivery_min'] = Variable<DateTime>(
+        promisedDeliveryMin.value,
+      );
+    }
+    if (promisedDeliveryMax.present) {
+      map['promised_delivery_max'] = Variable<DateTime>(
+        promisedDeliveryMax.value,
+      );
+    }
     if (approvedAt.present) {
       map['approved_at'] = Variable<DateTime>(approvedAt.value);
     }
@@ -2561,6 +2793,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
           ..write('trackingNumber: $trackingNumber, ')
           ..write('decisionLogId: $decisionLogId, ')
           ..write('marketplaceAccountId: $marketplaceAccountId, ')
+          ..write('promisedDeliveryMin: $promisedDeliveryMin, ')
+          ..write('promisedDeliveryMax: $promisedDeliveryMax, ')
           ..write('approvedAt: $approvedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -5663,6 +5897,680 @@ class MarketplaceAccountsCompanion
   }
 }
 
+class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReturnsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _returnIdMeta = const VerificationMeta(
+    'returnId',
+  );
+  @override
+  late final GeneratedColumn<String> returnId = GeneratedColumn<String>(
+    'return_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderIdMeta = const VerificationMeta(
+    'orderId',
+  );
+  @override
+  late final GeneratedColumn<String> orderId = GeneratedColumn<String>(
+    'order_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _refundAmountMeta = const VerificationMeta(
+    'refundAmount',
+  );
+  @override
+  late final GeneratedColumn<double> refundAmount = GeneratedColumn<double>(
+    'refund_amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnShippingCostMeta =
+      const VerificationMeta('returnShippingCost');
+  @override
+  late final GeneratedColumn<double> returnShippingCost =
+      GeneratedColumn<double>(
+        'return_shipping_cost',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _restockingFeeMeta = const VerificationMeta(
+    'restockingFee',
+  );
+  @override
+  late final GeneratedColumn<double> restockingFee = GeneratedColumn<double>(
+    'restocking_fee',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _requestedAtMeta = const VerificationMeta(
+    'requestedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> requestedAt = GeneratedColumn<DateTime>(
+    'requested_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resolvedAtMeta = const VerificationMeta(
+    'resolvedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> resolvedAt = GeneratedColumn<DateTime>(
+    'resolved_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    returnId,
+    orderId,
+    reason,
+    status,
+    notes,
+    refundAmount,
+    returnShippingCost,
+    restockingFee,
+    requestedAt,
+    resolvedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'returns';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReturnRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('return_id')) {
+      context.handle(
+        _returnIdMeta,
+        returnId.isAcceptableOrUnknown(data['return_id']!, _returnIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_returnIdMeta);
+    }
+    if (data.containsKey('order_id')) {
+      context.handle(
+        _orderIdMeta,
+        orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderIdMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('refund_amount')) {
+      context.handle(
+        _refundAmountMeta,
+        refundAmount.isAcceptableOrUnknown(
+          data['refund_amount']!,
+          _refundAmountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('return_shipping_cost')) {
+      context.handle(
+        _returnShippingCostMeta,
+        returnShippingCost.isAcceptableOrUnknown(
+          data['return_shipping_cost']!,
+          _returnShippingCostMeta,
+        ),
+      );
+    }
+    if (data.containsKey('restocking_fee')) {
+      context.handle(
+        _restockingFeeMeta,
+        restockingFee.isAcceptableOrUnknown(
+          data['restocking_fee']!,
+          _restockingFeeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('requested_at')) {
+      context.handle(
+        _requestedAtMeta,
+        requestedAt.isAcceptableOrUnknown(
+          data['requested_at']!,
+          _requestedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('resolved_at')) {
+      context.handle(
+        _resolvedAtMeta,
+        resolvedAt.isAcceptableOrUnknown(data['resolved_at']!, _resolvedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReturnRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReturnRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      returnId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_id'],
+      )!,
+      orderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_id'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      refundAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}refund_amount'],
+      ),
+      returnShippingCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}return_shipping_cost'],
+      ),
+      restockingFee: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}restocking_fee'],
+      ),
+      requestedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}requested_at'],
+      ),
+      resolvedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}resolved_at'],
+      ),
+    );
+  }
+
+  @override
+  $ReturnsTable createAlias(String alias) {
+    return $ReturnsTable(attachedDatabase, alias);
+  }
+}
+
+class ReturnRow extends DataClass implements Insertable<ReturnRow> {
+  final int id;
+  final String returnId;
+  final String orderId;
+  final String reason;
+  final String status;
+  final String? notes;
+  final double? refundAmount;
+  final double? returnShippingCost;
+  final double? restockingFee;
+  final DateTime? requestedAt;
+  final DateTime? resolvedAt;
+  const ReturnRow({
+    required this.id,
+    required this.returnId,
+    required this.orderId,
+    required this.reason,
+    required this.status,
+    this.notes,
+    this.refundAmount,
+    this.returnShippingCost,
+    this.restockingFee,
+    this.requestedAt,
+    this.resolvedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['return_id'] = Variable<String>(returnId);
+    map['order_id'] = Variable<String>(orderId);
+    map['reason'] = Variable<String>(reason);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || refundAmount != null) {
+      map['refund_amount'] = Variable<double>(refundAmount);
+    }
+    if (!nullToAbsent || returnShippingCost != null) {
+      map['return_shipping_cost'] = Variable<double>(returnShippingCost);
+    }
+    if (!nullToAbsent || restockingFee != null) {
+      map['restocking_fee'] = Variable<double>(restockingFee);
+    }
+    if (!nullToAbsent || requestedAt != null) {
+      map['requested_at'] = Variable<DateTime>(requestedAt);
+    }
+    if (!nullToAbsent || resolvedAt != null) {
+      map['resolved_at'] = Variable<DateTime>(resolvedAt);
+    }
+    return map;
+  }
+
+  ReturnsCompanion toCompanion(bool nullToAbsent) {
+    return ReturnsCompanion(
+      id: Value(id),
+      returnId: Value(returnId),
+      orderId: Value(orderId),
+      reason: Value(reason),
+      status: Value(status),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      refundAmount: refundAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(refundAmount),
+      returnShippingCost: returnShippingCost == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnShippingCost),
+      restockingFee: restockingFee == null && nullToAbsent
+          ? const Value.absent()
+          : Value(restockingFee),
+      requestedAt: requestedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(requestedAt),
+      resolvedAt: resolvedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resolvedAt),
+    );
+  }
+
+  factory ReturnRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReturnRow(
+      id: serializer.fromJson<int>(json['id']),
+      returnId: serializer.fromJson<String>(json['returnId']),
+      orderId: serializer.fromJson<String>(json['orderId']),
+      reason: serializer.fromJson<String>(json['reason']),
+      status: serializer.fromJson<String>(json['status']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      refundAmount: serializer.fromJson<double?>(json['refundAmount']),
+      returnShippingCost: serializer.fromJson<double?>(
+        json['returnShippingCost'],
+      ),
+      restockingFee: serializer.fromJson<double?>(json['restockingFee']),
+      requestedAt: serializer.fromJson<DateTime?>(json['requestedAt']),
+      resolvedAt: serializer.fromJson<DateTime?>(json['resolvedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'returnId': serializer.toJson<String>(returnId),
+      'orderId': serializer.toJson<String>(orderId),
+      'reason': serializer.toJson<String>(reason),
+      'status': serializer.toJson<String>(status),
+      'notes': serializer.toJson<String?>(notes),
+      'refundAmount': serializer.toJson<double?>(refundAmount),
+      'returnShippingCost': serializer.toJson<double?>(returnShippingCost),
+      'restockingFee': serializer.toJson<double?>(restockingFee),
+      'requestedAt': serializer.toJson<DateTime?>(requestedAt),
+      'resolvedAt': serializer.toJson<DateTime?>(resolvedAt),
+    };
+  }
+
+  ReturnRow copyWith({
+    int? id,
+    String? returnId,
+    String? orderId,
+    String? reason,
+    String? status,
+    Value<String?> notes = const Value.absent(),
+    Value<double?> refundAmount = const Value.absent(),
+    Value<double?> returnShippingCost = const Value.absent(),
+    Value<double?> restockingFee = const Value.absent(),
+    Value<DateTime?> requestedAt = const Value.absent(),
+    Value<DateTime?> resolvedAt = const Value.absent(),
+  }) => ReturnRow(
+    id: id ?? this.id,
+    returnId: returnId ?? this.returnId,
+    orderId: orderId ?? this.orderId,
+    reason: reason ?? this.reason,
+    status: status ?? this.status,
+    notes: notes.present ? notes.value : this.notes,
+    refundAmount: refundAmount.present ? refundAmount.value : this.refundAmount,
+    returnShippingCost: returnShippingCost.present
+        ? returnShippingCost.value
+        : this.returnShippingCost,
+    restockingFee: restockingFee.present
+        ? restockingFee.value
+        : this.restockingFee,
+    requestedAt: requestedAt.present ? requestedAt.value : this.requestedAt,
+    resolvedAt: resolvedAt.present ? resolvedAt.value : this.resolvedAt,
+  );
+  ReturnRow copyWithCompanion(ReturnsCompanion data) {
+    return ReturnRow(
+      id: data.id.present ? data.id.value : this.id,
+      returnId: data.returnId.present ? data.returnId.value : this.returnId,
+      orderId: data.orderId.present ? data.orderId.value : this.orderId,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      status: data.status.present ? data.status.value : this.status,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      refundAmount: data.refundAmount.present
+          ? data.refundAmount.value
+          : this.refundAmount,
+      returnShippingCost: data.returnShippingCost.present
+          ? data.returnShippingCost.value
+          : this.returnShippingCost,
+      restockingFee: data.restockingFee.present
+          ? data.restockingFee.value
+          : this.restockingFee,
+      requestedAt: data.requestedAt.present
+          ? data.requestedAt.value
+          : this.requestedAt,
+      resolvedAt: data.resolvedAt.present
+          ? data.resolvedAt.value
+          : this.resolvedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReturnRow(')
+          ..write('id: $id, ')
+          ..write('returnId: $returnId, ')
+          ..write('orderId: $orderId, ')
+          ..write('reason: $reason, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('refundAmount: $refundAmount, ')
+          ..write('returnShippingCost: $returnShippingCost, ')
+          ..write('restockingFee: $restockingFee, ')
+          ..write('requestedAt: $requestedAt, ')
+          ..write('resolvedAt: $resolvedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    returnId,
+    orderId,
+    reason,
+    status,
+    notes,
+    refundAmount,
+    returnShippingCost,
+    restockingFee,
+    requestedAt,
+    resolvedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReturnRow &&
+          other.id == this.id &&
+          other.returnId == this.returnId &&
+          other.orderId == this.orderId &&
+          other.reason == this.reason &&
+          other.status == this.status &&
+          other.notes == this.notes &&
+          other.refundAmount == this.refundAmount &&
+          other.returnShippingCost == this.returnShippingCost &&
+          other.restockingFee == this.restockingFee &&
+          other.requestedAt == this.requestedAt &&
+          other.resolvedAt == this.resolvedAt);
+}
+
+class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
+  final Value<int> id;
+  final Value<String> returnId;
+  final Value<String> orderId;
+  final Value<String> reason;
+  final Value<String> status;
+  final Value<String?> notes;
+  final Value<double?> refundAmount;
+  final Value<double?> returnShippingCost;
+  final Value<double?> restockingFee;
+  final Value<DateTime?> requestedAt;
+  final Value<DateTime?> resolvedAt;
+  const ReturnsCompanion({
+    this.id = const Value.absent(),
+    this.returnId = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.refundAmount = const Value.absent(),
+    this.returnShippingCost = const Value.absent(),
+    this.restockingFee = const Value.absent(),
+    this.requestedAt = const Value.absent(),
+    this.resolvedAt = const Value.absent(),
+  });
+  ReturnsCompanion.insert({
+    this.id = const Value.absent(),
+    required String returnId,
+    required String orderId,
+    required String reason,
+    required String status,
+    this.notes = const Value.absent(),
+    this.refundAmount = const Value.absent(),
+    this.returnShippingCost = const Value.absent(),
+    this.restockingFee = const Value.absent(),
+    this.requestedAt = const Value.absent(),
+    this.resolvedAt = const Value.absent(),
+  }) : returnId = Value(returnId),
+       orderId = Value(orderId),
+       reason = Value(reason),
+       status = Value(status);
+  static Insertable<ReturnRow> custom({
+    Expression<int>? id,
+    Expression<String>? returnId,
+    Expression<String>? orderId,
+    Expression<String>? reason,
+    Expression<String>? status,
+    Expression<String>? notes,
+    Expression<double>? refundAmount,
+    Expression<double>? returnShippingCost,
+    Expression<double>? restockingFee,
+    Expression<DateTime>? requestedAt,
+    Expression<DateTime>? resolvedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (returnId != null) 'return_id': returnId,
+      if (orderId != null) 'order_id': orderId,
+      if (reason != null) 'reason': reason,
+      if (status != null) 'status': status,
+      if (notes != null) 'notes': notes,
+      if (refundAmount != null) 'refund_amount': refundAmount,
+      if (returnShippingCost != null)
+        'return_shipping_cost': returnShippingCost,
+      if (restockingFee != null) 'restocking_fee': restockingFee,
+      if (requestedAt != null) 'requested_at': requestedAt,
+      if (resolvedAt != null) 'resolved_at': resolvedAt,
+    });
+  }
+
+  ReturnsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? returnId,
+    Value<String>? orderId,
+    Value<String>? reason,
+    Value<String>? status,
+    Value<String?>? notes,
+    Value<double?>? refundAmount,
+    Value<double?>? returnShippingCost,
+    Value<double?>? restockingFee,
+    Value<DateTime?>? requestedAt,
+    Value<DateTime?>? resolvedAt,
+  }) {
+    return ReturnsCompanion(
+      id: id ?? this.id,
+      returnId: returnId ?? this.returnId,
+      orderId: orderId ?? this.orderId,
+      reason: reason ?? this.reason,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+      refundAmount: refundAmount ?? this.refundAmount,
+      returnShippingCost: returnShippingCost ?? this.returnShippingCost,
+      restockingFee: restockingFee ?? this.restockingFee,
+      requestedAt: requestedAt ?? this.requestedAt,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (returnId.present) {
+      map['return_id'] = Variable<String>(returnId.value);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<String>(orderId.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (refundAmount.present) {
+      map['refund_amount'] = Variable<double>(refundAmount.value);
+    }
+    if (returnShippingCost.present) {
+      map['return_shipping_cost'] = Variable<double>(returnShippingCost.value);
+    }
+    if (restockingFee.present) {
+      map['restocking_fee'] = Variable<double>(restockingFee.value);
+    }
+    if (requestedAt.present) {
+      map['requested_at'] = Variable<DateTime>(requestedAt.value);
+    }
+    if (resolvedAt.present) {
+      map['resolved_at'] = Variable<DateTime>(resolvedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReturnsCompanion(')
+          ..write('id: $id, ')
+          ..write('returnId: $returnId, ')
+          ..write('orderId: $orderId, ')
+          ..write('reason: $reason, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('refundAmount: $refundAmount, ')
+          ..write('returnShippingCost: $returnShippingCost, ')
+          ..write('restockingFee: $restockingFee, ')
+          ..write('requestedAt: $requestedAt, ')
+          ..write('resolvedAt: $resolvedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5675,6 +6583,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SupplierOffersTable supplierOffers = $SupplierOffersTable(this);
   late final $MarketplaceAccountsTable marketplaceAccounts =
       $MarketplaceAccountsTable(this);
+  late final $ReturnsTable returns = $ReturnsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5688,6 +6597,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     suppliers,
     supplierOffers,
     marketplaceAccounts,
+    returns,
   ];
 }
 
@@ -6117,6 +7027,8 @@ typedef $$ListingsTableCreateCompanionBuilder =
       required double sourceCost,
       Value<String?> decisionLogId,
       Value<String?> marketplaceAccountId,
+      Value<int?> promisedMinDays,
+      Value<int?> promisedMaxDays,
       required DateTime createdAt,
       Value<DateTime?> publishedAt,
     });
@@ -6132,6 +7044,8 @@ typedef $$ListingsTableUpdateCompanionBuilder =
       Value<double> sourceCost,
       Value<String?> decisionLogId,
       Value<String?> marketplaceAccountId,
+      Value<int?> promisedMinDays,
+      Value<int?> promisedMaxDays,
       Value<DateTime> createdAt,
       Value<DateTime?> publishedAt,
     });
@@ -6192,6 +7106,16 @@ class $$ListingsTableFilterComposer
 
   ColumnFilters<String> get marketplaceAccountId => $composableBuilder(
     column: $table.marketplaceAccountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get promisedMinDays => $composableBuilder(
+    column: $table.promisedMinDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get promisedMaxDays => $composableBuilder(
+    column: $table.promisedMaxDays,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6265,6 +7189,16 @@ class $$ListingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get promisedMinDays => $composableBuilder(
+    column: $table.promisedMinDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get promisedMaxDays => $composableBuilder(
+    column: $table.promisedMaxDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -6327,6 +7261,16 @@ class $$ListingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get promisedMinDays => $composableBuilder(
+    column: $table.promisedMinDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get promisedMaxDays => $composableBuilder(
+    column: $table.promisedMaxDays,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -6377,6 +7321,8 @@ class $$ListingsTableTableManager
                 Value<double> sourceCost = const Value.absent(),
                 Value<String?> decisionLogId = const Value.absent(),
                 Value<String?> marketplaceAccountId = const Value.absent(),
+                Value<int?> promisedMinDays = const Value.absent(),
+                Value<int?> promisedMaxDays = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> publishedAt = const Value.absent(),
               }) => ListingsCompanion(
@@ -6390,6 +7336,8 @@ class $$ListingsTableTableManager
                 sourceCost: sourceCost,
                 decisionLogId: decisionLogId,
                 marketplaceAccountId: marketplaceAccountId,
+                promisedMinDays: promisedMinDays,
+                promisedMaxDays: promisedMaxDays,
                 createdAt: createdAt,
                 publishedAt: publishedAt,
               ),
@@ -6405,6 +7353,8 @@ class $$ListingsTableTableManager
                 required double sourceCost,
                 Value<String?> decisionLogId = const Value.absent(),
                 Value<String?> marketplaceAccountId = const Value.absent(),
+                Value<int?> promisedMinDays = const Value.absent(),
+                Value<int?> promisedMaxDays = const Value.absent(),
                 required DateTime createdAt,
                 Value<DateTime?> publishedAt = const Value.absent(),
               }) => ListingsCompanion.insert(
@@ -6418,6 +7368,8 @@ class $$ListingsTableTableManager
                 sourceCost: sourceCost,
                 decisionLogId: decisionLogId,
                 marketplaceAccountId: marketplaceAccountId,
+                promisedMinDays: promisedMinDays,
+                promisedMaxDays: promisedMaxDays,
                 createdAt: createdAt,
                 publishedAt: publishedAt,
               ),
@@ -6458,6 +7410,8 @@ typedef $$OrdersTableCreateCompanionBuilder =
       Value<String?> trackingNumber,
       Value<String?> decisionLogId,
       Value<String?> marketplaceAccountId,
+      Value<DateTime?> promisedDeliveryMin,
+      Value<DateTime?> promisedDeliveryMax,
       Value<DateTime?> approvedAt,
       required DateTime createdAt,
     });
@@ -6476,6 +7430,8 @@ typedef $$OrdersTableUpdateCompanionBuilder =
       Value<String?> trackingNumber,
       Value<String?> decisionLogId,
       Value<String?> marketplaceAccountId,
+      Value<DateTime?> promisedDeliveryMin,
+      Value<DateTime?> promisedDeliveryMax,
       Value<DateTime?> approvedAt,
       Value<DateTime> createdAt,
     });
@@ -6551,6 +7507,16 @@ class $$OrdersTableFilterComposer
 
   ColumnFilters<String> get marketplaceAccountId => $composableBuilder(
     column: $table.marketplaceAccountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get promisedDeliveryMin => $composableBuilder(
+    column: $table.promisedDeliveryMin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get promisedDeliveryMax => $composableBuilder(
+    column: $table.promisedDeliveryMax,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6639,6 +7605,16 @@ class $$OrdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get promisedDeliveryMin => $composableBuilder(
+    column: $table.promisedDeliveryMin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get promisedDeliveryMax => $composableBuilder(
+    column: $table.promisedDeliveryMax,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get approvedAt => $composableBuilder(
     column: $table.approvedAt,
     builder: (column) => ColumnOrderings(column),
@@ -6716,6 +7692,16 @@ class $$OrdersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get promisedDeliveryMin => $composableBuilder(
+    column: $table.promisedDeliveryMin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get promisedDeliveryMax => $composableBuilder(
+    column: $table.promisedDeliveryMax,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get approvedAt => $composableBuilder(
     column: $table.approvedAt,
     builder: (column) => column,
@@ -6766,6 +7752,8 @@ class $$OrdersTableTableManager
                 Value<String?> trackingNumber = const Value.absent(),
                 Value<String?> decisionLogId = const Value.absent(),
                 Value<String?> marketplaceAccountId = const Value.absent(),
+                Value<DateTime?> promisedDeliveryMin = const Value.absent(),
+                Value<DateTime?> promisedDeliveryMax = const Value.absent(),
                 Value<DateTime?> approvedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => OrdersCompanion(
@@ -6782,6 +7770,8 @@ class $$OrdersTableTableManager
                 trackingNumber: trackingNumber,
                 decisionLogId: decisionLogId,
                 marketplaceAccountId: marketplaceAccountId,
+                promisedDeliveryMin: promisedDeliveryMin,
+                promisedDeliveryMax: promisedDeliveryMax,
                 approvedAt: approvedAt,
                 createdAt: createdAt,
               ),
@@ -6800,6 +7790,8 @@ class $$OrdersTableTableManager
                 Value<String?> trackingNumber = const Value.absent(),
                 Value<String?> decisionLogId = const Value.absent(),
                 Value<String?> marketplaceAccountId = const Value.absent(),
+                Value<DateTime?> promisedDeliveryMin = const Value.absent(),
+                Value<DateTime?> promisedDeliveryMax = const Value.absent(),
                 Value<DateTime?> approvedAt = const Value.absent(),
                 required DateTime createdAt,
               }) => OrdersCompanion.insert(
@@ -6816,6 +7808,8 @@ class $$OrdersTableTableManager
                 trackingNumber: trackingNumber,
                 decisionLogId: decisionLogId,
                 marketplaceAccountId: marketplaceAccountId,
+                promisedDeliveryMin: promisedDeliveryMin,
+                promisedDeliveryMax: promisedDeliveryMax,
                 approvedAt: approvedAt,
                 createdAt: createdAt,
               ),
@@ -8313,6 +9307,318 @@ typedef $$MarketplaceAccountsTableProcessedTableManager =
       MarketplaceAccountRow,
       PrefetchHooks Function()
     >;
+typedef $$ReturnsTableCreateCompanionBuilder =
+    ReturnsCompanion Function({
+      Value<int> id,
+      required String returnId,
+      required String orderId,
+      required String reason,
+      required String status,
+      Value<String?> notes,
+      Value<double?> refundAmount,
+      Value<double?> returnShippingCost,
+      Value<double?> restockingFee,
+      Value<DateTime?> requestedAt,
+      Value<DateTime?> resolvedAt,
+    });
+typedef $$ReturnsTableUpdateCompanionBuilder =
+    ReturnsCompanion Function({
+      Value<int> id,
+      Value<String> returnId,
+      Value<String> orderId,
+      Value<String> reason,
+      Value<String> status,
+      Value<String?> notes,
+      Value<double?> refundAmount,
+      Value<double?> returnShippingCost,
+      Value<double?> restockingFee,
+      Value<DateTime?> requestedAt,
+      Value<DateTime?> resolvedAt,
+    });
+
+class $$ReturnsTableFilterComposer
+    extends Composer<_$AppDatabase, $ReturnsTable> {
+  $$ReturnsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnId => $composableBuilder(
+    column: $table.returnId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get refundAmount => $composableBuilder(
+    column: $table.refundAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get returnShippingCost => $composableBuilder(
+    column: $table.returnShippingCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get restockingFee => $composableBuilder(
+    column: $table.restockingFee,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReturnsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReturnsTable> {
+  $$ReturnsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get returnId => $composableBuilder(
+    column: $table.returnId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get refundAmount => $composableBuilder(
+    column: $table.refundAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get returnShippingCost => $composableBuilder(
+    column: $table.returnShippingCost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get restockingFee => $composableBuilder(
+    column: $table.restockingFee,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReturnsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReturnsTable> {
+  $$ReturnsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get returnId =>
+      $composableBuilder(column: $table.returnId, builder: (column) => column);
+
+  GeneratedColumn<String> get orderId =>
+      $composableBuilder(column: $table.orderId, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<double> get refundAmount => $composableBuilder(
+    column: $table.refundAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get returnShippingCost => $composableBuilder(
+    column: $table.returnShippingCost,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get restockingFee => $composableBuilder(
+    column: $table.restockingFee,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$ReturnsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReturnsTable,
+          ReturnRow,
+          $$ReturnsTableFilterComposer,
+          $$ReturnsTableOrderingComposer,
+          $$ReturnsTableAnnotationComposer,
+          $$ReturnsTableCreateCompanionBuilder,
+          $$ReturnsTableUpdateCompanionBuilder,
+          (ReturnRow, BaseReferences<_$AppDatabase, $ReturnsTable, ReturnRow>),
+          ReturnRow,
+          PrefetchHooks Function()
+        > {
+  $$ReturnsTableTableManager(_$AppDatabase db, $ReturnsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReturnsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReturnsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReturnsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> returnId = const Value.absent(),
+                Value<String> orderId = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<double?> refundAmount = const Value.absent(),
+                Value<double?> returnShippingCost = const Value.absent(),
+                Value<double?> restockingFee = const Value.absent(),
+                Value<DateTime?> requestedAt = const Value.absent(),
+                Value<DateTime?> resolvedAt = const Value.absent(),
+              }) => ReturnsCompanion(
+                id: id,
+                returnId: returnId,
+                orderId: orderId,
+                reason: reason,
+                status: status,
+                notes: notes,
+                refundAmount: refundAmount,
+                returnShippingCost: returnShippingCost,
+                restockingFee: restockingFee,
+                requestedAt: requestedAt,
+                resolvedAt: resolvedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String returnId,
+                required String orderId,
+                required String reason,
+                required String status,
+                Value<String?> notes = const Value.absent(),
+                Value<double?> refundAmount = const Value.absent(),
+                Value<double?> returnShippingCost = const Value.absent(),
+                Value<double?> restockingFee = const Value.absent(),
+                Value<DateTime?> requestedAt = const Value.absent(),
+                Value<DateTime?> resolvedAt = const Value.absent(),
+              }) => ReturnsCompanion.insert(
+                id: id,
+                returnId: returnId,
+                orderId: orderId,
+                reason: reason,
+                status: status,
+                notes: notes,
+                refundAmount: refundAmount,
+                returnShippingCost: returnShippingCost,
+                restockingFee: restockingFee,
+                requestedAt: requestedAt,
+                resolvedAt: resolvedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReturnsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReturnsTable,
+      ReturnRow,
+      $$ReturnsTableFilterComposer,
+      $$ReturnsTableOrderingComposer,
+      $$ReturnsTableAnnotationComposer,
+      $$ReturnsTableCreateCompanionBuilder,
+      $$ReturnsTableUpdateCompanionBuilder,
+      (ReturnRow, BaseReferences<_$AppDatabase, $ReturnsTable, ReturnRow>),
+      ReturnRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8333,4 +9639,6 @@ class $AppDatabaseManager {
       $$SupplierOffersTableTableManager(_db, _db.supplierOffers);
   $$MarketplaceAccountsTableTableManager get marketplaceAccounts =>
       $$MarketplaceAccountsTableTableManager(_db, _db.marketplaceAccounts);
+  $$ReturnsTableTableManager get returns =>
+      $$ReturnsTableTableManager(_db, _db.returns);
 }

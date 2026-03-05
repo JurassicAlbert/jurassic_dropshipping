@@ -30,6 +30,8 @@ mixin _$Listing {
   double get sourceCost => throw _privateConstructorUsedError;
   String? get decisionLogId => throw _privateConstructorUsedError;
   String? get marketplaceAccountId => throw _privateConstructorUsedError;
+  int? get promisedMinDays => throw _privateConstructorUsedError;
+  int? get promisedMaxDays => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get publishedAt => throw _privateConstructorUsedError;
 
@@ -57,6 +59,8 @@ abstract class $ListingCopyWith<$Res> {
     double sourceCost,
     String? decisionLogId,
     String? marketplaceAccountId,
+    int? promisedMinDays,
+    int? promisedMaxDays,
     DateTime? createdAt,
     DateTime? publishedAt,
   });
@@ -86,6 +90,8 @@ class _$ListingCopyWithImpl<$Res, $Val extends Listing>
     Object? sourceCost = null,
     Object? decisionLogId = freezed,
     Object? marketplaceAccountId = freezed,
+    Object? promisedMinDays = freezed,
+    Object? promisedMaxDays = freezed,
     Object? createdAt = freezed,
     Object? publishedAt = freezed,
   }) {
@@ -127,6 +133,14 @@ class _$ListingCopyWithImpl<$Res, $Val extends Listing>
                 ? _value.marketplaceAccountId
                 : marketplaceAccountId // ignore: cast_nullable_to_non_nullable
                       as String?,
+            promisedMinDays: freezed == promisedMinDays
+                ? _value.promisedMinDays
+                : promisedMinDays // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            promisedMaxDays: freezed == promisedMaxDays
+                ? _value.promisedMaxDays
+                : promisedMaxDays // ignore: cast_nullable_to_non_nullable
+                      as int?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -159,6 +173,8 @@ abstract class _$$ListingImplCopyWith<$Res> implements $ListingCopyWith<$Res> {
     double sourceCost,
     String? decisionLogId,
     String? marketplaceAccountId,
+    int? promisedMinDays,
+    int? promisedMaxDays,
     DateTime? createdAt,
     DateTime? publishedAt,
   });
@@ -187,6 +203,8 @@ class __$$ListingImplCopyWithImpl<$Res>
     Object? sourceCost = null,
     Object? decisionLogId = freezed,
     Object? marketplaceAccountId = freezed,
+    Object? promisedMinDays = freezed,
+    Object? promisedMaxDays = freezed,
     Object? createdAt = freezed,
     Object? publishedAt = freezed,
   }) {
@@ -228,6 +246,14 @@ class __$$ListingImplCopyWithImpl<$Res>
             ? _value.marketplaceAccountId
             : marketplaceAccountId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        promisedMinDays: freezed == promisedMinDays
+            ? _value.promisedMinDays
+            : promisedMinDays // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        promisedMaxDays: freezed == promisedMaxDays
+            ? _value.promisedMaxDays
+            : promisedMaxDays // ignore: cast_nullable_to_non_nullable
+                  as int?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -254,6 +280,8 @@ class _$ListingImpl implements _Listing {
     required this.sourceCost,
     this.decisionLogId,
     this.marketplaceAccountId,
+    this.promisedMinDays,
+    this.promisedMaxDays,
     this.createdAt,
     this.publishedAt,
   });
@@ -280,13 +308,17 @@ class _$ListingImpl implements _Listing {
   @override
   final String? marketplaceAccountId;
   @override
+  final int? promisedMinDays;
+  @override
+  final int? promisedMaxDays;
+  @override
   final DateTime? createdAt;
   @override
   final DateTime? publishedAt;
 
   @override
   String toString() {
-    return 'Listing(id: $id, productId: $productId, targetPlatformId: $targetPlatformId, targetListingId: $targetListingId, status: $status, sellingPrice: $sellingPrice, sourceCost: $sourceCost, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, createdAt: $createdAt, publishedAt: $publishedAt)';
+    return 'Listing(id: $id, productId: $productId, targetPlatformId: $targetPlatformId, targetListingId: $targetListingId, status: $status, sellingPrice: $sellingPrice, sourceCost: $sourceCost, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedMinDays: $promisedMinDays, promisedMaxDays: $promisedMaxDays, createdAt: $createdAt, publishedAt: $publishedAt)';
   }
 
   @override
@@ -310,6 +342,10 @@ class _$ListingImpl implements _Listing {
                 other.decisionLogId == decisionLogId) &&
             (identical(other.marketplaceAccountId, marketplaceAccountId) ||
                 other.marketplaceAccountId == marketplaceAccountId) &&
+            (identical(other.promisedMinDays, promisedMinDays) ||
+                other.promisedMinDays == promisedMinDays) &&
+            (identical(other.promisedMaxDays, promisedMaxDays) ||
+                other.promisedMaxDays == promisedMaxDays) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.publishedAt, publishedAt) ||
@@ -329,6 +365,8 @@ class _$ListingImpl implements _Listing {
     sourceCost,
     decisionLogId,
     marketplaceAccountId,
+    promisedMinDays,
+    promisedMaxDays,
     createdAt,
     publishedAt,
   );
@@ -358,6 +396,8 @@ abstract class _Listing implements Listing {
     required final double sourceCost,
     final String? decisionLogId,
     final String? marketplaceAccountId,
+    final int? promisedMinDays,
+    final int? promisedMaxDays,
     final DateTime? createdAt,
     final DateTime? publishedAt,
   }) = _$ListingImpl;
@@ -382,6 +422,10 @@ abstract class _Listing implements Listing {
   String? get decisionLogId;
   @override
   String? get marketplaceAccountId;
+  @override
+  int? get promisedMinDays;
+  @override
+  int? get promisedMaxDays;
   @override
   DateTime? get createdAt;
   @override

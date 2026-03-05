@@ -17,6 +17,8 @@ _$ListingImpl _$$ListingImplFromJson(Map<String, dynamic> json) =>
       sourceCost: (json['sourceCost'] as num).toDouble(),
       decisionLogId: json['decisionLogId'] as String?,
       marketplaceAccountId: json['marketplaceAccountId'] as String?,
+      promisedMinDays: (json['promisedMinDays'] as num?)?.toInt(),
+      promisedMaxDays: (json['promisedMaxDays'] as num?)?.toInt(),
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -36,6 +38,8 @@ Map<String, dynamic> _$$ListingImplToJson(_$ListingImpl instance) =>
       'sourceCost': instance.sourceCost,
       'decisionLogId': instance.decisionLogId,
       'marketplaceAccountId': instance.marketplaceAccountId,
+      'promisedMinDays': instance.promisedMinDays,
+      'promisedMaxDays': instance.promisedMaxDays,
       'createdAt': instance.createdAt?.toIso8601String(),
       'publishedAt': instance.publishedAt?.toIso8601String(),
     };

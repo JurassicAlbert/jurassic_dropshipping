@@ -45,6 +45,8 @@ class Order with _$Order {
     String? trackingNumber,
     String? decisionLogId,
     String? marketplaceAccountId,
+    DateTime? promisedDeliveryMin,
+    DateTime? promisedDeliveryMax,
     DateTime? approvedAt,
     DateTime? createdAt,
   }) = _Order;

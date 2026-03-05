@@ -36,4 +36,36 @@ class PricingCalculator {
   bool meetsMinProfit(double sellingPrice, double sourceCost, UserRules rules) {
     return profitMarginPercent(sellingPrice, sourceCost) >= rules.minProfitPercent;
   }
+
+  /// Calculate the financial impact of a no-reason return.
+  /// Returns the net loss: refund given minus what seller keeps.
+  ReturnCostEstimate estimateReturnCost({
+    required double sellingPrice,
+    required double sourceCost,
+    double returnShippingCost = 0,
+    double restockingFeePercent = 0,
+  }) {
+    final restockingFee = sellingPrice * (restockingFeePercent / 100);
+    final refundAmount = sellingPrice - restockingFee;
+    final netLoss = refundAmount + returnShippingCost - restockingFee;
+    return ReturnCostEstimate(
+      refundAmount: refundAmount,
+      restockingFee: restockingFee,
+      returnShippingCost: returnShippingCost,
+      netLoss: netLoss,
+    );
+  }
+}
+
+class ReturnCostEstimate {
+  const ReturnCostEstimate({
+    required this.refundAmount,
+    required this.restockingFee,
+    required this.returnShippingCost,
+    required this.netLoss,
+  });
+  final double refundAmount;
+  final double restockingFee;
+  final double returnShippingCost;
+  final double netLoss;
 }

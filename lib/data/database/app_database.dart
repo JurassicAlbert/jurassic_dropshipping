@@ -36,6 +36,8 @@ class Listings extends Table {
   RealColumn get sourceCost => real()();
   TextColumn get decisionLogId => text().nullable()();
   TextColumn get marketplaceAccountId => text().nullable()();
+  IntColumn get promisedMinDays => integer().nullable()();
+  IntColumn get promisedMaxDays => integer().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get publishedAt => dateTime().nullable()();
 }
@@ -55,6 +57,8 @@ class Orders extends Table {
   TextColumn get trackingNumber => text().nullable()();
   TextColumn get decisionLogId => text().nullable()();
   TextColumn get marketplaceAccountId => text().nullable()();
+  DateTimeColumn get promisedDeliveryMin => dateTime().nullable()();
+  DateTimeColumn get promisedDeliveryMax => dateTime().nullable()();
   DateTimeColumn get approvedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 }
@@ -116,6 +120,21 @@ class SupplierOffers extends Table {
   DateTimeColumn get lastStockRefreshAt => dateTime().nullable()();
 }
 
+@DataClassName('ReturnRow')
+class Returns extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get returnId => text()();
+  TextColumn get orderId => text()();
+  TextColumn get reason => text()();
+  TextColumn get status => text()();
+  TextColumn get notes => text().nullable()();
+  RealColumn get refundAmount => real().nullable()();
+  RealColumn get returnShippingCost => real().nullable()();
+  RealColumn get restockingFee => real().nullable()();
+  DateTimeColumn get requestedAt => dateTime().nullable()();
+  DateTimeColumn get resolvedAt => dateTime().nullable()();
+}
+
 @DataClassName('MarketplaceAccountRow')
 class MarketplaceAccounts extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -135,10 +154,11 @@ class MarketplaceAccounts extends Table {
   Suppliers,
   SupplierOffers,
   MarketplaceAccounts,
+  Returns,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(storage.openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 }

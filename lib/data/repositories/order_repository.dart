@@ -30,6 +30,8 @@ class OrderRepository {
       sellingPrice: row.sellingPrice,
       trackingNumber: row.trackingNumber,
       decisionLogId: row.decisionLogId,
+      promisedDeliveryMin: row.promisedDeliveryMin,
+      promisedDeliveryMax: row.promisedDeliveryMax,
       approvedAt: row.approvedAt,
       createdAt: row.createdAt,
     );
@@ -68,6 +70,9 @@ class OrderRepository {
         sellingPrice: order.sellingPrice,
         trackingNumber: Value(order.trackingNumber),
         decisionLogId: Value(order.decisionLogId),
+        marketplaceAccountId: Value(order.marketplaceAccountId),
+        promisedDeliveryMin: Value(order.promisedDeliveryMin),
+        promisedDeliveryMax: Value(order.promisedDeliveryMax),
         approvedAt: Value(order.approvedAt),
         createdAt: order.createdAt ?? DateTime.now(),
       ),

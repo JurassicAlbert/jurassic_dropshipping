@@ -24,6 +24,8 @@ class ListingRepository {
       sellingPrice: row.sellingPrice,
       sourceCost: row.sourceCost,
       decisionLogId: row.decisionLogId,
+      promisedMinDays: row.promisedMinDays,
+      promisedMaxDays: row.promisedMaxDays,
       createdAt: row.createdAt,
       publishedAt: row.publishedAt,
     );
@@ -66,6 +68,9 @@ class ListingRepository {
         sellingPrice: listing.sellingPrice,
         sourceCost: listing.sourceCost,
         decisionLogId: Value(listing.decisionLogId),
+        marketplaceAccountId: Value(listing.marketplaceAccountId),
+        promisedMinDays: Value(listing.promisedMinDays),
+        promisedMaxDays: Value(listing.promisedMaxDays),
         createdAt: listing.createdAt ?? DateTime.now(),
         publishedAt: Value(listing.publishedAt),
       ),

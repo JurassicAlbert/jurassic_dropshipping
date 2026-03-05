@@ -47,6 +47,12 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   trackingNumber: json['trackingNumber'] as String?,
   decisionLogId: json['decisionLogId'] as String?,
   marketplaceAccountId: json['marketplaceAccountId'] as String?,
+  promisedDeliveryMin: json['promisedDeliveryMin'] == null
+      ? null
+      : DateTime.parse(json['promisedDeliveryMin'] as String),
+  promisedDeliveryMax: json['promisedDeliveryMax'] == null
+      ? null
+      : DateTime.parse(json['promisedDeliveryMax'] as String),
   approvedAt: json['approvedAt'] == null
       ? null
       : DateTime.parse(json['approvedAt'] as String),
@@ -69,6 +75,8 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'trackingNumber': instance.trackingNumber,
       'decisionLogId': instance.decisionLogId,
       'marketplaceAccountId': instance.marketplaceAccountId,
+      'promisedDeliveryMin': instance.promisedDeliveryMin?.toIso8601String(),
+      'promisedDeliveryMax': instance.promisedDeliveryMax?.toIso8601String(),
       'approvedAt': instance.approvedAt?.toIso8601String(),
       'createdAt': instance.createdAt?.toIso8601String(),
     };

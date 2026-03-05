@@ -6,10 +6,12 @@ import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/data/models/supplier.dart';
 import 'package:jurassic_dropshipping/data/models/supplier_offer.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
+import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/return_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_repository.dart';
@@ -43,6 +45,7 @@ final decisionLogRepositoryProvider = Provider<DecisionLogRepository>((ref) => D
 final rulesRepositoryProvider = Provider<RulesRepository>((ref) => RulesRepository(ref.watch(dbProvider)));
 final supplierRepositoryProvider = Provider<SupplierRepository>((ref) => SupplierRepository(ref.watch(dbProvider)));
 final supplierOfferRepositoryProvider = Provider<SupplierOfferRepository>((ref) => SupplierOfferRepository(ref.watch(dbProvider)));
+final returnRepositoryProvider = Provider<ReturnRepository>((ref) => ReturnRepository(ref.watch(dbProvider)));
 
 final cjClientProvider = Provider<CjDropshippingClient>((ref) => CjDropshippingClient(secureStorage: ref.watch(secureStorageProvider)));
 final allegroClientProvider = Provider<AllegroClient>((ref) => AllegroClient(secureStorage: ref.watch(secureStorageProvider)));
@@ -107,3 +110,4 @@ final pendingOrdersProvider = FutureProvider<List<Order>>((ref) => ref.watch(ord
 final decisionLogsProvider = FutureProvider<List<DecisionLog>>((ref) => ref.watch(decisionLogRepositoryProvider).getAll(limit: 100));
 final suppliersProvider = FutureProvider<List<Supplier>>((ref) => ref.watch(supplierRepositoryProvider).getAll());
 final supplierOffersProvider = FutureProvider<List<SupplierOffer>>((ref) => ref.watch(supplierOfferRepositoryProvider).getAll());
+final returnRequestsProvider = FutureProvider<List<ReturnRequest>>((ref) => ref.watch(returnRepositoryProvider).getAll());
