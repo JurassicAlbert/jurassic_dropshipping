@@ -29,6 +29,7 @@ mixin _$Listing {
   double get sellingPrice => throw _privateConstructorUsedError;
   double get sourceCost => throw _privateConstructorUsedError;
   String? get decisionLogId => throw _privateConstructorUsedError;
+  String? get marketplaceAccountId => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get publishedAt => throw _privateConstructorUsedError;
 
@@ -55,6 +56,7 @@ abstract class $ListingCopyWith<$Res> {
     double sellingPrice,
     double sourceCost,
     String? decisionLogId,
+    String? marketplaceAccountId,
     DateTime? createdAt,
     DateTime? publishedAt,
   });
@@ -83,6 +85,7 @@ class _$ListingCopyWithImpl<$Res, $Val extends Listing>
     Object? sellingPrice = null,
     Object? sourceCost = null,
     Object? decisionLogId = freezed,
+    Object? marketplaceAccountId = freezed,
     Object? createdAt = freezed,
     Object? publishedAt = freezed,
   }) {
@@ -120,6 +123,10 @@ class _$ListingCopyWithImpl<$Res, $Val extends Listing>
                 ? _value.decisionLogId
                 : decisionLogId // ignore: cast_nullable_to_non_nullable
                       as String?,
+            marketplaceAccountId: freezed == marketplaceAccountId
+                ? _value.marketplaceAccountId
+                : marketplaceAccountId // ignore: cast_nullable_to_non_nullable
+                      as String?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -151,6 +158,7 @@ abstract class _$$ListingImplCopyWith<$Res> implements $ListingCopyWith<$Res> {
     double sellingPrice,
     double sourceCost,
     String? decisionLogId,
+    String? marketplaceAccountId,
     DateTime? createdAt,
     DateTime? publishedAt,
   });
@@ -178,6 +186,7 @@ class __$$ListingImplCopyWithImpl<$Res>
     Object? sellingPrice = null,
     Object? sourceCost = null,
     Object? decisionLogId = freezed,
+    Object? marketplaceAccountId = freezed,
     Object? createdAt = freezed,
     Object? publishedAt = freezed,
   }) {
@@ -215,6 +224,10 @@ class __$$ListingImplCopyWithImpl<$Res>
             ? _value.decisionLogId
             : decisionLogId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        marketplaceAccountId: freezed == marketplaceAccountId
+            ? _value.marketplaceAccountId
+            : marketplaceAccountId // ignore: cast_nullable_to_non_nullable
+                  as String?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -240,6 +253,7 @@ class _$ListingImpl implements _Listing {
     required this.sellingPrice,
     required this.sourceCost,
     this.decisionLogId,
+    this.marketplaceAccountId,
     this.createdAt,
     this.publishedAt,
   });
@@ -264,13 +278,15 @@ class _$ListingImpl implements _Listing {
   @override
   final String? decisionLogId;
   @override
+  final String? marketplaceAccountId;
+  @override
   final DateTime? createdAt;
   @override
   final DateTime? publishedAt;
 
   @override
   String toString() {
-    return 'Listing(id: $id, productId: $productId, targetPlatformId: $targetPlatformId, targetListingId: $targetListingId, status: $status, sellingPrice: $sellingPrice, sourceCost: $sourceCost, decisionLogId: $decisionLogId, createdAt: $createdAt, publishedAt: $publishedAt)';
+    return 'Listing(id: $id, productId: $productId, targetPlatformId: $targetPlatformId, targetListingId: $targetListingId, status: $status, sellingPrice: $sellingPrice, sourceCost: $sourceCost, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, createdAt: $createdAt, publishedAt: $publishedAt)';
   }
 
   @override
@@ -292,6 +308,8 @@ class _$ListingImpl implements _Listing {
                 other.sourceCost == sourceCost) &&
             (identical(other.decisionLogId, decisionLogId) ||
                 other.decisionLogId == decisionLogId) &&
+            (identical(other.marketplaceAccountId, marketplaceAccountId) ||
+                other.marketplaceAccountId == marketplaceAccountId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.publishedAt, publishedAt) ||
@@ -310,6 +328,7 @@ class _$ListingImpl implements _Listing {
     sellingPrice,
     sourceCost,
     decisionLogId,
+    marketplaceAccountId,
     createdAt,
     publishedAt,
   );
@@ -338,6 +357,7 @@ abstract class _Listing implements Listing {
     required final double sellingPrice,
     required final double sourceCost,
     final String? decisionLogId,
+    final String? marketplaceAccountId,
     final DateTime? createdAt,
     final DateTime? publishedAt,
   }) = _$ListingImpl;
@@ -360,6 +380,8 @@ abstract class _Listing implements Listing {
   double get sourceCost;
   @override
   String? get decisionLogId;
+  @override
+  String? get marketplaceAccountId;
   @override
   DateTime? get createdAt;
   @override

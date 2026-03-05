@@ -35,6 +35,7 @@ class Listings extends Table {
   RealColumn get sellingPrice => real()();
   RealColumn get sourceCost => real()();
   TextColumn get decisionLogId => text().nullable()();
+  TextColumn get marketplaceAccountId => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get publishedAt => dateTime().nullable()();
 }
@@ -53,6 +54,7 @@ class Orders extends Table {
   RealColumn get sellingPrice => real()();
   TextColumn get trackingNumber => text().nullable()();
   TextColumn get decisionLogId => text().nullable()();
+  TextColumn get marketplaceAccountId => text().nullable()();
   DateTimeColumn get approvedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 }
@@ -114,6 +116,16 @@ class SupplierOffers extends Table {
   DateTimeColumn get lastStockRefreshAt => dateTime().nullable()();
 }
 
+@DataClassName('MarketplaceAccountRow')
+class MarketplaceAccounts extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get accountId => text()();
+  TextColumn get platformId => text()();
+  TextColumn get displayName => text()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get connectedAt => dateTime().nullable()();
+}
+
 @DriftDatabase(tables: [
   Products,
   Listings,
@@ -122,10 +134,11 @@ class SupplierOffers extends Table {
   UserRulesTable,
   Suppliers,
   SupplierOffers,
+  MarketplaceAccounts,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(storage.openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 }

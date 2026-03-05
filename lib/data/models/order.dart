@@ -44,6 +44,7 @@ class Order with _$Order {
     required double sellingPrice,
     String? trackingNumber,
     String? decisionLogId,
+    String? marketplaceAccountId,
     DateTime? approvedAt,
     DateTime? createdAt,
   }) = _Order;

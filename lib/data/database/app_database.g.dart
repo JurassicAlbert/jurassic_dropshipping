@@ -1032,6 +1032,17 @@ class $ListingsTable extends Listings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _marketplaceAccountIdMeta =
+      const VerificationMeta('marketplaceAccountId');
+  @override
+  late final GeneratedColumn<String> marketplaceAccountId =
+      GeneratedColumn<String>(
+        'marketplace_account_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1065,6 +1076,7 @@ class $ListingsTable extends Listings
     sellingPrice,
     sourceCost,
     decisionLogId,
+    marketplaceAccountId,
     createdAt,
     publishedAt,
   ];
@@ -1155,6 +1167,15 @@ class $ListingsTable extends Listings
         ),
       );
     }
+    if (data.containsKey('marketplace_account_id')) {
+      context.handle(
+        _marketplaceAccountIdMeta,
+        marketplaceAccountId.isAcceptableOrUnknown(
+          data['marketplace_account_id']!,
+          _marketplaceAccountIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1217,6 +1238,10 @@ class $ListingsTable extends Listings
         DriftSqlType.string,
         data['${effectivePrefix}decision_log_id'],
       ),
+      marketplaceAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}marketplace_account_id'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1244,6 +1269,7 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
   final double sellingPrice;
   final double sourceCost;
   final String? decisionLogId;
+  final String? marketplaceAccountId;
   final DateTime createdAt;
   final DateTime? publishedAt;
   const ListingRow({
@@ -1256,6 +1282,7 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     required this.sellingPrice,
     required this.sourceCost,
     this.decisionLogId,
+    this.marketplaceAccountId,
     required this.createdAt,
     this.publishedAt,
   });
@@ -1274,6 +1301,9 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     map['source_cost'] = Variable<double>(sourceCost);
     if (!nullToAbsent || decisionLogId != null) {
       map['decision_log_id'] = Variable<String>(decisionLogId);
+    }
+    if (!nullToAbsent || marketplaceAccountId != null) {
+      map['marketplace_account_id'] = Variable<String>(marketplaceAccountId);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || publishedAt != null) {
@@ -1297,6 +1327,9 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
       decisionLogId: decisionLogId == null && nullToAbsent
           ? const Value.absent()
           : Value(decisionLogId),
+      marketplaceAccountId: marketplaceAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(marketplaceAccountId),
       createdAt: Value(createdAt),
       publishedAt: publishedAt == null && nullToAbsent
           ? const Value.absent()
@@ -1319,6 +1352,9 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
       sellingPrice: serializer.fromJson<double>(json['sellingPrice']),
       sourceCost: serializer.fromJson<double>(json['sourceCost']),
       decisionLogId: serializer.fromJson<String?>(json['decisionLogId']),
+      marketplaceAccountId: serializer.fromJson<String?>(
+        json['marketplaceAccountId'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       publishedAt: serializer.fromJson<DateTime?>(json['publishedAt']),
     );
@@ -1336,6 +1372,7 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
       'sellingPrice': serializer.toJson<double>(sellingPrice),
       'sourceCost': serializer.toJson<double>(sourceCost),
       'decisionLogId': serializer.toJson<String?>(decisionLogId),
+      'marketplaceAccountId': serializer.toJson<String?>(marketplaceAccountId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'publishedAt': serializer.toJson<DateTime?>(publishedAt),
     };
@@ -1351,6 +1388,7 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     double? sellingPrice,
     double? sourceCost,
     Value<String?> decisionLogId = const Value.absent(),
+    Value<String?> marketplaceAccountId = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> publishedAt = const Value.absent(),
   }) => ListingRow(
@@ -1367,6 +1405,9 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     decisionLogId: decisionLogId.present
         ? decisionLogId.value
         : this.decisionLogId,
+    marketplaceAccountId: marketplaceAccountId.present
+        ? marketplaceAccountId.value
+        : this.marketplaceAccountId,
     createdAt: createdAt ?? this.createdAt,
     publishedAt: publishedAt.present ? publishedAt.value : this.publishedAt,
   );
@@ -1391,6 +1432,9 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
       decisionLogId: data.decisionLogId.present
           ? data.decisionLogId.value
           : this.decisionLogId,
+      marketplaceAccountId: data.marketplaceAccountId.present
+          ? data.marketplaceAccountId.value
+          : this.marketplaceAccountId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       publishedAt: data.publishedAt.present
           ? data.publishedAt.value
@@ -1410,6 +1454,7 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
           ..write('sellingPrice: $sellingPrice, ')
           ..write('sourceCost: $sourceCost, ')
           ..write('decisionLogId: $decisionLogId, ')
+          ..write('marketplaceAccountId: $marketplaceAccountId, ')
           ..write('createdAt: $createdAt, ')
           ..write('publishedAt: $publishedAt')
           ..write(')'))
@@ -1427,6 +1472,7 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
     sellingPrice,
     sourceCost,
     decisionLogId,
+    marketplaceAccountId,
     createdAt,
     publishedAt,
   );
@@ -1443,6 +1489,7 @@ class ListingRow extends DataClass implements Insertable<ListingRow> {
           other.sellingPrice == this.sellingPrice &&
           other.sourceCost == this.sourceCost &&
           other.decisionLogId == this.decisionLogId &&
+          other.marketplaceAccountId == this.marketplaceAccountId &&
           other.createdAt == this.createdAt &&
           other.publishedAt == this.publishedAt);
 }
@@ -1457,6 +1504,7 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
   final Value<double> sellingPrice;
   final Value<double> sourceCost;
   final Value<String?> decisionLogId;
+  final Value<String?> marketplaceAccountId;
   final Value<DateTime> createdAt;
   final Value<DateTime?> publishedAt;
   const ListingsCompanion({
@@ -1469,6 +1517,7 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     this.sellingPrice = const Value.absent(),
     this.sourceCost = const Value.absent(),
     this.decisionLogId = const Value.absent(),
+    this.marketplaceAccountId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.publishedAt = const Value.absent(),
   });
@@ -1482,6 +1531,7 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     required double sellingPrice,
     required double sourceCost,
     this.decisionLogId = const Value.absent(),
+    this.marketplaceAccountId = const Value.absent(),
     required DateTime createdAt,
     this.publishedAt = const Value.absent(),
   }) : localId = Value(localId),
@@ -1501,6 +1551,7 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     Expression<double>? sellingPrice,
     Expression<double>? sourceCost,
     Expression<String>? decisionLogId,
+    Expression<String>? marketplaceAccountId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? publishedAt,
   }) {
@@ -1514,6 +1565,8 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
       if (sellingPrice != null) 'selling_price': sellingPrice,
       if (sourceCost != null) 'source_cost': sourceCost,
       if (decisionLogId != null) 'decision_log_id': decisionLogId,
+      if (marketplaceAccountId != null)
+        'marketplace_account_id': marketplaceAccountId,
       if (createdAt != null) 'created_at': createdAt,
       if (publishedAt != null) 'published_at': publishedAt,
     });
@@ -1529,6 +1582,7 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     Value<double>? sellingPrice,
     Value<double>? sourceCost,
     Value<String?>? decisionLogId,
+    Value<String?>? marketplaceAccountId,
     Value<DateTime>? createdAt,
     Value<DateTime?>? publishedAt,
   }) {
@@ -1542,6 +1596,7 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
       sellingPrice: sellingPrice ?? this.sellingPrice,
       sourceCost: sourceCost ?? this.sourceCost,
       decisionLogId: decisionLogId ?? this.decisionLogId,
+      marketplaceAccountId: marketplaceAccountId ?? this.marketplaceAccountId,
       createdAt: createdAt ?? this.createdAt,
       publishedAt: publishedAt ?? this.publishedAt,
     );
@@ -1577,6 +1632,11 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
     if (decisionLogId.present) {
       map['decision_log_id'] = Variable<String>(decisionLogId.value);
     }
+    if (marketplaceAccountId.present) {
+      map['marketplace_account_id'] = Variable<String>(
+        marketplaceAccountId.value,
+      );
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1598,6 +1658,7 @@ class ListingsCompanion extends UpdateCompanion<ListingRow> {
           ..write('sellingPrice: $sellingPrice, ')
           ..write('sourceCost: $sourceCost, ')
           ..write('decisionLogId: $decisionLogId, ')
+          ..write('marketplaceAccountId: $marketplaceAccountId, ')
           ..write('createdAt: $createdAt, ')
           ..write('publishedAt: $publishedAt')
           ..write(')'))
@@ -1742,6 +1803,17 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _marketplaceAccountIdMeta =
+      const VerificationMeta('marketplaceAccountId');
+  @override
+  late final GeneratedColumn<String> marketplaceAccountId =
+      GeneratedColumn<String>(
+        'marketplace_account_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _approvedAtMeta = const VerificationMeta(
     'approvedAt',
   );
@@ -1778,6 +1850,7 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
     sellingPrice,
     trackingNumber,
     decisionLogId,
+    marketplaceAccountId,
     approvedAt,
     createdAt,
   ];
@@ -1899,6 +1972,15 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         ),
       );
     }
+    if (data.containsKey('marketplace_account_id')) {
+      context.handle(
+        _marketplaceAccountIdMeta,
+        marketplaceAccountId.isAcceptableOrUnknown(
+          data['marketplace_account_id']!,
+          _marketplaceAccountIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('approved_at')) {
       context.handle(
         _approvedAtMeta,
@@ -1970,6 +2052,10 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         DriftSqlType.string,
         data['${effectivePrefix}decision_log_id'],
       ),
+      marketplaceAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}marketplace_account_id'],
+      ),
       approvedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}approved_at'],
@@ -2000,6 +2086,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
   final double sellingPrice;
   final String? trackingNumber;
   final String? decisionLogId;
+  final String? marketplaceAccountId;
   final DateTime? approvedAt;
   final DateTime createdAt;
   const OrderRow({
@@ -2015,6 +2102,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     required this.sellingPrice,
     this.trackingNumber,
     this.decisionLogId,
+    this.marketplaceAccountId,
     this.approvedAt,
     required this.createdAt,
   });
@@ -2038,6 +2126,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     }
     if (!nullToAbsent || decisionLogId != null) {
       map['decision_log_id'] = Variable<String>(decisionLogId);
+    }
+    if (!nullToAbsent || marketplaceAccountId != null) {
+      map['marketplace_account_id'] = Variable<String>(marketplaceAccountId);
     }
     if (!nullToAbsent || approvedAt != null) {
       map['approved_at'] = Variable<DateTime>(approvedAt);
@@ -2066,6 +2157,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       decisionLogId: decisionLogId == null && nullToAbsent
           ? const Value.absent()
           : Value(decisionLogId),
+      marketplaceAccountId: marketplaceAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(marketplaceAccountId),
       approvedAt: approvedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(approvedAt),
@@ -2093,6 +2187,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       sellingPrice: serializer.fromJson<double>(json['sellingPrice']),
       trackingNumber: serializer.fromJson<String?>(json['trackingNumber']),
       decisionLogId: serializer.fromJson<String?>(json['decisionLogId']),
+      marketplaceAccountId: serializer.fromJson<String?>(
+        json['marketplaceAccountId'],
+      ),
       approvedAt: serializer.fromJson<DateTime?>(json['approvedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -2113,6 +2210,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       'sellingPrice': serializer.toJson<double>(sellingPrice),
       'trackingNumber': serializer.toJson<String?>(trackingNumber),
       'decisionLogId': serializer.toJson<String?>(decisionLogId),
+      'marketplaceAccountId': serializer.toJson<String?>(marketplaceAccountId),
       'approvedAt': serializer.toJson<DateTime?>(approvedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -2131,6 +2229,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     double? sellingPrice,
     Value<String?> trackingNumber = const Value.absent(),
     Value<String?> decisionLogId = const Value.absent(),
+    Value<String?> marketplaceAccountId = const Value.absent(),
     Value<DateTime?> approvedAt = const Value.absent(),
     DateTime? createdAt,
   }) => OrderRow(
@@ -2152,6 +2251,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     decisionLogId: decisionLogId.present
         ? decisionLogId.value
         : this.decisionLogId,
+    marketplaceAccountId: marketplaceAccountId.present
+        ? marketplaceAccountId.value
+        : this.marketplaceAccountId,
     approvedAt: approvedAt.present ? approvedAt.value : this.approvedAt,
     createdAt: createdAt ?? this.createdAt,
   );
@@ -2185,6 +2287,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       decisionLogId: data.decisionLogId.present
           ? data.decisionLogId.value
           : this.decisionLogId,
+      marketplaceAccountId: data.marketplaceAccountId.present
+          ? data.marketplaceAccountId.value
+          : this.marketplaceAccountId,
       approvedAt: data.approvedAt.present
           ? data.approvedAt.value
           : this.approvedAt,
@@ -2207,6 +2312,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
           ..write('sellingPrice: $sellingPrice, ')
           ..write('trackingNumber: $trackingNumber, ')
           ..write('decisionLogId: $decisionLogId, ')
+          ..write('marketplaceAccountId: $marketplaceAccountId, ')
           ..write('approvedAt: $approvedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -2227,6 +2333,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     sellingPrice,
     trackingNumber,
     decisionLogId,
+    marketplaceAccountId,
     approvedAt,
     createdAt,
   );
@@ -2246,6 +2353,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
           other.sellingPrice == this.sellingPrice &&
           other.trackingNumber == this.trackingNumber &&
           other.decisionLogId == this.decisionLogId &&
+          other.marketplaceAccountId == this.marketplaceAccountId &&
           other.approvedAt == this.approvedAt &&
           other.createdAt == this.createdAt);
 }
@@ -2263,6 +2371,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
   final Value<double> sellingPrice;
   final Value<String?> trackingNumber;
   final Value<String?> decisionLogId;
+  final Value<String?> marketplaceAccountId;
   final Value<DateTime?> approvedAt;
   final Value<DateTime> createdAt;
   const OrdersCompanion({
@@ -2278,6 +2387,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     this.sellingPrice = const Value.absent(),
     this.trackingNumber = const Value.absent(),
     this.decisionLogId = const Value.absent(),
+    this.marketplaceAccountId = const Value.absent(),
     this.approvedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
@@ -2294,6 +2404,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     required double sellingPrice,
     this.trackingNumber = const Value.absent(),
     this.decisionLogId = const Value.absent(),
+    this.marketplaceAccountId = const Value.absent(),
     this.approvedAt = const Value.absent(),
     required DateTime createdAt,
   }) : localId = Value(localId),
@@ -2318,6 +2429,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     Expression<double>? sellingPrice,
     Expression<String>? trackingNumber,
     Expression<String>? decisionLogId,
+    Expression<String>? marketplaceAccountId,
     Expression<DateTime>? approvedAt,
     Expression<DateTime>? createdAt,
   }) {
@@ -2335,6 +2447,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
       if (sellingPrice != null) 'selling_price': sellingPrice,
       if (trackingNumber != null) 'tracking_number': trackingNumber,
       if (decisionLogId != null) 'decision_log_id': decisionLogId,
+      if (marketplaceAccountId != null)
+        'marketplace_account_id': marketplaceAccountId,
       if (approvedAt != null) 'approved_at': approvedAt,
       if (createdAt != null) 'created_at': createdAt,
     });
@@ -2353,6 +2467,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     Value<double>? sellingPrice,
     Value<String?>? trackingNumber,
     Value<String?>? decisionLogId,
+    Value<String?>? marketplaceAccountId,
     Value<DateTime?>? approvedAt,
     Value<DateTime>? createdAt,
   }) {
@@ -2369,6 +2484,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
       sellingPrice: sellingPrice ?? this.sellingPrice,
       trackingNumber: trackingNumber ?? this.trackingNumber,
       decisionLogId: decisionLogId ?? this.decisionLogId,
+      marketplaceAccountId: marketplaceAccountId ?? this.marketplaceAccountId,
       approvedAt: approvedAt ?? this.approvedAt,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -2415,6 +2531,11 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     if (decisionLogId.present) {
       map['decision_log_id'] = Variable<String>(decisionLogId.value);
     }
+    if (marketplaceAccountId.present) {
+      map['marketplace_account_id'] = Variable<String>(
+        marketplaceAccountId.value,
+      );
+    }
     if (approvedAt.present) {
       map['approved_at'] = Variable<DateTime>(approvedAt.value);
     }
@@ -2439,6 +2560,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
           ..write('sellingPrice: $sellingPrice, ')
           ..write('trackingNumber: $trackingNumber, ')
           ..write('decisionLogId: $decisionLogId, ')
+          ..write('marketplaceAccountId: $marketplaceAccountId, ')
           ..write('approvedAt: $approvedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -5119,6 +5241,428 @@ class SupplierOffersCompanion extends UpdateCompanion<SupplierOfferRow> {
   }
 }
 
+class $MarketplaceAccountsTable extends MarketplaceAccounts
+    with TableInfo<$MarketplaceAccountsTable, MarketplaceAccountRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MarketplaceAccountsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _platformIdMeta = const VerificationMeta(
+    'platformId',
+  );
+  @override
+  late final GeneratedColumn<String> platformId = GeneratedColumn<String>(
+    'platform_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _connectedAtMeta = const VerificationMeta(
+    'connectedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> connectedAt = GeneratedColumn<DateTime>(
+    'connected_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    accountId,
+    platformId,
+    displayName,
+    isActive,
+    connectedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'marketplace_accounts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MarketplaceAccountRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('platform_id')) {
+      context.handle(
+        _platformIdMeta,
+        platformId.isAcceptableOrUnknown(data['platform_id']!, _platformIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_platformIdMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_displayNameMeta);
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('connected_at')) {
+      context.handle(
+        _connectedAtMeta,
+        connectedAt.isAcceptableOrUnknown(
+          data['connected_at']!,
+          _connectedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MarketplaceAccountRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MarketplaceAccountRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      platformId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}platform_id'],
+      )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      connectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}connected_at'],
+      ),
+    );
+  }
+
+  @override
+  $MarketplaceAccountsTable createAlias(String alias) {
+    return $MarketplaceAccountsTable(attachedDatabase, alias);
+  }
+}
+
+class MarketplaceAccountRow extends DataClass
+    implements Insertable<MarketplaceAccountRow> {
+  final int id;
+  final String accountId;
+  final String platformId;
+  final String displayName;
+  final bool isActive;
+  final DateTime? connectedAt;
+  const MarketplaceAccountRow({
+    required this.id,
+    required this.accountId,
+    required this.platformId,
+    required this.displayName,
+    required this.isActive,
+    this.connectedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['account_id'] = Variable<String>(accountId);
+    map['platform_id'] = Variable<String>(platformId);
+    map['display_name'] = Variable<String>(displayName);
+    map['is_active'] = Variable<bool>(isActive);
+    if (!nullToAbsent || connectedAt != null) {
+      map['connected_at'] = Variable<DateTime>(connectedAt);
+    }
+    return map;
+  }
+
+  MarketplaceAccountsCompanion toCompanion(bool nullToAbsent) {
+    return MarketplaceAccountsCompanion(
+      id: Value(id),
+      accountId: Value(accountId),
+      platformId: Value(platformId),
+      displayName: Value(displayName),
+      isActive: Value(isActive),
+      connectedAt: connectedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(connectedAt),
+    );
+  }
+
+  factory MarketplaceAccountRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MarketplaceAccountRow(
+      id: serializer.fromJson<int>(json['id']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+      platformId: serializer.fromJson<String>(json['platformId']),
+      displayName: serializer.fromJson<String>(json['displayName']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      connectedAt: serializer.fromJson<DateTime?>(json['connectedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'accountId': serializer.toJson<String>(accountId),
+      'platformId': serializer.toJson<String>(platformId),
+      'displayName': serializer.toJson<String>(displayName),
+      'isActive': serializer.toJson<bool>(isActive),
+      'connectedAt': serializer.toJson<DateTime?>(connectedAt),
+    };
+  }
+
+  MarketplaceAccountRow copyWith({
+    int? id,
+    String? accountId,
+    String? platformId,
+    String? displayName,
+    bool? isActive,
+    Value<DateTime?> connectedAt = const Value.absent(),
+  }) => MarketplaceAccountRow(
+    id: id ?? this.id,
+    accountId: accountId ?? this.accountId,
+    platformId: platformId ?? this.platformId,
+    displayName: displayName ?? this.displayName,
+    isActive: isActive ?? this.isActive,
+    connectedAt: connectedAt.present ? connectedAt.value : this.connectedAt,
+  );
+  MarketplaceAccountRow copyWithCompanion(MarketplaceAccountsCompanion data) {
+    return MarketplaceAccountRow(
+      id: data.id.present ? data.id.value : this.id,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      platformId: data.platformId.present
+          ? data.platformId.value
+          : this.platformId,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      connectedAt: data.connectedAt.present
+          ? data.connectedAt.value
+          : this.connectedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MarketplaceAccountRow(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('platformId: $platformId, ')
+          ..write('displayName: $displayName, ')
+          ..write('isActive: $isActive, ')
+          ..write('connectedAt: $connectedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    accountId,
+    platformId,
+    displayName,
+    isActive,
+    connectedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MarketplaceAccountRow &&
+          other.id == this.id &&
+          other.accountId == this.accountId &&
+          other.platformId == this.platformId &&
+          other.displayName == this.displayName &&
+          other.isActive == this.isActive &&
+          other.connectedAt == this.connectedAt);
+}
+
+class MarketplaceAccountsCompanion
+    extends UpdateCompanion<MarketplaceAccountRow> {
+  final Value<int> id;
+  final Value<String> accountId;
+  final Value<String> platformId;
+  final Value<String> displayName;
+  final Value<bool> isActive;
+  final Value<DateTime?> connectedAt;
+  const MarketplaceAccountsCompanion({
+    this.id = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.platformId = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.connectedAt = const Value.absent(),
+  });
+  MarketplaceAccountsCompanion.insert({
+    this.id = const Value.absent(),
+    required String accountId,
+    required String platformId,
+    required String displayName,
+    this.isActive = const Value.absent(),
+    this.connectedAt = const Value.absent(),
+  }) : accountId = Value(accountId),
+       platformId = Value(platformId),
+       displayName = Value(displayName);
+  static Insertable<MarketplaceAccountRow> custom({
+    Expression<int>? id,
+    Expression<String>? accountId,
+    Expression<String>? platformId,
+    Expression<String>? displayName,
+    Expression<bool>? isActive,
+    Expression<DateTime>? connectedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (accountId != null) 'account_id': accountId,
+      if (platformId != null) 'platform_id': platformId,
+      if (displayName != null) 'display_name': displayName,
+      if (isActive != null) 'is_active': isActive,
+      if (connectedAt != null) 'connected_at': connectedAt,
+    });
+  }
+
+  MarketplaceAccountsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? accountId,
+    Value<String>? platformId,
+    Value<String>? displayName,
+    Value<bool>? isActive,
+    Value<DateTime?>? connectedAt,
+  }) {
+    return MarketplaceAccountsCompanion(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      platformId: platformId ?? this.platformId,
+      displayName: displayName ?? this.displayName,
+      isActive: isActive ?? this.isActive,
+      connectedAt: connectedAt ?? this.connectedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (platformId.present) {
+      map['platform_id'] = Variable<String>(platformId.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (connectedAt.present) {
+      map['connected_at'] = Variable<DateTime>(connectedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MarketplaceAccountsCompanion(')
+          ..write('id: $id, ')
+          ..write('accountId: $accountId, ')
+          ..write('platformId: $platformId, ')
+          ..write('displayName: $displayName, ')
+          ..write('isActive: $isActive, ')
+          ..write('connectedAt: $connectedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5129,6 +5673,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UserRulesTableTable userRulesTable = $UserRulesTableTable(this);
   late final $SuppliersTable suppliers = $SuppliersTable(this);
   late final $SupplierOffersTable supplierOffers = $SupplierOffersTable(this);
+  late final $MarketplaceAccountsTable marketplaceAccounts =
+      $MarketplaceAccountsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5141,6 +5687,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     userRulesTable,
     suppliers,
     supplierOffers,
+    marketplaceAccounts,
   ];
 }
 
@@ -5569,6 +6116,7 @@ typedef $$ListingsTableCreateCompanionBuilder =
       required double sellingPrice,
       required double sourceCost,
       Value<String?> decisionLogId,
+      Value<String?> marketplaceAccountId,
       required DateTime createdAt,
       Value<DateTime?> publishedAt,
     });
@@ -5583,6 +6131,7 @@ typedef $$ListingsTableUpdateCompanionBuilder =
       Value<double> sellingPrice,
       Value<double> sourceCost,
       Value<String?> decisionLogId,
+      Value<String?> marketplaceAccountId,
       Value<DateTime> createdAt,
       Value<DateTime?> publishedAt,
     });
@@ -5638,6 +6187,11 @@ class $$ListingsTableFilterComposer
 
   ColumnFilters<String> get decisionLogId => $composableBuilder(
     column: $table.decisionLogId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get marketplaceAccountId => $composableBuilder(
+    column: $table.marketplaceAccountId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5706,6 +6260,11 @@ class $$ListingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get marketplaceAccountId => $composableBuilder(
+    column: $table.marketplaceAccountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -5763,6 +6322,11 @@ class $$ListingsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get marketplaceAccountId => $composableBuilder(
+    column: $table.marketplaceAccountId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -5812,6 +6376,7 @@ class $$ListingsTableTableManager
                 Value<double> sellingPrice = const Value.absent(),
                 Value<double> sourceCost = const Value.absent(),
                 Value<String?> decisionLogId = const Value.absent(),
+                Value<String?> marketplaceAccountId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> publishedAt = const Value.absent(),
               }) => ListingsCompanion(
@@ -5824,6 +6389,7 @@ class $$ListingsTableTableManager
                 sellingPrice: sellingPrice,
                 sourceCost: sourceCost,
                 decisionLogId: decisionLogId,
+                marketplaceAccountId: marketplaceAccountId,
                 createdAt: createdAt,
                 publishedAt: publishedAt,
               ),
@@ -5838,6 +6404,7 @@ class $$ListingsTableTableManager
                 required double sellingPrice,
                 required double sourceCost,
                 Value<String?> decisionLogId = const Value.absent(),
+                Value<String?> marketplaceAccountId = const Value.absent(),
                 required DateTime createdAt,
                 Value<DateTime?> publishedAt = const Value.absent(),
               }) => ListingsCompanion.insert(
@@ -5850,6 +6417,7 @@ class $$ListingsTableTableManager
                 sellingPrice: sellingPrice,
                 sourceCost: sourceCost,
                 decisionLogId: decisionLogId,
+                marketplaceAccountId: marketplaceAccountId,
                 createdAt: createdAt,
                 publishedAt: publishedAt,
               ),
@@ -5889,6 +6457,7 @@ typedef $$OrdersTableCreateCompanionBuilder =
       required double sellingPrice,
       Value<String?> trackingNumber,
       Value<String?> decisionLogId,
+      Value<String?> marketplaceAccountId,
       Value<DateTime?> approvedAt,
       required DateTime createdAt,
     });
@@ -5906,6 +6475,7 @@ typedef $$OrdersTableUpdateCompanionBuilder =
       Value<double> sellingPrice,
       Value<String?> trackingNumber,
       Value<String?> decisionLogId,
+      Value<String?> marketplaceAccountId,
       Value<DateTime?> approvedAt,
       Value<DateTime> createdAt,
     });
@@ -5976,6 +6546,11 @@ class $$OrdersTableFilterComposer
 
   ColumnFilters<String> get decisionLogId => $composableBuilder(
     column: $table.decisionLogId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get marketplaceAccountId => $composableBuilder(
+    column: $table.marketplaceAccountId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6059,6 +6634,11 @@ class $$OrdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get marketplaceAccountId => $composableBuilder(
+    column: $table.marketplaceAccountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get approvedAt => $composableBuilder(
     column: $table.approvedAt,
     builder: (column) => ColumnOrderings(column),
@@ -6131,6 +6711,11 @@ class $$OrdersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get marketplaceAccountId => $composableBuilder(
+    column: $table.marketplaceAccountId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get approvedAt => $composableBuilder(
     column: $table.approvedAt,
     builder: (column) => column,
@@ -6180,6 +6765,7 @@ class $$OrdersTableTableManager
                 Value<double> sellingPrice = const Value.absent(),
                 Value<String?> trackingNumber = const Value.absent(),
                 Value<String?> decisionLogId = const Value.absent(),
+                Value<String?> marketplaceAccountId = const Value.absent(),
                 Value<DateTime?> approvedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => OrdersCompanion(
@@ -6195,6 +6781,7 @@ class $$OrdersTableTableManager
                 sellingPrice: sellingPrice,
                 trackingNumber: trackingNumber,
                 decisionLogId: decisionLogId,
+                marketplaceAccountId: marketplaceAccountId,
                 approvedAt: approvedAt,
                 createdAt: createdAt,
               ),
@@ -6212,6 +6799,7 @@ class $$OrdersTableTableManager
                 required double sellingPrice,
                 Value<String?> trackingNumber = const Value.absent(),
                 Value<String?> decisionLogId = const Value.absent(),
+                Value<String?> marketplaceAccountId = const Value.absent(),
                 Value<DateTime?> approvedAt = const Value.absent(),
                 required DateTime createdAt,
               }) => OrdersCompanion.insert(
@@ -6227,6 +6815,7 @@ class $$OrdersTableTableManager
                 sellingPrice: sellingPrice,
                 trackingNumber: trackingNumber,
                 decisionLogId: decisionLogId,
+                marketplaceAccountId: marketplaceAccountId,
                 approvedAt: approvedAt,
                 createdAt: createdAt,
               ),
@@ -7489,6 +8078,241 @@ typedef $$SupplierOffersTableProcessedTableManager =
       SupplierOfferRow,
       PrefetchHooks Function()
     >;
+typedef $$MarketplaceAccountsTableCreateCompanionBuilder =
+    MarketplaceAccountsCompanion Function({
+      Value<int> id,
+      required String accountId,
+      required String platformId,
+      required String displayName,
+      Value<bool> isActive,
+      Value<DateTime?> connectedAt,
+    });
+typedef $$MarketplaceAccountsTableUpdateCompanionBuilder =
+    MarketplaceAccountsCompanion Function({
+      Value<int> id,
+      Value<String> accountId,
+      Value<String> platformId,
+      Value<String> displayName,
+      Value<bool> isActive,
+      Value<DateTime?> connectedAt,
+    });
+
+class $$MarketplaceAccountsTableFilterComposer
+    extends Composer<_$AppDatabase, $MarketplaceAccountsTable> {
+  $$MarketplaceAccountsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get platformId => $composableBuilder(
+    column: $table.platformId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get connectedAt => $composableBuilder(
+    column: $table.connectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MarketplaceAccountsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MarketplaceAccountsTable> {
+  $$MarketplaceAccountsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get platformId => $composableBuilder(
+    column: $table.platformId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get connectedAt => $composableBuilder(
+    column: $table.connectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MarketplaceAccountsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MarketplaceAccountsTable> {
+  $$MarketplaceAccountsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get accountId =>
+      $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  GeneratedColumn<String> get platformId => $composableBuilder(
+    column: $table.platformId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get connectedAt => $composableBuilder(
+    column: $table.connectedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$MarketplaceAccountsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MarketplaceAccountsTable,
+          MarketplaceAccountRow,
+          $$MarketplaceAccountsTableFilterComposer,
+          $$MarketplaceAccountsTableOrderingComposer,
+          $$MarketplaceAccountsTableAnnotationComposer,
+          $$MarketplaceAccountsTableCreateCompanionBuilder,
+          $$MarketplaceAccountsTableUpdateCompanionBuilder,
+          (
+            MarketplaceAccountRow,
+            BaseReferences<
+              _$AppDatabase,
+              $MarketplaceAccountsTable,
+              MarketplaceAccountRow
+            >,
+          ),
+          MarketplaceAccountRow,
+          PrefetchHooks Function()
+        > {
+  $$MarketplaceAccountsTableTableManager(
+    _$AppDatabase db,
+    $MarketplaceAccountsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MarketplaceAccountsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MarketplaceAccountsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$MarketplaceAccountsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> accountId = const Value.absent(),
+                Value<String> platformId = const Value.absent(),
+                Value<String> displayName = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<DateTime?> connectedAt = const Value.absent(),
+              }) => MarketplaceAccountsCompanion(
+                id: id,
+                accountId: accountId,
+                platformId: platformId,
+                displayName: displayName,
+                isActive: isActive,
+                connectedAt: connectedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String accountId,
+                required String platformId,
+                required String displayName,
+                Value<bool> isActive = const Value.absent(),
+                Value<DateTime?> connectedAt = const Value.absent(),
+              }) => MarketplaceAccountsCompanion.insert(
+                id: id,
+                accountId: accountId,
+                platformId: platformId,
+                displayName: displayName,
+                isActive: isActive,
+                connectedAt: connectedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MarketplaceAccountsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MarketplaceAccountsTable,
+      MarketplaceAccountRow,
+      $$MarketplaceAccountsTableFilterComposer,
+      $$MarketplaceAccountsTableOrderingComposer,
+      $$MarketplaceAccountsTableAnnotationComposer,
+      $$MarketplaceAccountsTableCreateCompanionBuilder,
+      $$MarketplaceAccountsTableUpdateCompanionBuilder,
+      (
+        MarketplaceAccountRow,
+        BaseReferences<
+          _$AppDatabase,
+          $MarketplaceAccountsTable,
+          MarketplaceAccountRow
+        >,
+      ),
+      MarketplaceAccountRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7507,4 +8331,6 @@ class $AppDatabaseManager {
       $$SuppliersTableTableManager(_db, _db.suppliers);
   $$SupplierOffersTableTableManager get supplierOffers =>
       $$SupplierOffersTableTableManager(_db, _db.supplierOffers);
+  $$MarketplaceAccountsTableTableManager get marketplaceAccounts =>
+      $$MarketplaceAccountsTableTableManager(_db, _db.marketplaceAccounts);
 }

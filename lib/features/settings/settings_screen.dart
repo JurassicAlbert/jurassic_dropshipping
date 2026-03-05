@@ -20,6 +20,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _allegroClientSecretController = TextEditingController();
   bool _rulesLoaded = false;
   bool _allegroConnecting = false;
+  bool? _allegroConnected;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAllegroStatus();
+  }
+
+  Future<void> _checkAllegroStatus() async {
+    final storage = ref.read(secureStorageProvider);
+    final token = await storage.read(SecureKeys.allegroAccessToken);
+    if (mounted) {
+      setState(() => _allegroConnected = token != null && token.isNotEmpty);
+    }
+  }
 
   @override
   void dispose() {
@@ -134,6 +149,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             decoration: const InputDecoration(labelText: 'Client Secret', border: OutlineInputBorder()),
           ),
           const SizedBox(height: 12),
+          Row(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _allegroConnected == true ? Colors.green : Colors.red,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _allegroConnected == true ? 'Connected' : 'Not connected',
+                style: TextStyle(
+                  color: _allegroConnected == true ? Colors.green : Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           FilledButton(
             onPressed: _allegroConnecting
                 ? null
@@ -156,6 +192,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     final oauth = ref.read(allegroOAuthProvider);
                     final ok = await oauth.authorize();
                     setState(() => _allegroConnecting = false);
+                    if (ok) await _checkAllegroStatus();
 
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(

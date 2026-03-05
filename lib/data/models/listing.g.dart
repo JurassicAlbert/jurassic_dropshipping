@@ -16,6 +16,7 @@ _$ListingImpl _$$ListingImplFromJson(Map<String, dynamic> json) =>
       sellingPrice: (json['sellingPrice'] as num).toDouble(),
       sourceCost: (json['sourceCost'] as num).toDouble(),
       decisionLogId: json['decisionLogId'] as String?,
+      marketplaceAccountId: json['marketplaceAccountId'] as String?,
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -34,6 +35,7 @@ Map<String, dynamic> _$$ListingImplToJson(_$ListingImpl instance) =>
       'sellingPrice': instance.sellingPrice,
       'sourceCost': instance.sourceCost,
       'decisionLogId': instance.decisionLogId,
+      'marketplaceAccountId': instance.marketplaceAccountId,
       'createdAt': instance.createdAt?.toIso8601String(),
       'publishedAt': instance.publishedAt?.toIso8601String(),
     };

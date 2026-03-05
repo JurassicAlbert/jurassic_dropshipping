@@ -349,6 +349,7 @@ mixin _$Order {
   double get sellingPrice => throw _privateConstructorUsedError;
   String? get trackingNumber => throw _privateConstructorUsedError;
   String? get decisionLogId => throw _privateConstructorUsedError;
+  String? get marketplaceAccountId => throw _privateConstructorUsedError;
   DateTime? get approvedAt => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
@@ -378,6 +379,7 @@ abstract class $OrderCopyWith<$Res> {
     double sellingPrice,
     String? trackingNumber,
     String? decisionLogId,
+    String? marketplaceAccountId,
     DateTime? approvedAt,
     DateTime? createdAt,
   });
@@ -411,6 +413,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? sellingPrice = null,
     Object? trackingNumber = freezed,
     Object? decisionLogId = freezed,
+    Object? marketplaceAccountId = freezed,
     Object? approvedAt = freezed,
     Object? createdAt = freezed,
   }) {
@@ -460,6 +463,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.decisionLogId
                 : decisionLogId // ignore: cast_nullable_to_non_nullable
                       as String?,
+            marketplaceAccountId: freezed == marketplaceAccountId
+                ? _value.marketplaceAccountId
+                : marketplaceAccountId // ignore: cast_nullable_to_non_nullable
+                      as String?,
             approvedAt: freezed == approvedAt
                 ? _value.approvedAt
                 : approvedAt // ignore: cast_nullable_to_non_nullable
@@ -504,6 +511,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     double sellingPrice,
     String? trackingNumber,
     String? decisionLogId,
+    String? marketplaceAccountId,
     DateTime? approvedAt,
     DateTime? createdAt,
   });
@@ -537,6 +545,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? sellingPrice = null,
     Object? trackingNumber = freezed,
     Object? decisionLogId = freezed,
+    Object? marketplaceAccountId = freezed,
     Object? approvedAt = freezed,
     Object? createdAt = freezed,
   }) {
@@ -586,6 +595,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.decisionLogId
             : decisionLogId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        marketplaceAccountId: freezed == marketplaceAccountId
+            ? _value.marketplaceAccountId
+            : marketplaceAccountId // ignore: cast_nullable_to_non_nullable
+                  as String?,
         approvedAt: freezed == approvedAt
             ? _value.approvedAt
             : approvedAt // ignore: cast_nullable_to_non_nullable
@@ -614,6 +627,7 @@ class _$OrderImpl implements _Order {
     required this.sellingPrice,
     this.trackingNumber,
     this.decisionLogId,
+    this.marketplaceAccountId,
     this.approvedAt,
     this.createdAt,
   });
@@ -644,13 +658,15 @@ class _$OrderImpl implements _Order {
   @override
   final String? decisionLogId;
   @override
+  final String? marketplaceAccountId;
+  @override
   final DateTime? approvedAt;
   @override
   final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'Order(id: $id, listingId: $listingId, targetOrderId: $targetOrderId, targetPlatformId: $targetPlatformId, customerAddress: $customerAddress, status: $status, sourceOrderId: $sourceOrderId, sourceCost: $sourceCost, sellingPrice: $sellingPrice, trackingNumber: $trackingNumber, decisionLogId: $decisionLogId, approvedAt: $approvedAt, createdAt: $createdAt)';
+    return 'Order(id: $id, listingId: $listingId, targetOrderId: $targetOrderId, targetPlatformId: $targetPlatformId, customerAddress: $customerAddress, status: $status, sourceOrderId: $sourceOrderId, sourceCost: $sourceCost, sellingPrice: $sellingPrice, trackingNumber: $trackingNumber, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, approvedAt: $approvedAt, createdAt: $createdAt)';
   }
 
   @override
@@ -678,6 +694,8 @@ class _$OrderImpl implements _Order {
                 other.trackingNumber == trackingNumber) &&
             (identical(other.decisionLogId, decisionLogId) ||
                 other.decisionLogId == decisionLogId) &&
+            (identical(other.marketplaceAccountId, marketplaceAccountId) ||
+                other.marketplaceAccountId == marketplaceAccountId) &&
             (identical(other.approvedAt, approvedAt) ||
                 other.approvedAt == approvedAt) &&
             (identical(other.createdAt, createdAt) ||
@@ -699,6 +717,7 @@ class _$OrderImpl implements _Order {
     sellingPrice,
     trackingNumber,
     decisionLogId,
+    marketplaceAccountId,
     approvedAt,
     createdAt,
   );
@@ -730,6 +749,7 @@ abstract class _Order implements Order {
     required final double sellingPrice,
     final String? trackingNumber,
     final String? decisionLogId,
+    final String? marketplaceAccountId,
     final DateTime? approvedAt,
     final DateTime? createdAt,
   }) = _$OrderImpl;
@@ -758,6 +778,8 @@ abstract class _Order implements Order {
   String? get trackingNumber;
   @override
   String? get decisionLogId;
+  @override
+  String? get marketplaceAccountId;
   @override
   DateTime? get approvedAt;
   @override

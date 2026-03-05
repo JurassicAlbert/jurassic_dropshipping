@@ -46,6 +46,7 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   sellingPrice: (json['sellingPrice'] as num).toDouble(),
   trackingNumber: json['trackingNumber'] as String?,
   decisionLogId: json['decisionLogId'] as String?,
+  marketplaceAccountId: json['marketplaceAccountId'] as String?,
   approvedAt: json['approvedAt'] == null
       ? null
       : DateTime.parse(json['approvedAt'] as String),
@@ -67,6 +68,7 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'sellingPrice': instance.sellingPrice,
       'trackingNumber': instance.trackingNumber,
       'decisionLogId': instance.decisionLogId,
+      'marketplaceAccountId': instance.marketplaceAccountId,
       'approvedAt': instance.approvedAt?.toIso8601String(),
       'createdAt': instance.createdAt?.toIso8601String(),
     };

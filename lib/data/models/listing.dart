@@ -21,6 +21,7 @@ class Listing with _$Listing {
     required double sellingPrice,
     required double sourceCost,
     String? decisionLogId,
+    String? marketplaceAccountId,
     DateTime? createdAt,
     DateTime? publishedAt,
   }) = _Listing;

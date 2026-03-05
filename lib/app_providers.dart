@@ -3,12 +3,16 @@ import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/decision_log.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
+import 'package:jurassic_dropshipping/data/models/supplier.dart';
+import 'package:jurassic_dropshipping/data/models/supplier_offer.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/supplier_repository.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/listing_decider.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/scanner.dart';
@@ -19,10 +23,14 @@ import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
 import 'package:jurassic_dropshipping/services/order_sync_scheduler.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
+import 'package:jurassic_dropshipping/services/sources/api2cart_client.dart';
+import 'package:jurassic_dropshipping/services/sources/api2cart_source_platform.dart';
 import 'package:jurassic_dropshipping/services/sources/cj_dropshipping_client.dart';
 import 'package:jurassic_dropshipping/services/sources/cj_source_platform.dart';
 import 'package:jurassic_dropshipping/services/targets/allegro_client.dart';
 import 'package:jurassic_dropshipping/services/targets/allegro_target_platform.dart';
+import 'package:jurassic_dropshipping/services/targets/temu_seller_client.dart';
+import 'package:jurassic_dropshipping/services/targets/temu_target_platform.dart';
 
 final dbProvider = Provider<AppDatabase>((ref) => AppDatabase());
 
@@ -33,6 +41,8 @@ final listingRepositoryProvider = Provider<ListingRepository>((ref) => ListingRe
 final orderRepositoryProvider = Provider<OrderRepository>((ref) => OrderRepository(ref.watch(dbProvider)));
 final decisionLogRepositoryProvider = Provider<DecisionLogRepository>((ref) => DecisionLogRepository(ref.watch(dbProvider)));
 final rulesRepositoryProvider = Provider<RulesRepository>((ref) => RulesRepository(ref.watch(dbProvider)));
+final supplierRepositoryProvider = Provider<SupplierRepository>((ref) => SupplierRepository(ref.watch(dbProvider)));
+final supplierOfferRepositoryProvider = Provider<SupplierOfferRepository>((ref) => SupplierOfferRepository(ref.watch(dbProvider)));
 
 final cjClientProvider = Provider<CjDropshippingClient>((ref) => CjDropshippingClient(secureStorage: ref.watch(secureStorageProvider)));
 final allegroClientProvider = Provider<AllegroClient>((ref) => AllegroClient(secureStorage: ref.watch(secureStorageProvider)));
@@ -40,8 +50,11 @@ final allegroClientProvider = Provider<AllegroClient>((ref) => AllegroClient(sec
 final cjSourceProvider = Provider<SourcePlatform>((ref) => CjSourcePlatform(ref.watch(cjClientProvider)));
 final allegroTargetProvider = Provider<TargetPlatform>((ref) => AllegroTargetPlatform(ref.watch(allegroClientProvider)));
 
+final temuSellerClientProvider = Provider<TemuSellerClient>((ref) => TemuSellerClient(secureStorage: ref.watch(secureStorageProvider)));
+final temuTargetProvider = Provider<TargetPlatform>((ref) => TemuTargetPlatform(ref.watch(temuSellerClientProvider)));
+
 final sourcesListProvider = Provider<List<SourcePlatform>>((ref) => [ref.watch(cjSourceProvider)]);
-final targetsListProvider = Provider<List<TargetPlatform>>((ref) => [ref.watch(allegroTargetProvider)]);
+final targetsListProvider = Provider<List<TargetPlatform>>((ref) => [ref.watch(allegroTargetProvider), ref.watch(temuTargetProvider)]);
 
 final pricingCalculatorProvider = Provider<PricingCalculator>((ref) => PricingCalculator());
 final listingDeciderProvider = Provider<ListingDecider>((ref) => ListingDecider(pricingCalculator: ref.watch(pricingCalculatorProvider)));
