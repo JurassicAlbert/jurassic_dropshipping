@@ -10,6 +10,8 @@ abstract class SecureKeys {
   static const String allegroRefreshToken = 'allegro_refresh_token';
   static const String allegroClientId = 'allegro_client_id';
   static const String allegroClientSecret = 'allegro_client_secret';
+  static const String api2cartApiKey = 'api2cart_api_key';
+  static const String api2cartStoreKey = 'api2cart_store_key';
 }
 
 /// Secure storage for API keys and tokens. Never log or expose these.

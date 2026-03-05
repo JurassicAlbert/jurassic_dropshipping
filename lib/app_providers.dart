@@ -53,7 +53,10 @@ final allegroTargetProvider = Provider<TargetPlatform>((ref) => AllegroTargetPla
 final temuSellerClientProvider = Provider<TemuSellerClient>((ref) => TemuSellerClient(secureStorage: ref.watch(secureStorageProvider)));
 final temuTargetProvider = Provider<TargetPlatform>((ref) => TemuTargetPlatform(ref.watch(temuSellerClientProvider)));
 
-final sourcesListProvider = Provider<List<SourcePlatform>>((ref) => [ref.watch(cjSourceProvider)]);
+final api2cartClientProvider = Provider<Api2CartClient>((ref) => Api2CartClient(secureStorage: ref.watch(secureStorageProvider)));
+final api2cartSourceProvider = Provider<SourcePlatform>((ref) => Api2CartSourcePlatform(ref.watch(api2cartClientProvider)));
+
+final sourcesListProvider = Provider<List<SourcePlatform>>((ref) => [ref.watch(cjSourceProvider), ref.watch(api2cartSourceProvider)]);
 final targetsListProvider = Provider<List<TargetPlatform>>((ref) => [ref.watch(allegroTargetProvider), ref.watch(temuTargetProvider)]);
 
 final pricingCalculatorProvider = Provider<PricingCalculator>((ref) => PricingCalculator());
@@ -102,3 +105,5 @@ final rulesProvider = FutureProvider<UserRules>((ref) => ref.watch(rulesReposito
 final pendingListingsProvider = FutureProvider<List<Listing>>((ref) => ref.watch(listingRepositoryProvider).getPendingApproval());
 final pendingOrdersProvider = FutureProvider<List<Order>>((ref) => ref.watch(orderRepositoryProvider).getPendingApproval());
 final decisionLogsProvider = FutureProvider<List<DecisionLog>>((ref) => ref.watch(decisionLogRepositoryProvider).getAll(limit: 100));
+final suppliersProvider = FutureProvider<List<Supplier>>((ref) => ref.watch(supplierRepositoryProvider).getAll());
+final supplierOffersProvider = FutureProvider<List<SupplierOffer>>((ref) => ref.watch(supplierOfferRepositoryProvider).getAll());
