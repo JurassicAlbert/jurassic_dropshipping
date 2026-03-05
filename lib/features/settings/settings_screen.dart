@@ -18,6 +18,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _cjApiKeyController = TextEditingController();
   final _allegroClientIdController = TextEditingController();
   final _allegroClientSecretController = TextEditingController();
+  final _api2cartApiKeyController = TextEditingController();
+  final _api2cartStoreKeyController = TextEditingController();
   bool _rulesLoaded = false;
   bool _allegroConnecting = false;
   bool? _allegroConnected;
@@ -45,6 +47,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _cjApiKeyController.dispose();
     _allegroClientIdController.dispose();
     _allegroClientSecretController.dispose();
+    _api2cartApiKeyController.dispose();
+    _api2cartStoreKeyController.dispose();
     super.dispose();
   }
 
@@ -203,6 +207,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: _allegroConnecting
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Text('Connect Allegro (OAuth)'),
+          ),
+          const SizedBox(height: 24),
+          const Text('API2Cart', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _api2cartApiKeyController,
+            obscureText: true,
+            decoration: const InputDecoration(labelText: 'API Key', border: OutlineInputBorder()),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _api2cartStoreKeyController,
+            obscureText: true,
+            decoration: const InputDecoration(labelText: 'Store Key', border: OutlineInputBorder()),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () async {
+              final apiKey = _api2cartApiKeyController.text.trim();
+              final storeKey = _api2cartStoreKeyController.text.trim();
+              if (apiKey.isEmpty || storeKey.isEmpty) return;
+              final storage = ref.read(secureStorageProvider);
+              await storage.write(SecureKeys.api2cartApiKey, apiKey);
+              await storage.write(SecureKeys.api2cartStoreKey, storeKey);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('API2Cart credentials saved.')),
+                );
+              }
+            },
+            child: const Text('Save API2Cart credentials'),
           ),
         ],
       ),

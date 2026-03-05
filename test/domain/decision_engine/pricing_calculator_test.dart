@@ -78,4 +78,39 @@ void main() {
       expect(calculator.meetsMinProfit(144.44, 100.0, rules), isFalse);
     });
   });
+
+  group('estimateReturnCost', () {
+    test('return cost with no restocking fee', () {
+      final result = calculator.estimateReturnCost(
+        sellingPrice: 100.0,
+        sourceCost: 60.0,
+      );
+      expect(result.restockingFee, 0.0);
+      expect(result.refundAmount, 100.0);
+      expect(result.returnShippingCost, 0.0);
+      expect(result.netLoss, 100.0);
+    });
+
+    test('return cost with restocking fee', () {
+      final result = calculator.estimateReturnCost(
+        sellingPrice: 100.0,
+        sourceCost: 60.0,
+        restockingFeePercent: 15.0,
+      );
+      expect(result.restockingFee, 15.0);
+      expect(result.refundAmount, 85.0);
+      expect(result.netLoss, closeTo(70.0, 0.01));
+    });
+
+    test('return cost with shipping cost', () {
+      final result = calculator.estimateReturnCost(
+        sellingPrice: 100.0,
+        sourceCost: 60.0,
+        returnShippingCost: 20.0,
+      );
+      expect(result.returnShippingCost, 20.0);
+      expect(result.refundAmount, 100.0);
+      expect(result.netLoss, 120.0);
+    });
+  });
 }

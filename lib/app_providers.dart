@@ -22,6 +22,7 @@ import 'package:jurassic_dropshipping/domain/decision_engine/supplier_selector.d
 import 'package:jurassic_dropshipping/domain/platforms.dart';
 import 'package:jurassic_dropshipping/services/allegro_oauth_service.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
+import 'package:jurassic_dropshipping/services/automation_scheduler.dart';
 import 'package:jurassic_dropshipping/services/order_sync_scheduler.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
@@ -97,6 +98,13 @@ final allegroOAuthProvider = Provider<AllegroOAuthService>((ref) => AllegroOAuth
 ));
 
 final orderSyncSchedulerProvider = Provider<OrderSyncScheduler>((ref) => OrderSyncScheduler(
+  orderSyncService: ref.watch(orderSyncServiceProvider),
+  fulfillmentService: ref.watch(fulfillmentServiceProvider),
+  rulesRepository: ref.watch(rulesRepositoryProvider),
+));
+
+final automationSchedulerProvider = Provider<AutomationScheduler>((ref) => AutomationScheduler(
+  scanner: ref.watch(scannerProvider),
   orderSyncService: ref.watch(orderSyncServiceProvider),
   fulfillmentService: ref.watch(fulfillmentServiceProvider),
   rulesRepository: ref.watch(rulesRepositoryProvider),

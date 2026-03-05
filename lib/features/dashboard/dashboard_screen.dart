@@ -12,7 +12,7 @@ class DashboardScreen extends ConsumerWidget {
     final listingsAsync = ref.watch(listingsProvider);
     final ordersAsync = ref.watch(ordersProvider);
     final rulesAsync = ref.watch(rulesProvider);
-    final scheduler = ref.watch(orderSyncSchedulerProvider);
+    final automation = ref.watch(automationSchedulerProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -77,40 +77,38 @@ class DashboardScreen extends ConsumerWidget {
               error: (e, _) => Card(child: Padding(padding: const EdgeInsets.all(16), child: Text('Error: $e'))),
             ),
             const SizedBox(height: 12),
-            // Profit trend chart
             ordersAsync.when(
               data: (orders) => _ProfitChart(orders: orders),
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 16),
-            // Order sync controls
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Order Sync', style: TextStyle(fontWeight: FontWeight.w600)),
+                    const Text('Automation', style: TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
-                    Text(scheduler.isRunning ? 'Status: Running' : 'Status: Stopped'),
-                    if (scheduler.lastSyncTime != null)
-                      Text('Last sync: ${_formatTime(scheduler.lastSyncTime!)}'),
-                    const SizedBox(height: 8),
+                    _StatusRow(label: 'Scanner', running: automation.isScanRunning, lastTime: automation.lastScanTime),
+                    _StatusRow(label: 'Order Sync', running: automation.isSyncRunning, lastTime: automation.lastSyncTime),
+                    _StatusRow(label: 'Price Refresh', running: automation.isPriceRefreshRunning, lastTime: automation.lastPriceRefreshTime),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         FilledButton(
-                          onPressed: scheduler.isRunning
+                          onPressed: (automation.isScanRunning && automation.isSyncRunning)
                               ? null
-                              : () => scheduler.start(),
-                          child: const Text('Start sync'),
+                              : () => automation.startAll(),
+                          child: const Text('Start all'),
                         ),
                         const SizedBox(width: 8),
                         OutlinedButton(
-                          onPressed: scheduler.isRunning
-                              ? () => scheduler.stop()
+                          onPressed: (automation.isScanRunning || automation.isSyncRunning || automation.isPriceRefreshRunning)
+                              ? () => automation.stopAll()
                               : null,
-                          child: const Text('Stop'),
+                          child: const Text('Stop all'),
                         ),
                       ],
                     ),
@@ -143,8 +141,40 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  String _formatTime(DateTime dt) {
+  static String _formatTime(DateTime dt) {
     return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+  }
+}
+
+class _StatusRow extends StatelessWidget {
+  const _StatusRow({required this.label, required this.running, this.lastTime});
+  final String label;
+  final bool running;
+  final DateTime? lastTime;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Icon(
+            running ? Icons.play_circle : Icons.stop_circle,
+            size: 16,
+            color: running ? Colors.green : Colors.grey,
+          ),
+          const SizedBox(width: 6),
+          Text('$label: ${running ? "Running" : "Stopped"}'),
+          if (lastTime != null) ...[
+            const SizedBox(width: 8),
+            Text(
+              '(last: ${DashboardScreen._formatTime(lastTime!)})',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 

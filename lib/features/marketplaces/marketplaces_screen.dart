@@ -2,22 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 
-/// Marketplaces overview: shows basic stats per target platform.
+/// Known marketplace display names.
+const _marketplaceNames = <String, String>{
+  'allegro': 'Allegro',
+  'temu': 'Temu',
+  'amazon': 'Amazon',
+};
+
+/// Marketplaces overview: shows stats per target platform and connection status.
 class MarketplacesScreen extends ConsumerWidget {
   const MarketplacesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersAsync = ref.watch(ordersProvider);
+    final targets = ref.watch(targetsListProvider);
+    final registeredIds = targets.map((t) => t.id).toSet();
+
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(ordersProvider);
       },
       child: ordersAsync.when(
         data: (orders) {
-          if (orders.isEmpty) {
-            return const Center(child: Text('No marketplace activity yet.'));
-          }
           final byPlatform = <String, _MarketplaceStats>{};
           for (final o in orders) {
             byPlatform.update(
@@ -26,18 +33,57 @@ class MarketplacesScreen extends ConsumerWidget {
               ifAbsent: () => _MarketplaceStats.fromOrder(o.sellingPrice, o.sourceCost),
             );
           }
-          final entries = byPlatform.entries.toList()
-            ..sort((a, b) => b.value.profit.compareTo(a.value.profit));
+
+          final allIds = {...byPlatform.keys, ...registeredIds};
+          final sortedIds = allIds.toList()..sort();
+
+          if (sortedIds.isEmpty) {
+            return ListView(
+              children: const [
+                SizedBox(height: 120),
+                Center(child: Text('No marketplace activity yet.')),
+              ],
+            );
+          }
+
           return ListView.builder(
-            itemCount: entries.length,
+            itemCount: sortedIds.length,
             itemBuilder: (_, i) {
-              final e = entries[i];
-              final stats = e.value;
-              return ListTile(
-                leading: const Icon(Icons.public),
-                title: Text(e.key),
-                subtitle: Text(
-                  'Orders: ${stats.count} · Profit: ${stats.profit.toStringAsFixed(2)} PLN',
+              final platformId = sortedIds[i];
+              final stats = byPlatform[platformId];
+              final isConnected = registeredIds.contains(platformId);
+              final displayName = _marketplaceNames[platformId] ?? platformId;
+
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: ListTile(
+                  leading: const Icon(Icons.public),
+                  title: Row(
+                    children: [
+                      Text(displayName),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isConnected ? Colors.green.shade100 : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          isConnected ? 'Connected' : 'Not connected',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isConnected ? Colors.green.shade800 : Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  subtitle: stats != null
+                      ? Text(
+                          'Orders: ${stats.count} · Revenue: ${stats.revenue.toStringAsFixed(2)} PLN · Profit: ${stats.profit.toStringAsFixed(2)} PLN',
+                        )
+                      : const Text('No orders yet'),
                 ),
               );
             },
@@ -71,4 +117,3 @@ class _MarketplaceStats {
     return _MarketplaceStats(count: 1, revenue: sellingPrice, cost: sourceCost);
   }
 }
-
