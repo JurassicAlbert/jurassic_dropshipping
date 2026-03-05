@@ -16,15 +16,44 @@ class AllegroTargetPlatform implements TargetPlatform {
 
   @override
   Future<String> createListing(ListingDraft draft) async {
-    final body = {
+    final body = <String, dynamic>{
       'name': draft.title,
-      'description': {'sections': [
-        {'items': [{'type': 'TEXT', 'content': draft.description}]}
-      ]},
-      'sellingMode': {'price': {'amount': draft.sellingPrice.toString(), 'currency': 'PLN'}},
-      'stock': {'available': draft.stock ?? 99},
-      'images': draft.imageUrls.take(10).map((url) => {'url': url}).toList(),
-      if (draft.categoryId != null) 'category': {'id': draft.categoryId},
+      'productSet': [
+        {
+          'product': {
+            if (draft.categoryId != null) 'category': {'id': draft.categoryId},
+            'parameters': <Map<String, dynamic>>[],
+          },
+          'quantity': {'value': draft.stock ?? 99},
+        },
+      ],
+      'description': {
+        'sections': [
+          {
+            'items': [
+              {'type': 'TEXT', 'content': draft.description},
+            ],
+          },
+        ],
+      },
+      'sellingMode': {
+        'format': 'BUY_NOW',
+        'price': {
+          'amount': draft.sellingPrice.toStringAsFixed(2),
+          'currency': 'PLN',
+        },
+      },
+      'stock': {'available': draft.stock ?? 99, 'unit': 'UNIT'},
+      'images': draft.imageUrls
+          .take(16)
+          .map((url) => {'url': url})
+          .toList(),
+      'location': {'countryCode': 'PL'},
+      'delivery': {
+        'shippingRates': null,
+        'handlingTime': 'PT72H',
+      },
+      'payments': {'invoice': 'NO_INVOICE'},
     };
     final offerId = await _client.createOffer(body);
     if (offerId == null) throw Exception('Allegro createOffer returned no id');
