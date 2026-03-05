@@ -3653,6 +3653,1472 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
   }
 }
 
+class $SuppliersTable extends Suppliers
+    with TableInfo<$SuppliersTable, SupplierRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SuppliersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _platformTypeMeta = const VerificationMeta(
+    'platformType',
+  );
+  @override
+  late final GeneratedColumn<String> platformType = GeneratedColumn<String>(
+    'platform_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countryCodeMeta = const VerificationMeta(
+    'countryCode',
+  );
+  @override
+  late final GeneratedColumn<String> countryCode = GeneratedColumn<String>(
+    'country_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
+  @override
+  late final GeneratedColumn<double> rating = GeneratedColumn<double>(
+    'rating',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnWindowDaysMeta = const VerificationMeta(
+    'returnWindowDays',
+  );
+  @override
+  late final GeneratedColumn<int> returnWindowDays = GeneratedColumn<int>(
+    'return_window_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnShippingCostMeta =
+      const VerificationMeta('returnShippingCost');
+  @override
+  late final GeneratedColumn<double> returnShippingCost =
+      GeneratedColumn<double>(
+        'return_shipping_cost',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _restockingFeePercentMeta =
+      const VerificationMeta('restockingFeePercent');
+  @override
+  late final GeneratedColumn<double> restockingFeePercent =
+      GeneratedColumn<double>(
+        'restocking_fee_percent',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _acceptsNoReasonReturnsMeta =
+      const VerificationMeta('acceptsNoReasonReturns');
+  @override
+  late final GeneratedColumn<bool> acceptsNoReasonReturns =
+      GeneratedColumn<bool>(
+        'accepts_no_reason_returns',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("accepts_no_reason_returns" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    supplierId,
+    name,
+    platformType,
+    countryCode,
+    rating,
+    returnWindowDays,
+    returnShippingCost,
+    restockingFeePercent,
+    acceptsNoReasonReturns,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'suppliers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SupplierRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_supplierIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('platform_type')) {
+      context.handle(
+        _platformTypeMeta,
+        platformType.isAcceptableOrUnknown(
+          data['platform_type']!,
+          _platformTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_platformTypeMeta);
+    }
+    if (data.containsKey('country_code')) {
+      context.handle(
+        _countryCodeMeta,
+        countryCode.isAcceptableOrUnknown(
+          data['country_code']!,
+          _countryCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('rating')) {
+      context.handle(
+        _ratingMeta,
+        rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta),
+      );
+    }
+    if (data.containsKey('return_window_days')) {
+      context.handle(
+        _returnWindowDaysMeta,
+        returnWindowDays.isAcceptableOrUnknown(
+          data['return_window_days']!,
+          _returnWindowDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('return_shipping_cost')) {
+      context.handle(
+        _returnShippingCostMeta,
+        returnShippingCost.isAcceptableOrUnknown(
+          data['return_shipping_cost']!,
+          _returnShippingCostMeta,
+        ),
+      );
+    }
+    if (data.containsKey('restocking_fee_percent')) {
+      context.handle(
+        _restockingFeePercentMeta,
+        restockingFeePercent.isAcceptableOrUnknown(
+          data['restocking_fee_percent']!,
+          _restockingFeePercentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('accepts_no_reason_returns')) {
+      context.handle(
+        _acceptsNoReasonReturnsMeta,
+        acceptsNoReasonReturns.isAcceptableOrUnknown(
+          data['accepts_no_reason_returns']!,
+          _acceptsNoReasonReturnsMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SupplierRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SupplierRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      platformType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}platform_type'],
+      )!,
+      countryCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}country_code'],
+      ),
+      rating: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}rating'],
+      ),
+      returnWindowDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}return_window_days'],
+      ),
+      returnShippingCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}return_shipping_cost'],
+      ),
+      restockingFeePercent: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}restocking_fee_percent'],
+      ),
+      acceptsNoReasonReturns: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}accepts_no_reason_returns'],
+      )!,
+    );
+  }
+
+  @override
+  $SuppliersTable createAlias(String alias) {
+    return $SuppliersTable(attachedDatabase, alias);
+  }
+}
+
+class SupplierRow extends DataClass implements Insertable<SupplierRow> {
+  final int id;
+  final String supplierId;
+  final String name;
+  final String platformType;
+  final String? countryCode;
+  final double? rating;
+  final int? returnWindowDays;
+  final double? returnShippingCost;
+  final double? restockingFeePercent;
+  final bool acceptsNoReasonReturns;
+  const SupplierRow({
+    required this.id,
+    required this.supplierId,
+    required this.name,
+    required this.platformType,
+    this.countryCode,
+    this.rating,
+    this.returnWindowDays,
+    this.returnShippingCost,
+    this.restockingFeePercent,
+    required this.acceptsNoReasonReturns,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['supplier_id'] = Variable<String>(supplierId);
+    map['name'] = Variable<String>(name);
+    map['platform_type'] = Variable<String>(platformType);
+    if (!nullToAbsent || countryCode != null) {
+      map['country_code'] = Variable<String>(countryCode);
+    }
+    if (!nullToAbsent || rating != null) {
+      map['rating'] = Variable<double>(rating);
+    }
+    if (!nullToAbsent || returnWindowDays != null) {
+      map['return_window_days'] = Variable<int>(returnWindowDays);
+    }
+    if (!nullToAbsent || returnShippingCost != null) {
+      map['return_shipping_cost'] = Variable<double>(returnShippingCost);
+    }
+    if (!nullToAbsent || restockingFeePercent != null) {
+      map['restocking_fee_percent'] = Variable<double>(restockingFeePercent);
+    }
+    map['accepts_no_reason_returns'] = Variable<bool>(acceptsNoReasonReturns);
+    return map;
+  }
+
+  SuppliersCompanion toCompanion(bool nullToAbsent) {
+    return SuppliersCompanion(
+      id: Value(id),
+      supplierId: Value(supplierId),
+      name: Value(name),
+      platformType: Value(platformType),
+      countryCode: countryCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(countryCode),
+      rating: rating == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rating),
+      returnWindowDays: returnWindowDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnWindowDays),
+      returnShippingCost: returnShippingCost == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnShippingCost),
+      restockingFeePercent: restockingFeePercent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(restockingFeePercent),
+      acceptsNoReasonReturns: Value(acceptsNoReasonReturns),
+    );
+  }
+
+  factory SupplierRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SupplierRow(
+      id: serializer.fromJson<int>(json['id']),
+      supplierId: serializer.fromJson<String>(json['supplierId']),
+      name: serializer.fromJson<String>(json['name']),
+      platformType: serializer.fromJson<String>(json['platformType']),
+      countryCode: serializer.fromJson<String?>(json['countryCode']),
+      rating: serializer.fromJson<double?>(json['rating']),
+      returnWindowDays: serializer.fromJson<int?>(json['returnWindowDays']),
+      returnShippingCost: serializer.fromJson<double?>(
+        json['returnShippingCost'],
+      ),
+      restockingFeePercent: serializer.fromJson<double?>(
+        json['restockingFeePercent'],
+      ),
+      acceptsNoReasonReturns: serializer.fromJson<bool>(
+        json['acceptsNoReasonReturns'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'supplierId': serializer.toJson<String>(supplierId),
+      'name': serializer.toJson<String>(name),
+      'platformType': serializer.toJson<String>(platformType),
+      'countryCode': serializer.toJson<String?>(countryCode),
+      'rating': serializer.toJson<double?>(rating),
+      'returnWindowDays': serializer.toJson<int?>(returnWindowDays),
+      'returnShippingCost': serializer.toJson<double?>(returnShippingCost),
+      'restockingFeePercent': serializer.toJson<double?>(restockingFeePercent),
+      'acceptsNoReasonReturns': serializer.toJson<bool>(acceptsNoReasonReturns),
+    };
+  }
+
+  SupplierRow copyWith({
+    int? id,
+    String? supplierId,
+    String? name,
+    String? platformType,
+    Value<String?> countryCode = const Value.absent(),
+    Value<double?> rating = const Value.absent(),
+    Value<int?> returnWindowDays = const Value.absent(),
+    Value<double?> returnShippingCost = const Value.absent(),
+    Value<double?> restockingFeePercent = const Value.absent(),
+    bool? acceptsNoReasonReturns,
+  }) => SupplierRow(
+    id: id ?? this.id,
+    supplierId: supplierId ?? this.supplierId,
+    name: name ?? this.name,
+    platformType: platformType ?? this.platformType,
+    countryCode: countryCode.present ? countryCode.value : this.countryCode,
+    rating: rating.present ? rating.value : this.rating,
+    returnWindowDays: returnWindowDays.present
+        ? returnWindowDays.value
+        : this.returnWindowDays,
+    returnShippingCost: returnShippingCost.present
+        ? returnShippingCost.value
+        : this.returnShippingCost,
+    restockingFeePercent: restockingFeePercent.present
+        ? restockingFeePercent.value
+        : this.restockingFeePercent,
+    acceptsNoReasonReturns:
+        acceptsNoReasonReturns ?? this.acceptsNoReasonReturns,
+  );
+  SupplierRow copyWithCompanion(SuppliersCompanion data) {
+    return SupplierRow(
+      id: data.id.present ? data.id.value : this.id,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
+      name: data.name.present ? data.name.value : this.name,
+      platformType: data.platformType.present
+          ? data.platformType.value
+          : this.platformType,
+      countryCode: data.countryCode.present
+          ? data.countryCode.value
+          : this.countryCode,
+      rating: data.rating.present ? data.rating.value : this.rating,
+      returnWindowDays: data.returnWindowDays.present
+          ? data.returnWindowDays.value
+          : this.returnWindowDays,
+      returnShippingCost: data.returnShippingCost.present
+          ? data.returnShippingCost.value
+          : this.returnShippingCost,
+      restockingFeePercent: data.restockingFeePercent.present
+          ? data.restockingFeePercent.value
+          : this.restockingFeePercent,
+      acceptsNoReasonReturns: data.acceptsNoReasonReturns.present
+          ? data.acceptsNoReasonReturns.value
+          : this.acceptsNoReasonReturns,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SupplierRow(')
+          ..write('id: $id, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('name: $name, ')
+          ..write('platformType: $platformType, ')
+          ..write('countryCode: $countryCode, ')
+          ..write('rating: $rating, ')
+          ..write('returnWindowDays: $returnWindowDays, ')
+          ..write('returnShippingCost: $returnShippingCost, ')
+          ..write('restockingFeePercent: $restockingFeePercent, ')
+          ..write('acceptsNoReasonReturns: $acceptsNoReasonReturns')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    supplierId,
+    name,
+    platformType,
+    countryCode,
+    rating,
+    returnWindowDays,
+    returnShippingCost,
+    restockingFeePercent,
+    acceptsNoReasonReturns,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SupplierRow &&
+          other.id == this.id &&
+          other.supplierId == this.supplierId &&
+          other.name == this.name &&
+          other.platformType == this.platformType &&
+          other.countryCode == this.countryCode &&
+          other.rating == this.rating &&
+          other.returnWindowDays == this.returnWindowDays &&
+          other.returnShippingCost == this.returnShippingCost &&
+          other.restockingFeePercent == this.restockingFeePercent &&
+          other.acceptsNoReasonReturns == this.acceptsNoReasonReturns);
+}
+
+class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
+  final Value<int> id;
+  final Value<String> supplierId;
+  final Value<String> name;
+  final Value<String> platformType;
+  final Value<String?> countryCode;
+  final Value<double?> rating;
+  final Value<int?> returnWindowDays;
+  final Value<double?> returnShippingCost;
+  final Value<double?> restockingFeePercent;
+  final Value<bool> acceptsNoReasonReturns;
+  const SuppliersCompanion({
+    this.id = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.platformType = const Value.absent(),
+    this.countryCode = const Value.absent(),
+    this.rating = const Value.absent(),
+    this.returnWindowDays = const Value.absent(),
+    this.returnShippingCost = const Value.absent(),
+    this.restockingFeePercent = const Value.absent(),
+    this.acceptsNoReasonReturns = const Value.absent(),
+  });
+  SuppliersCompanion.insert({
+    this.id = const Value.absent(),
+    required String supplierId,
+    required String name,
+    required String platformType,
+    this.countryCode = const Value.absent(),
+    this.rating = const Value.absent(),
+    this.returnWindowDays = const Value.absent(),
+    this.returnShippingCost = const Value.absent(),
+    this.restockingFeePercent = const Value.absent(),
+    this.acceptsNoReasonReturns = const Value.absent(),
+  }) : supplierId = Value(supplierId),
+       name = Value(name),
+       platformType = Value(platformType);
+  static Insertable<SupplierRow> custom({
+    Expression<int>? id,
+    Expression<String>? supplierId,
+    Expression<String>? name,
+    Expression<String>? platformType,
+    Expression<String>? countryCode,
+    Expression<double>? rating,
+    Expression<int>? returnWindowDays,
+    Expression<double>? returnShippingCost,
+    Expression<double>? restockingFeePercent,
+    Expression<bool>? acceptsNoReasonReturns,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (supplierId != null) 'supplier_id': supplierId,
+      if (name != null) 'name': name,
+      if (platformType != null) 'platform_type': platformType,
+      if (countryCode != null) 'country_code': countryCode,
+      if (rating != null) 'rating': rating,
+      if (returnWindowDays != null) 'return_window_days': returnWindowDays,
+      if (returnShippingCost != null)
+        'return_shipping_cost': returnShippingCost,
+      if (restockingFeePercent != null)
+        'restocking_fee_percent': restockingFeePercent,
+      if (acceptsNoReasonReturns != null)
+        'accepts_no_reason_returns': acceptsNoReasonReturns,
+    });
+  }
+
+  SuppliersCompanion copyWith({
+    Value<int>? id,
+    Value<String>? supplierId,
+    Value<String>? name,
+    Value<String>? platformType,
+    Value<String?>? countryCode,
+    Value<double?>? rating,
+    Value<int?>? returnWindowDays,
+    Value<double?>? returnShippingCost,
+    Value<double?>? restockingFeePercent,
+    Value<bool>? acceptsNoReasonReturns,
+  }) {
+    return SuppliersCompanion(
+      id: id ?? this.id,
+      supplierId: supplierId ?? this.supplierId,
+      name: name ?? this.name,
+      platformType: platformType ?? this.platformType,
+      countryCode: countryCode ?? this.countryCode,
+      rating: rating ?? this.rating,
+      returnWindowDays: returnWindowDays ?? this.returnWindowDays,
+      returnShippingCost: returnShippingCost ?? this.returnShippingCost,
+      restockingFeePercent: restockingFeePercent ?? this.restockingFeePercent,
+      acceptsNoReasonReturns:
+          acceptsNoReasonReturns ?? this.acceptsNoReasonReturns,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (platformType.present) {
+      map['platform_type'] = Variable<String>(platformType.value);
+    }
+    if (countryCode.present) {
+      map['country_code'] = Variable<String>(countryCode.value);
+    }
+    if (rating.present) {
+      map['rating'] = Variable<double>(rating.value);
+    }
+    if (returnWindowDays.present) {
+      map['return_window_days'] = Variable<int>(returnWindowDays.value);
+    }
+    if (returnShippingCost.present) {
+      map['return_shipping_cost'] = Variable<double>(returnShippingCost.value);
+    }
+    if (restockingFeePercent.present) {
+      map['restocking_fee_percent'] = Variable<double>(
+        restockingFeePercent.value,
+      );
+    }
+    if (acceptsNoReasonReturns.present) {
+      map['accepts_no_reason_returns'] = Variable<bool>(
+        acceptsNoReasonReturns.value,
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SuppliersCompanion(')
+          ..write('id: $id, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('name: $name, ')
+          ..write('platformType: $platformType, ')
+          ..write('countryCode: $countryCode, ')
+          ..write('rating: $rating, ')
+          ..write('returnWindowDays: $returnWindowDays, ')
+          ..write('returnShippingCost: $returnShippingCost, ')
+          ..write('restockingFeePercent: $restockingFeePercent, ')
+          ..write('acceptsNoReasonReturns: $acceptsNoReasonReturns')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SupplierOffersTable extends SupplierOffers
+    with TableInfo<$SupplierOffersTable, SupplierOfferRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SupplierOffersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _offerIdMeta = const VerificationMeta(
+    'offerId',
+  );
+  @override
+  late final GeneratedColumn<String> offerId = GeneratedColumn<String>(
+    'offer_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourcePlatformIdMeta = const VerificationMeta(
+    'sourcePlatformId',
+  );
+  @override
+  late final GeneratedColumn<String> sourcePlatformId = GeneratedColumn<String>(
+    'source_platform_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _costMeta = const VerificationMeta('cost');
+  @override
+  late final GeneratedColumn<double> cost = GeneratedColumn<double>(
+    'cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _shippingCostMeta = const VerificationMeta(
+    'shippingCost',
+  );
+  @override
+  late final GeneratedColumn<double> shippingCost = GeneratedColumn<double>(
+    'shipping_cost',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _minEstimatedDaysMeta = const VerificationMeta(
+    'minEstimatedDays',
+  );
+  @override
+  late final GeneratedColumn<int> minEstimatedDays = GeneratedColumn<int>(
+    'min_estimated_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _maxEstimatedDaysMeta = const VerificationMeta(
+    'maxEstimatedDays',
+  );
+  @override
+  late final GeneratedColumn<int> maxEstimatedDays = GeneratedColumn<int>(
+    'max_estimated_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _carrierCodeMeta = const VerificationMeta(
+    'carrierCode',
+  );
+  @override
+  late final GeneratedColumn<String> carrierCode = GeneratedColumn<String>(
+    'carrier_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _shippingMethodNameMeta =
+      const VerificationMeta('shippingMethodName');
+  @override
+  late final GeneratedColumn<String> shippingMethodName =
+      GeneratedColumn<String>(
+        'shipping_method_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _lastPriceRefreshAtMeta =
+      const VerificationMeta('lastPriceRefreshAt');
+  @override
+  late final GeneratedColumn<DateTime> lastPriceRefreshAt =
+      GeneratedColumn<DateTime>(
+        'last_price_refresh_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _lastStockRefreshAtMeta =
+      const VerificationMeta('lastStockRefreshAt');
+  @override
+  late final GeneratedColumn<DateTime> lastStockRefreshAt =
+      GeneratedColumn<DateTime>(
+        'last_stock_refresh_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    offerId,
+    productId,
+    supplierId,
+    sourcePlatformId,
+    cost,
+    shippingCost,
+    minEstimatedDays,
+    maxEstimatedDays,
+    carrierCode,
+    shippingMethodName,
+    lastPriceRefreshAt,
+    lastStockRefreshAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'supplier_offers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SupplierOfferRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('offer_id')) {
+      context.handle(
+        _offerIdMeta,
+        offerId.isAcceptableOrUnknown(data['offer_id']!, _offerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_offerIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_supplierIdMeta);
+    }
+    if (data.containsKey('source_platform_id')) {
+      context.handle(
+        _sourcePlatformIdMeta,
+        sourcePlatformId.isAcceptableOrUnknown(
+          data['source_platform_id']!,
+          _sourcePlatformIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourcePlatformIdMeta);
+    }
+    if (data.containsKey('cost')) {
+      context.handle(
+        _costMeta,
+        cost.isAcceptableOrUnknown(data['cost']!, _costMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_costMeta);
+    }
+    if (data.containsKey('shipping_cost')) {
+      context.handle(
+        _shippingCostMeta,
+        shippingCost.isAcceptableOrUnknown(
+          data['shipping_cost']!,
+          _shippingCostMeta,
+        ),
+      );
+    }
+    if (data.containsKey('min_estimated_days')) {
+      context.handle(
+        _minEstimatedDaysMeta,
+        minEstimatedDays.isAcceptableOrUnknown(
+          data['min_estimated_days']!,
+          _minEstimatedDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('max_estimated_days')) {
+      context.handle(
+        _maxEstimatedDaysMeta,
+        maxEstimatedDays.isAcceptableOrUnknown(
+          data['max_estimated_days']!,
+          _maxEstimatedDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('carrier_code')) {
+      context.handle(
+        _carrierCodeMeta,
+        carrierCode.isAcceptableOrUnknown(
+          data['carrier_code']!,
+          _carrierCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('shipping_method_name')) {
+      context.handle(
+        _shippingMethodNameMeta,
+        shippingMethodName.isAcceptableOrUnknown(
+          data['shipping_method_name']!,
+          _shippingMethodNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_price_refresh_at')) {
+      context.handle(
+        _lastPriceRefreshAtMeta,
+        lastPriceRefreshAt.isAcceptableOrUnknown(
+          data['last_price_refresh_at']!,
+          _lastPriceRefreshAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_stock_refresh_at')) {
+      context.handle(
+        _lastStockRefreshAtMeta,
+        lastStockRefreshAt.isAcceptableOrUnknown(
+          data['last_stock_refresh_at']!,
+          _lastStockRefreshAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SupplierOfferRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SupplierOfferRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      offerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}offer_id'],
+      )!,
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      )!,
+      sourcePlatformId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_platform_id'],
+      )!,
+      cost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cost'],
+      )!,
+      shippingCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}shipping_cost'],
+      ),
+      minEstimatedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}min_estimated_days'],
+      ),
+      maxEstimatedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_estimated_days'],
+      ),
+      carrierCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}carrier_code'],
+      ),
+      shippingMethodName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shipping_method_name'],
+      ),
+      lastPriceRefreshAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_price_refresh_at'],
+      ),
+      lastStockRefreshAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_stock_refresh_at'],
+      ),
+    );
+  }
+
+  @override
+  $SupplierOffersTable createAlias(String alias) {
+    return $SupplierOffersTable(attachedDatabase, alias);
+  }
+}
+
+class SupplierOfferRow extends DataClass
+    implements Insertable<SupplierOfferRow> {
+  final int id;
+  final String offerId;
+  final String productId;
+  final String supplierId;
+  final String sourcePlatformId;
+  final double cost;
+  final double? shippingCost;
+  final int? minEstimatedDays;
+  final int? maxEstimatedDays;
+  final String? carrierCode;
+  final String? shippingMethodName;
+  final DateTime? lastPriceRefreshAt;
+  final DateTime? lastStockRefreshAt;
+  const SupplierOfferRow({
+    required this.id,
+    required this.offerId,
+    required this.productId,
+    required this.supplierId,
+    required this.sourcePlatformId,
+    required this.cost,
+    this.shippingCost,
+    this.minEstimatedDays,
+    this.maxEstimatedDays,
+    this.carrierCode,
+    this.shippingMethodName,
+    this.lastPriceRefreshAt,
+    this.lastStockRefreshAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['offer_id'] = Variable<String>(offerId);
+    map['product_id'] = Variable<String>(productId);
+    map['supplier_id'] = Variable<String>(supplierId);
+    map['source_platform_id'] = Variable<String>(sourcePlatformId);
+    map['cost'] = Variable<double>(cost);
+    if (!nullToAbsent || shippingCost != null) {
+      map['shipping_cost'] = Variable<double>(shippingCost);
+    }
+    if (!nullToAbsent || minEstimatedDays != null) {
+      map['min_estimated_days'] = Variable<int>(minEstimatedDays);
+    }
+    if (!nullToAbsent || maxEstimatedDays != null) {
+      map['max_estimated_days'] = Variable<int>(maxEstimatedDays);
+    }
+    if (!nullToAbsent || carrierCode != null) {
+      map['carrier_code'] = Variable<String>(carrierCode);
+    }
+    if (!nullToAbsent || shippingMethodName != null) {
+      map['shipping_method_name'] = Variable<String>(shippingMethodName);
+    }
+    if (!nullToAbsent || lastPriceRefreshAt != null) {
+      map['last_price_refresh_at'] = Variable<DateTime>(lastPriceRefreshAt);
+    }
+    if (!nullToAbsent || lastStockRefreshAt != null) {
+      map['last_stock_refresh_at'] = Variable<DateTime>(lastStockRefreshAt);
+    }
+    return map;
+  }
+
+  SupplierOffersCompanion toCompanion(bool nullToAbsent) {
+    return SupplierOffersCompanion(
+      id: Value(id),
+      offerId: Value(offerId),
+      productId: Value(productId),
+      supplierId: Value(supplierId),
+      sourcePlatformId: Value(sourcePlatformId),
+      cost: Value(cost),
+      shippingCost: shippingCost == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shippingCost),
+      minEstimatedDays: minEstimatedDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(minEstimatedDays),
+      maxEstimatedDays: maxEstimatedDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(maxEstimatedDays),
+      carrierCode: carrierCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(carrierCode),
+      shippingMethodName: shippingMethodName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shippingMethodName),
+      lastPriceRefreshAt: lastPriceRefreshAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPriceRefreshAt),
+      lastStockRefreshAt: lastStockRefreshAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastStockRefreshAt),
+    );
+  }
+
+  factory SupplierOfferRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SupplierOfferRow(
+      id: serializer.fromJson<int>(json['id']),
+      offerId: serializer.fromJson<String>(json['offerId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      supplierId: serializer.fromJson<String>(json['supplierId']),
+      sourcePlatformId: serializer.fromJson<String>(json['sourcePlatformId']),
+      cost: serializer.fromJson<double>(json['cost']),
+      shippingCost: serializer.fromJson<double?>(json['shippingCost']),
+      minEstimatedDays: serializer.fromJson<int?>(json['minEstimatedDays']),
+      maxEstimatedDays: serializer.fromJson<int?>(json['maxEstimatedDays']),
+      carrierCode: serializer.fromJson<String?>(json['carrierCode']),
+      shippingMethodName: serializer.fromJson<String?>(
+        json['shippingMethodName'],
+      ),
+      lastPriceRefreshAt: serializer.fromJson<DateTime?>(
+        json['lastPriceRefreshAt'],
+      ),
+      lastStockRefreshAt: serializer.fromJson<DateTime?>(
+        json['lastStockRefreshAt'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'offerId': serializer.toJson<String>(offerId),
+      'productId': serializer.toJson<String>(productId),
+      'supplierId': serializer.toJson<String>(supplierId),
+      'sourcePlatformId': serializer.toJson<String>(sourcePlatformId),
+      'cost': serializer.toJson<double>(cost),
+      'shippingCost': serializer.toJson<double?>(shippingCost),
+      'minEstimatedDays': serializer.toJson<int?>(minEstimatedDays),
+      'maxEstimatedDays': serializer.toJson<int?>(maxEstimatedDays),
+      'carrierCode': serializer.toJson<String?>(carrierCode),
+      'shippingMethodName': serializer.toJson<String?>(shippingMethodName),
+      'lastPriceRefreshAt': serializer.toJson<DateTime?>(lastPriceRefreshAt),
+      'lastStockRefreshAt': serializer.toJson<DateTime?>(lastStockRefreshAt),
+    };
+  }
+
+  SupplierOfferRow copyWith({
+    int? id,
+    String? offerId,
+    String? productId,
+    String? supplierId,
+    String? sourcePlatformId,
+    double? cost,
+    Value<double?> shippingCost = const Value.absent(),
+    Value<int?> minEstimatedDays = const Value.absent(),
+    Value<int?> maxEstimatedDays = const Value.absent(),
+    Value<String?> carrierCode = const Value.absent(),
+    Value<String?> shippingMethodName = const Value.absent(),
+    Value<DateTime?> lastPriceRefreshAt = const Value.absent(),
+    Value<DateTime?> lastStockRefreshAt = const Value.absent(),
+  }) => SupplierOfferRow(
+    id: id ?? this.id,
+    offerId: offerId ?? this.offerId,
+    productId: productId ?? this.productId,
+    supplierId: supplierId ?? this.supplierId,
+    sourcePlatformId: sourcePlatformId ?? this.sourcePlatformId,
+    cost: cost ?? this.cost,
+    shippingCost: shippingCost.present ? shippingCost.value : this.shippingCost,
+    minEstimatedDays: minEstimatedDays.present
+        ? minEstimatedDays.value
+        : this.minEstimatedDays,
+    maxEstimatedDays: maxEstimatedDays.present
+        ? maxEstimatedDays.value
+        : this.maxEstimatedDays,
+    carrierCode: carrierCode.present ? carrierCode.value : this.carrierCode,
+    shippingMethodName: shippingMethodName.present
+        ? shippingMethodName.value
+        : this.shippingMethodName,
+    lastPriceRefreshAt: lastPriceRefreshAt.present
+        ? lastPriceRefreshAt.value
+        : this.lastPriceRefreshAt,
+    lastStockRefreshAt: lastStockRefreshAt.present
+        ? lastStockRefreshAt.value
+        : this.lastStockRefreshAt,
+  );
+  SupplierOfferRow copyWithCompanion(SupplierOffersCompanion data) {
+    return SupplierOfferRow(
+      id: data.id.present ? data.id.value : this.id,
+      offerId: data.offerId.present ? data.offerId.value : this.offerId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
+      sourcePlatformId: data.sourcePlatformId.present
+          ? data.sourcePlatformId.value
+          : this.sourcePlatformId,
+      cost: data.cost.present ? data.cost.value : this.cost,
+      shippingCost: data.shippingCost.present
+          ? data.shippingCost.value
+          : this.shippingCost,
+      minEstimatedDays: data.minEstimatedDays.present
+          ? data.minEstimatedDays.value
+          : this.minEstimatedDays,
+      maxEstimatedDays: data.maxEstimatedDays.present
+          ? data.maxEstimatedDays.value
+          : this.maxEstimatedDays,
+      carrierCode: data.carrierCode.present
+          ? data.carrierCode.value
+          : this.carrierCode,
+      shippingMethodName: data.shippingMethodName.present
+          ? data.shippingMethodName.value
+          : this.shippingMethodName,
+      lastPriceRefreshAt: data.lastPriceRefreshAt.present
+          ? data.lastPriceRefreshAt.value
+          : this.lastPriceRefreshAt,
+      lastStockRefreshAt: data.lastStockRefreshAt.present
+          ? data.lastStockRefreshAt.value
+          : this.lastStockRefreshAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SupplierOfferRow(')
+          ..write('id: $id, ')
+          ..write('offerId: $offerId, ')
+          ..write('productId: $productId, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('sourcePlatformId: $sourcePlatformId, ')
+          ..write('cost: $cost, ')
+          ..write('shippingCost: $shippingCost, ')
+          ..write('minEstimatedDays: $minEstimatedDays, ')
+          ..write('maxEstimatedDays: $maxEstimatedDays, ')
+          ..write('carrierCode: $carrierCode, ')
+          ..write('shippingMethodName: $shippingMethodName, ')
+          ..write('lastPriceRefreshAt: $lastPriceRefreshAt, ')
+          ..write('lastStockRefreshAt: $lastStockRefreshAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    offerId,
+    productId,
+    supplierId,
+    sourcePlatformId,
+    cost,
+    shippingCost,
+    minEstimatedDays,
+    maxEstimatedDays,
+    carrierCode,
+    shippingMethodName,
+    lastPriceRefreshAt,
+    lastStockRefreshAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SupplierOfferRow &&
+          other.id == this.id &&
+          other.offerId == this.offerId &&
+          other.productId == this.productId &&
+          other.supplierId == this.supplierId &&
+          other.sourcePlatformId == this.sourcePlatformId &&
+          other.cost == this.cost &&
+          other.shippingCost == this.shippingCost &&
+          other.minEstimatedDays == this.minEstimatedDays &&
+          other.maxEstimatedDays == this.maxEstimatedDays &&
+          other.carrierCode == this.carrierCode &&
+          other.shippingMethodName == this.shippingMethodName &&
+          other.lastPriceRefreshAt == this.lastPriceRefreshAt &&
+          other.lastStockRefreshAt == this.lastStockRefreshAt);
+}
+
+class SupplierOffersCompanion extends UpdateCompanion<SupplierOfferRow> {
+  final Value<int> id;
+  final Value<String> offerId;
+  final Value<String> productId;
+  final Value<String> supplierId;
+  final Value<String> sourcePlatformId;
+  final Value<double> cost;
+  final Value<double?> shippingCost;
+  final Value<int?> minEstimatedDays;
+  final Value<int?> maxEstimatedDays;
+  final Value<String?> carrierCode;
+  final Value<String?> shippingMethodName;
+  final Value<DateTime?> lastPriceRefreshAt;
+  final Value<DateTime?> lastStockRefreshAt;
+  const SupplierOffersCompanion({
+    this.id = const Value.absent(),
+    this.offerId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.sourcePlatformId = const Value.absent(),
+    this.cost = const Value.absent(),
+    this.shippingCost = const Value.absent(),
+    this.minEstimatedDays = const Value.absent(),
+    this.maxEstimatedDays = const Value.absent(),
+    this.carrierCode = const Value.absent(),
+    this.shippingMethodName = const Value.absent(),
+    this.lastPriceRefreshAt = const Value.absent(),
+    this.lastStockRefreshAt = const Value.absent(),
+  });
+  SupplierOffersCompanion.insert({
+    this.id = const Value.absent(),
+    required String offerId,
+    required String productId,
+    required String supplierId,
+    required String sourcePlatformId,
+    required double cost,
+    this.shippingCost = const Value.absent(),
+    this.minEstimatedDays = const Value.absent(),
+    this.maxEstimatedDays = const Value.absent(),
+    this.carrierCode = const Value.absent(),
+    this.shippingMethodName = const Value.absent(),
+    this.lastPriceRefreshAt = const Value.absent(),
+    this.lastStockRefreshAt = const Value.absent(),
+  }) : offerId = Value(offerId),
+       productId = Value(productId),
+       supplierId = Value(supplierId),
+       sourcePlatformId = Value(sourcePlatformId),
+       cost = Value(cost);
+  static Insertable<SupplierOfferRow> custom({
+    Expression<int>? id,
+    Expression<String>? offerId,
+    Expression<String>? productId,
+    Expression<String>? supplierId,
+    Expression<String>? sourcePlatformId,
+    Expression<double>? cost,
+    Expression<double>? shippingCost,
+    Expression<int>? minEstimatedDays,
+    Expression<int>? maxEstimatedDays,
+    Expression<String>? carrierCode,
+    Expression<String>? shippingMethodName,
+    Expression<DateTime>? lastPriceRefreshAt,
+    Expression<DateTime>? lastStockRefreshAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (offerId != null) 'offer_id': offerId,
+      if (productId != null) 'product_id': productId,
+      if (supplierId != null) 'supplier_id': supplierId,
+      if (sourcePlatformId != null) 'source_platform_id': sourcePlatformId,
+      if (cost != null) 'cost': cost,
+      if (shippingCost != null) 'shipping_cost': shippingCost,
+      if (minEstimatedDays != null) 'min_estimated_days': minEstimatedDays,
+      if (maxEstimatedDays != null) 'max_estimated_days': maxEstimatedDays,
+      if (carrierCode != null) 'carrier_code': carrierCode,
+      if (shippingMethodName != null)
+        'shipping_method_name': shippingMethodName,
+      if (lastPriceRefreshAt != null)
+        'last_price_refresh_at': lastPriceRefreshAt,
+      if (lastStockRefreshAt != null)
+        'last_stock_refresh_at': lastStockRefreshAt,
+    });
+  }
+
+  SupplierOffersCompanion copyWith({
+    Value<int>? id,
+    Value<String>? offerId,
+    Value<String>? productId,
+    Value<String>? supplierId,
+    Value<String>? sourcePlatformId,
+    Value<double>? cost,
+    Value<double?>? shippingCost,
+    Value<int?>? minEstimatedDays,
+    Value<int?>? maxEstimatedDays,
+    Value<String?>? carrierCode,
+    Value<String?>? shippingMethodName,
+    Value<DateTime?>? lastPriceRefreshAt,
+    Value<DateTime?>? lastStockRefreshAt,
+  }) {
+    return SupplierOffersCompanion(
+      id: id ?? this.id,
+      offerId: offerId ?? this.offerId,
+      productId: productId ?? this.productId,
+      supplierId: supplierId ?? this.supplierId,
+      sourcePlatformId: sourcePlatformId ?? this.sourcePlatformId,
+      cost: cost ?? this.cost,
+      shippingCost: shippingCost ?? this.shippingCost,
+      minEstimatedDays: minEstimatedDays ?? this.minEstimatedDays,
+      maxEstimatedDays: maxEstimatedDays ?? this.maxEstimatedDays,
+      carrierCode: carrierCode ?? this.carrierCode,
+      shippingMethodName: shippingMethodName ?? this.shippingMethodName,
+      lastPriceRefreshAt: lastPriceRefreshAt ?? this.lastPriceRefreshAt,
+      lastStockRefreshAt: lastStockRefreshAt ?? this.lastStockRefreshAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (offerId.present) {
+      map['offer_id'] = Variable<String>(offerId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
+    if (sourcePlatformId.present) {
+      map['source_platform_id'] = Variable<String>(sourcePlatformId.value);
+    }
+    if (cost.present) {
+      map['cost'] = Variable<double>(cost.value);
+    }
+    if (shippingCost.present) {
+      map['shipping_cost'] = Variable<double>(shippingCost.value);
+    }
+    if (minEstimatedDays.present) {
+      map['min_estimated_days'] = Variable<int>(minEstimatedDays.value);
+    }
+    if (maxEstimatedDays.present) {
+      map['max_estimated_days'] = Variable<int>(maxEstimatedDays.value);
+    }
+    if (carrierCode.present) {
+      map['carrier_code'] = Variable<String>(carrierCode.value);
+    }
+    if (shippingMethodName.present) {
+      map['shipping_method_name'] = Variable<String>(shippingMethodName.value);
+    }
+    if (lastPriceRefreshAt.present) {
+      map['last_price_refresh_at'] = Variable<DateTime>(
+        lastPriceRefreshAt.value,
+      );
+    }
+    if (lastStockRefreshAt.present) {
+      map['last_stock_refresh_at'] = Variable<DateTime>(
+        lastStockRefreshAt.value,
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SupplierOffersCompanion(')
+          ..write('id: $id, ')
+          ..write('offerId: $offerId, ')
+          ..write('productId: $productId, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('sourcePlatformId: $sourcePlatformId, ')
+          ..write('cost: $cost, ')
+          ..write('shippingCost: $shippingCost, ')
+          ..write('minEstimatedDays: $minEstimatedDays, ')
+          ..write('maxEstimatedDays: $maxEstimatedDays, ')
+          ..write('carrierCode: $carrierCode, ')
+          ..write('shippingMethodName: $shippingMethodName, ')
+          ..write('lastPriceRefreshAt: $lastPriceRefreshAt, ')
+          ..write('lastStockRefreshAt: $lastStockRefreshAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3661,6 +5127,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $OrdersTable orders = $OrdersTable(this);
   late final $DecisionLogsTable decisionLogs = $DecisionLogsTable(this);
   late final $UserRulesTableTable userRulesTable = $UserRulesTableTable(this);
+  late final $SuppliersTable suppliers = $SuppliersTable(this);
+  late final $SupplierOffersTable supplierOffers = $SupplierOffersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3671,6 +5139,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     orders,
     decisionLogs,
     userRulesTable,
+    suppliers,
+    supplierOffers,
   ];
 }
 
@@ -5346,6 +6816,679 @@ typedef $$UserRulesTableTableProcessedTableManager =
       UserRulesRow,
       PrefetchHooks Function()
     >;
+typedef $$SuppliersTableCreateCompanionBuilder =
+    SuppliersCompanion Function({
+      Value<int> id,
+      required String supplierId,
+      required String name,
+      required String platformType,
+      Value<String?> countryCode,
+      Value<double?> rating,
+      Value<int?> returnWindowDays,
+      Value<double?> returnShippingCost,
+      Value<double?> restockingFeePercent,
+      Value<bool> acceptsNoReasonReturns,
+    });
+typedef $$SuppliersTableUpdateCompanionBuilder =
+    SuppliersCompanion Function({
+      Value<int> id,
+      Value<String> supplierId,
+      Value<String> name,
+      Value<String> platformType,
+      Value<String?> countryCode,
+      Value<double?> rating,
+      Value<int?> returnWindowDays,
+      Value<double?> returnShippingCost,
+      Value<double?> restockingFeePercent,
+      Value<bool> acceptsNoReasonReturns,
+    });
+
+class $$SuppliersTableFilterComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get platformType => $composableBuilder(
+    column: $table.platformType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get rating => $composableBuilder(
+    column: $table.rating,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get returnWindowDays => $composableBuilder(
+    column: $table.returnWindowDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get returnShippingCost => $composableBuilder(
+    column: $table.returnShippingCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get restockingFeePercent => $composableBuilder(
+    column: $table.restockingFeePercent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get acceptsNoReasonReturns => $composableBuilder(
+    column: $table.acceptsNoReasonReturns,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SuppliersTableOrderingComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get platformType => $composableBuilder(
+    column: $table.platformType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get rating => $composableBuilder(
+    column: $table.rating,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get returnWindowDays => $composableBuilder(
+    column: $table.returnWindowDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get returnShippingCost => $composableBuilder(
+    column: $table.returnShippingCost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get restockingFeePercent => $composableBuilder(
+    column: $table.restockingFeePercent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get acceptsNoReasonReturns => $composableBuilder(
+    column: $table.acceptsNoReasonReturns,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SuppliersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get platformType => $composableBuilder(
+    column: $table.platformType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get rating =>
+      $composableBuilder(column: $table.rating, builder: (column) => column);
+
+  GeneratedColumn<int> get returnWindowDays => $composableBuilder(
+    column: $table.returnWindowDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get returnShippingCost => $composableBuilder(
+    column: $table.returnShippingCost,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get restockingFeePercent => $composableBuilder(
+    column: $table.restockingFeePercent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get acceptsNoReasonReturns => $composableBuilder(
+    column: $table.acceptsNoReasonReturns,
+    builder: (column) => column,
+  );
+}
+
+class $$SuppliersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SuppliersTable,
+          SupplierRow,
+          $$SuppliersTableFilterComposer,
+          $$SuppliersTableOrderingComposer,
+          $$SuppliersTableAnnotationComposer,
+          $$SuppliersTableCreateCompanionBuilder,
+          $$SuppliersTableUpdateCompanionBuilder,
+          (
+            SupplierRow,
+            BaseReferences<_$AppDatabase, $SuppliersTable, SupplierRow>,
+          ),
+          SupplierRow,
+          PrefetchHooks Function()
+        > {
+  $$SuppliersTableTableManager(_$AppDatabase db, $SuppliersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SuppliersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SuppliersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SuppliersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> supplierId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> platformType = const Value.absent(),
+                Value<String?> countryCode = const Value.absent(),
+                Value<double?> rating = const Value.absent(),
+                Value<int?> returnWindowDays = const Value.absent(),
+                Value<double?> returnShippingCost = const Value.absent(),
+                Value<double?> restockingFeePercent = const Value.absent(),
+                Value<bool> acceptsNoReasonReturns = const Value.absent(),
+              }) => SuppliersCompanion(
+                id: id,
+                supplierId: supplierId,
+                name: name,
+                platformType: platformType,
+                countryCode: countryCode,
+                rating: rating,
+                returnWindowDays: returnWindowDays,
+                returnShippingCost: returnShippingCost,
+                restockingFeePercent: restockingFeePercent,
+                acceptsNoReasonReturns: acceptsNoReasonReturns,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String supplierId,
+                required String name,
+                required String platformType,
+                Value<String?> countryCode = const Value.absent(),
+                Value<double?> rating = const Value.absent(),
+                Value<int?> returnWindowDays = const Value.absent(),
+                Value<double?> returnShippingCost = const Value.absent(),
+                Value<double?> restockingFeePercent = const Value.absent(),
+                Value<bool> acceptsNoReasonReturns = const Value.absent(),
+              }) => SuppliersCompanion.insert(
+                id: id,
+                supplierId: supplierId,
+                name: name,
+                platformType: platformType,
+                countryCode: countryCode,
+                rating: rating,
+                returnWindowDays: returnWindowDays,
+                returnShippingCost: returnShippingCost,
+                restockingFeePercent: restockingFeePercent,
+                acceptsNoReasonReturns: acceptsNoReasonReturns,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SuppliersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SuppliersTable,
+      SupplierRow,
+      $$SuppliersTableFilterComposer,
+      $$SuppliersTableOrderingComposer,
+      $$SuppliersTableAnnotationComposer,
+      $$SuppliersTableCreateCompanionBuilder,
+      $$SuppliersTableUpdateCompanionBuilder,
+      (
+        SupplierRow,
+        BaseReferences<_$AppDatabase, $SuppliersTable, SupplierRow>,
+      ),
+      SupplierRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SupplierOffersTableCreateCompanionBuilder =
+    SupplierOffersCompanion Function({
+      Value<int> id,
+      required String offerId,
+      required String productId,
+      required String supplierId,
+      required String sourcePlatformId,
+      required double cost,
+      Value<double?> shippingCost,
+      Value<int?> minEstimatedDays,
+      Value<int?> maxEstimatedDays,
+      Value<String?> carrierCode,
+      Value<String?> shippingMethodName,
+      Value<DateTime?> lastPriceRefreshAt,
+      Value<DateTime?> lastStockRefreshAt,
+    });
+typedef $$SupplierOffersTableUpdateCompanionBuilder =
+    SupplierOffersCompanion Function({
+      Value<int> id,
+      Value<String> offerId,
+      Value<String> productId,
+      Value<String> supplierId,
+      Value<String> sourcePlatformId,
+      Value<double> cost,
+      Value<double?> shippingCost,
+      Value<int?> minEstimatedDays,
+      Value<int?> maxEstimatedDays,
+      Value<String?> carrierCode,
+      Value<String?> shippingMethodName,
+      Value<DateTime?> lastPriceRefreshAt,
+      Value<DateTime?> lastStockRefreshAt,
+    });
+
+class $$SupplierOffersTableFilterComposer
+    extends Composer<_$AppDatabase, $SupplierOffersTable> {
+  $$SupplierOffersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get offerId => $composableBuilder(
+    column: $table.offerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourcePlatformId => $composableBuilder(
+    column: $table.sourcePlatformId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get cost => $composableBuilder(
+    column: $table.cost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get shippingCost => $composableBuilder(
+    column: $table.shippingCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minEstimatedDays => $composableBuilder(
+    column: $table.minEstimatedDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get maxEstimatedDays => $composableBuilder(
+    column: $table.maxEstimatedDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get carrierCode => $composableBuilder(
+    column: $table.carrierCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shippingMethodName => $composableBuilder(
+    column: $table.shippingMethodName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastPriceRefreshAt => $composableBuilder(
+    column: $table.lastPriceRefreshAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastStockRefreshAt => $composableBuilder(
+    column: $table.lastStockRefreshAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SupplierOffersTableOrderingComposer
+    extends Composer<_$AppDatabase, $SupplierOffersTable> {
+  $$SupplierOffersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get offerId => $composableBuilder(
+    column: $table.offerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourcePlatformId => $composableBuilder(
+    column: $table.sourcePlatformId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get cost => $composableBuilder(
+    column: $table.cost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get shippingCost => $composableBuilder(
+    column: $table.shippingCost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minEstimatedDays => $composableBuilder(
+    column: $table.minEstimatedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get maxEstimatedDays => $composableBuilder(
+    column: $table.maxEstimatedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get carrierCode => $composableBuilder(
+    column: $table.carrierCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shippingMethodName => $composableBuilder(
+    column: $table.shippingMethodName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastPriceRefreshAt => $composableBuilder(
+    column: $table.lastPriceRefreshAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastStockRefreshAt => $composableBuilder(
+    column: $table.lastStockRefreshAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SupplierOffersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SupplierOffersTable> {
+  $$SupplierOffersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get offerId =>
+      $composableBuilder(column: $table.offerId, builder: (column) => column);
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourcePlatformId => $composableBuilder(
+    column: $table.sourcePlatformId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get cost =>
+      $composableBuilder(column: $table.cost, builder: (column) => column);
+
+  GeneratedColumn<double> get shippingCost => $composableBuilder(
+    column: $table.shippingCost,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get minEstimatedDays => $composableBuilder(
+    column: $table.minEstimatedDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get maxEstimatedDays => $composableBuilder(
+    column: $table.maxEstimatedDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get carrierCode => $composableBuilder(
+    column: $table.carrierCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get shippingMethodName => $composableBuilder(
+    column: $table.shippingMethodName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastPriceRefreshAt => $composableBuilder(
+    column: $table.lastPriceRefreshAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastStockRefreshAt => $composableBuilder(
+    column: $table.lastStockRefreshAt,
+    builder: (column) => column,
+  );
+}
+
+class $$SupplierOffersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SupplierOffersTable,
+          SupplierOfferRow,
+          $$SupplierOffersTableFilterComposer,
+          $$SupplierOffersTableOrderingComposer,
+          $$SupplierOffersTableAnnotationComposer,
+          $$SupplierOffersTableCreateCompanionBuilder,
+          $$SupplierOffersTableUpdateCompanionBuilder,
+          (
+            SupplierOfferRow,
+            BaseReferences<
+              _$AppDatabase,
+              $SupplierOffersTable,
+              SupplierOfferRow
+            >,
+          ),
+          SupplierOfferRow,
+          PrefetchHooks Function()
+        > {
+  $$SupplierOffersTableTableManager(
+    _$AppDatabase db,
+    $SupplierOffersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SupplierOffersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SupplierOffersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SupplierOffersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> offerId = const Value.absent(),
+                Value<String> productId = const Value.absent(),
+                Value<String> supplierId = const Value.absent(),
+                Value<String> sourcePlatformId = const Value.absent(),
+                Value<double> cost = const Value.absent(),
+                Value<double?> shippingCost = const Value.absent(),
+                Value<int?> minEstimatedDays = const Value.absent(),
+                Value<int?> maxEstimatedDays = const Value.absent(),
+                Value<String?> carrierCode = const Value.absent(),
+                Value<String?> shippingMethodName = const Value.absent(),
+                Value<DateTime?> lastPriceRefreshAt = const Value.absent(),
+                Value<DateTime?> lastStockRefreshAt = const Value.absent(),
+              }) => SupplierOffersCompanion(
+                id: id,
+                offerId: offerId,
+                productId: productId,
+                supplierId: supplierId,
+                sourcePlatformId: sourcePlatformId,
+                cost: cost,
+                shippingCost: shippingCost,
+                minEstimatedDays: minEstimatedDays,
+                maxEstimatedDays: maxEstimatedDays,
+                carrierCode: carrierCode,
+                shippingMethodName: shippingMethodName,
+                lastPriceRefreshAt: lastPriceRefreshAt,
+                lastStockRefreshAt: lastStockRefreshAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String offerId,
+                required String productId,
+                required String supplierId,
+                required String sourcePlatformId,
+                required double cost,
+                Value<double?> shippingCost = const Value.absent(),
+                Value<int?> minEstimatedDays = const Value.absent(),
+                Value<int?> maxEstimatedDays = const Value.absent(),
+                Value<String?> carrierCode = const Value.absent(),
+                Value<String?> shippingMethodName = const Value.absent(),
+                Value<DateTime?> lastPriceRefreshAt = const Value.absent(),
+                Value<DateTime?> lastStockRefreshAt = const Value.absent(),
+              }) => SupplierOffersCompanion.insert(
+                id: id,
+                offerId: offerId,
+                productId: productId,
+                supplierId: supplierId,
+                sourcePlatformId: sourcePlatformId,
+                cost: cost,
+                shippingCost: shippingCost,
+                minEstimatedDays: minEstimatedDays,
+                maxEstimatedDays: maxEstimatedDays,
+                carrierCode: carrierCode,
+                shippingMethodName: shippingMethodName,
+                lastPriceRefreshAt: lastPriceRefreshAt,
+                lastStockRefreshAt: lastStockRefreshAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SupplierOffersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SupplierOffersTable,
+      SupplierOfferRow,
+      $$SupplierOffersTableFilterComposer,
+      $$SupplierOffersTableOrderingComposer,
+      $$SupplierOffersTableAnnotationComposer,
+      $$SupplierOffersTableCreateCompanionBuilder,
+      $$SupplierOffersTableUpdateCompanionBuilder,
+      (
+        SupplierOfferRow,
+        BaseReferences<_$AppDatabase, $SupplierOffersTable, SupplierOfferRow>,
+      ),
+      SupplierOfferRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5360,4 +7503,8 @@ class $AppDatabaseManager {
       $$DecisionLogsTableTableManager(_db, _db.decisionLogs);
   $$UserRulesTableTableTableManager get userRulesTable =>
       $$UserRulesTableTableTableManager(_db, _db.userRulesTable);
+  $$SuppliersTableTableManager get suppliers =>
+      $$SuppliersTableTableManager(_db, _db.suppliers);
+  $$SupplierOffersTableTableManager get supplierOffers =>
+      $$SupplierOffersTableTableManager(_db, _db.supplierOffers);
 }

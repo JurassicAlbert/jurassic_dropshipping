@@ -83,12 +83,45 @@ class UserRulesTable extends Table {
   TextColumn get searchKeywords => text()();
 }
 
+@DataClassName('SupplierRow')
+class Suppliers extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get supplierId => text()();
+  TextColumn get name => text()();
+  TextColumn get platformType => text()();
+  TextColumn get countryCode => text().nullable()();
+  RealColumn get rating => real().nullable()();
+  IntColumn get returnWindowDays => integer().nullable()();
+  RealColumn get returnShippingCost => real().nullable()();
+  RealColumn get restockingFeePercent => real().nullable()();
+  BoolColumn get acceptsNoReasonReturns => boolean().withDefault(const Constant(false))();
+}
+
+@DataClassName('SupplierOfferRow')
+class SupplierOffers extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get offerId => text()();
+  TextColumn get productId => text()();
+  TextColumn get supplierId => text()();
+  TextColumn get sourcePlatformId => text()();
+  RealColumn get cost => real()();
+  RealColumn get shippingCost => real().nullable()();
+  IntColumn get minEstimatedDays => integer().nullable()();
+  IntColumn get maxEstimatedDays => integer().nullable()();
+  TextColumn get carrierCode => text().nullable()();
+  TextColumn get shippingMethodName => text().nullable()();
+  DateTimeColumn get lastPriceRefreshAt => dateTime().nullable()();
+  DateTimeColumn get lastStockRefreshAt => dateTime().nullable()();
+}
+
 @DriftDatabase(tables: [
   Products,
   Listings,
   Orders,
   DecisionLogs,
   UserRulesTable,
+  Suppliers,
+  SupplierOffers,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(storage.openAppDatabaseConnection());
