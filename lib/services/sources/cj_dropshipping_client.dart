@@ -93,9 +93,9 @@ class CjDropshippingClient {
       'page': page,
       'size': size,
       if (keyWord?.isNotEmpty == true) 'keyWord': keyWord!,
-      if (countryCode != null) 'countryCode': countryCode,
-      if (startSellPrice != null) 'startSellPrice': startSellPrice,
-      if (endSellPrice != null) 'endSellPrice': endSellPrice,
+      'countryCode': ?countryCode,
+      'startSellPrice': ?startSellPrice,
+      'endSellPrice': ?endSellPrice,
     };
     final res = await _dio.get<Map<String, dynamic>>(
       '/product/listV2',
