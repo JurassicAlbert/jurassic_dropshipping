@@ -14,7 +14,9 @@ import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.
 import 'package:jurassic_dropshipping/domain/decision_engine/scanner.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/supplier_selector.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart';
+import 'package:jurassic_dropshipping/services/allegro_oauth_service.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
+import 'package:jurassic_dropshipping/services/order_sync_scheduler.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 import 'package:jurassic_dropshipping/services/sources/cj_dropshipping_client.dart';
@@ -69,6 +71,16 @@ final fulfillmentServiceProvider = Provider<FulfillmentService>((ref) => Fulfill
   productRepository: ref.watch(productRepositoryProvider),
   sources: ref.watch(sourcesListProvider),
   targets: ref.watch(targetsListProvider),
+));
+
+final allegroOAuthProvider = Provider<AllegroOAuthService>((ref) => AllegroOAuthService(
+  secureStorage: ref.watch(secureStorageProvider),
+));
+
+final orderSyncSchedulerProvider = Provider<OrderSyncScheduler>((ref) => OrderSyncScheduler(
+  orderSyncService: ref.watch(orderSyncServiceProvider),
+  fulfillmentService: ref.watch(fulfillmentServiceProvider),
+  rulesRepository: ref.watch(rulesRepositoryProvider),
 ));
 
 final listingsProvider = FutureProvider<List<Listing>>((ref) => ref.watch(listingRepositoryProvider).getAll());
