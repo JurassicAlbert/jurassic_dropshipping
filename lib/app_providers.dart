@@ -107,6 +107,7 @@ final automationSchedulerProvider = Provider<AutomationScheduler>((ref) => Autom
   orderSyncService: ref.watch(orderSyncServiceProvider),
   fulfillmentService: ref.watch(fulfillmentServiceProvider),
   rulesRepository: ref.watch(rulesRepositoryProvider),
+  priceRefreshService: ref.watch(priceRefreshServiceProvider),
 ));
 
 final listingsProvider = FutureProvider<List<Listing>>((ref) => ref.watch(listingRepositoryProvider).getAll());

@@ -4,6 +4,7 @@ import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/scanner.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
+import 'package:jurassic_dropshipping/services/price_refresh_service.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 
 class AutomationScheduler {
@@ -12,12 +13,14 @@ class AutomationScheduler {
     required this.orderSyncService,
     required this.fulfillmentService,
     required this.rulesRepository,
+    required this.priceRefreshService,
   });
 
   final Scanner scanner;
   final OrderSyncService orderSyncService;
   final FulfillmentService fulfillmentService;
   final RulesRepository rulesRepository;
+  final PriceRefreshService priceRefreshService;
 
   Timer? _scanTimer;
   Timer? _syncTimer;
@@ -69,11 +72,19 @@ class AutomationScheduler {
 
   void startPriceRefresh({Duration interval = const Duration(hours: 6)}) {
     _priceRefreshTimer?.cancel();
-    _priceRefreshTimer = Timer.periodic(interval, (_) {
-      lastPriceRefreshTime = DateTime.now();
-      appLogger.i('AutomationScheduler: price refresh tick (placeholder)');
-    });
+    _runPriceRefresh();
+    _priceRefreshTimer = Timer.periodic(interval, (_) => _runPriceRefresh());
     appLogger.i('AutomationScheduler: price refresh started with interval $interval');
+  }
+
+  Future<void> _runPriceRefresh() async {
+    try {
+      final refreshed = await priceRefreshService.refreshStaleOffers();
+      lastPriceRefreshTime = DateTime.now();
+      appLogger.i('AutomationScheduler: price refresh complete - $refreshed offers refreshed');
+    } catch (e, st) {
+      appLogger.e('AutomationScheduler: price refresh failed', error: e, stackTrace: st);
+    }
   }
 
   Future<void> _runScan() async {
