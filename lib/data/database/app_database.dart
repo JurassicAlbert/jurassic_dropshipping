@@ -102,6 +102,14 @@ class Suppliers extends Table {
   RealColumn get returnShippingCost => real().nullable()();
   RealColumn get restockingFeePercent => real().nullable()();
   BoolColumn get acceptsNoReasonReturns => boolean().withDefault(const Constant(false))();
+  TextColumn get warehouseAddress => text().nullable()();
+  TextColumn get warehouseCity => text().nullable()();
+  TextColumn get warehouseZip => text().nullable()();
+  TextColumn get warehouseCountry => text().nullable()();
+  TextColumn get warehousePhone => text().nullable()();
+  TextColumn get warehouseEmail => text().nullable()();
+  TextColumn get feedSource => text().nullable()();
+  TextColumn get shopUrl => text().nullable()();
 }
 
 @DataClassName('SupplierOfferRow')
@@ -134,6 +142,15 @@ class Returns extends Table {
   RealColumn get restockingFee => real().nullable()();
   DateTimeColumn get requestedAt => dateTime().nullable()();
   DateTimeColumn get resolvedAt => dateTime().nullable()();
+  TextColumn get returnToAddress => text().nullable()();
+  TextColumn get returnToCity => text().nullable()();
+  TextColumn get returnToCountry => text().nullable()();
+  TextColumn get returnTrackingNumber => text().nullable()();
+  TextColumn get returnCarrier => text().nullable()();
+  TextColumn get supplierId => text().nullable()();
+  TextColumn get productId => text().nullable()();
+  TextColumn get sourcePlatformId => text().nullable()();
+  TextColumn get targetPlatformId => text().nullable()();
 }
 
 @DataClassName('MarketplaceAccountRow')
@@ -164,7 +181,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -189,6 +206,26 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         // v3 -> v4: added per-platform marketplace fees
         await m.addColumn(userRulesTable, userRulesTable.marketplaceFeesJson);
+      }
+      if (from < 5) {
+        // v4 -> v5: supplier warehouse/feed fields, return shipment tracking fields
+        await m.addColumn(suppliers, suppliers.warehouseAddress);
+        await m.addColumn(suppliers, suppliers.warehouseCity);
+        await m.addColumn(suppliers, suppliers.warehouseZip);
+        await m.addColumn(suppliers, suppliers.warehouseCountry);
+        await m.addColumn(suppliers, suppliers.warehousePhone);
+        await m.addColumn(suppliers, suppliers.warehouseEmail);
+        await m.addColumn(suppliers, suppliers.feedSource);
+        await m.addColumn(suppliers, suppliers.shopUrl);
+        await m.addColumn(returns, returns.returnToAddress);
+        await m.addColumn(returns, returns.returnToCity);
+        await m.addColumn(returns, returns.returnToCountry);
+        await m.addColumn(returns, returns.returnTrackingNumber);
+        await m.addColumn(returns, returns.returnCarrier);
+        await m.addColumn(returns, returns.supplierId);
+        await m.addColumn(returns, returns.productId);
+        await m.addColumn(returns, returns.sourcePlatformId);
+        await m.addColumn(returns, returns.targetPlatformId);
       }
     },
   );

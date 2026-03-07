@@ -17,6 +17,14 @@ class SupplierRepository {
       returnShippingCost: row.returnShippingCost,
       restockingFeePercent: row.restockingFeePercent,
       acceptsNoReasonReturns: row.acceptsNoReasonReturns,
+      warehouseAddress: row.warehouseAddress,
+      warehouseCity: row.warehouseCity,
+      warehouseZip: row.warehouseZip,
+      warehouseCountry: row.warehouseCountry,
+      warehousePhone: row.warehousePhone,
+      warehouseEmail: row.warehouseEmail,
+      feedSource: row.feedSource,
+      shopUrl: row.shopUrl,
     );
   }
 
@@ -48,6 +56,14 @@ class SupplierRepository {
         returnShippingCost: Value(supplier.returnShippingCost),
         restockingFeePercent: Value(supplier.restockingFeePercent),
         acceptsNoReasonReturns: Value(supplier.acceptsNoReasonReturns),
+        warehouseAddress: Value(supplier.warehouseAddress),
+        warehouseCity: Value(supplier.warehouseCity),
+        warehouseZip: Value(supplier.warehouseZip),
+        warehouseCountry: Value(supplier.warehouseCountry),
+        warehousePhone: Value(supplier.warehousePhone),
+        warehouseEmail: Value(supplier.warehouseEmail),
+        feedSource: Value(supplier.feedSource),
+        shopUrl: Value(supplier.shopUrl),
       ));
     } else {
       await _db.into(_db.suppliers).insert(SuppliersCompanion.insert(
@@ -60,6 +76,14 @@ class SupplierRepository {
         returnShippingCost: Value(supplier.returnShippingCost),
         restockingFeePercent: Value(supplier.restockingFeePercent),
         acceptsNoReasonReturns: Value(supplier.acceptsNoReasonReturns),
+        warehouseAddress: Value(supplier.warehouseAddress),
+        warehouseCity: Value(supplier.warehouseCity),
+        warehouseZip: Value(supplier.warehouseZip),
+        warehouseCountry: Value(supplier.warehouseCountry),
+        warehousePhone: Value(supplier.warehousePhone),
+        warehouseEmail: Value(supplier.warehouseEmail),
+        feedSource: Value(supplier.feedSource),
+        shopUrl: Value(supplier.shopUrl),
       ));
     }
   }

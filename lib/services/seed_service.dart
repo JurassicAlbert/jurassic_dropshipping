@@ -78,11 +78,11 @@ class SeedService {
 
     // ── Suppliers ──
     final suppliers = [
-      Supplier(id: 'sup_cj', name: 'CJ Electronics', platformType: 'cj', countryCode: 'CN', rating: 4.3, returnWindowDays: 14, returnShippingCost: 30.0, restockingFeePercent: 0, acceptsNoReasonReturns: true),
-      Supplier(id: 'sup_pl_warehouse', name: 'Warsaw Wholesale', platformType: 'local', countryCode: 'PL', rating: 4.8, returnWindowDays: 14, returnShippingCost: 10.0, restockingFeePercent: 0, acceptsNoReasonReturns: true),
-      Supplier(id: 'sup_de_tech', name: 'Berlin Tech Supply', platformType: 'api2cart', countryCode: 'DE', rating: 4.6, returnWindowDays: 30, returnShippingCost: 15.0, restockingFeePercent: 5.0, acceptsNoReasonReturns: true),
-      Supplier(id: 'sup_cn_gadgets', name: 'Shenzhen Gadgets', platformType: 'cj', countryCode: 'CN', rating: 3.9, returnWindowDays: 7, returnShippingCost: 40.0, restockingFeePercent: 10.0, acceptsNoReasonReturns: false),
-      Supplier(id: 'sup_tr_bulk', name: 'Istanbul Bulk Trader', platformType: 'api2cart', countryCode: 'TR', rating: 4.1, returnWindowDays: 0, returnShippingCost: 0, restockingFeePercent: 0, acceptsNoReasonReturns: false),
+      Supplier(id: 'sup_cj', name: 'CJ Electronics', platformType: 'cj', countryCode: 'CN', rating: 4.3, returnWindowDays: 14, returnShippingCost: 30.0, restockingFeePercent: 0, acceptsNoReasonReturns: true, warehouseAddress: '88 Keyuan Road, Nanshan District', warehouseCity: 'Shenzhen', warehouseZip: '518057', warehouseCountry: 'CN', warehousePhone: '+86-755-8600-0088', warehouseEmail: 'returns@cjelectronics.cn', feedSource: 'cj_api', shopUrl: 'https://cjdropshipping.com/supplier/cj-electronics'),
+      Supplier(id: 'sup_pl_warehouse', name: 'Warsaw Wholesale', platformType: 'local', countryCode: 'PL', rating: 4.8, returnWindowDays: 14, returnShippingCost: 10.0, restockingFeePercent: 0, acceptsNoReasonReturns: true, warehouseAddress: 'ul. Annopol 3', warehouseCity: 'Warszawa', warehouseZip: '03-236', warehouseCountry: 'PL', warehousePhone: '+48-22-100-2000', warehouseEmail: 'magazyn@warsawwholesale.pl', feedSource: 'manual', shopUrl: 'https://warsawwholesale.pl'),
+      Supplier(id: 'sup_de_tech', name: 'Berlin Tech Supply', platformType: 'api2cart', countryCode: 'DE', rating: 4.6, returnWindowDays: 30, returnShippingCost: 15.0, restockingFeePercent: 5.0, acceptsNoReasonReturns: true, warehouseAddress: 'Industriestr. 12', warehouseCity: 'Berlin', warehouseZip: '10317', warehouseCountry: 'DE', warehousePhone: '+49-30-5500-1234', warehouseEmail: 'retouren@berlintechsupply.de', feedSource: 'api2cart_shopify', shopUrl: 'https://berlintechsupply.de'),
+      Supplier(id: 'sup_cn_gadgets', name: 'Shenzhen Gadgets', platformType: 'cj', countryCode: 'CN', rating: 3.9, returnWindowDays: 7, returnShippingCost: 40.0, restockingFeePercent: 10.0, acceptsNoReasonReturns: false, warehouseAddress: '168 Baoan Blvd, Baoan District', warehouseCity: 'Shenzhen', warehouseZip: '518101', warehouseCountry: 'CN', warehousePhone: '+86-755-2900-1688', warehouseEmail: 'rma@shenzhengadgets.cn', feedSource: 'cj_api', shopUrl: 'https://cjdropshipping.com/supplier/sz-gadgets'),
+      Supplier(id: 'sup_tr_bulk', name: 'Istanbul Bulk Trader', platformType: 'api2cart', countryCode: 'TR', rating: 4.1, returnWindowDays: 0, returnShippingCost: 0, restockingFeePercent: 0, acceptsNoReasonReturns: false, warehouseAddress: 'Organize Sanayi Bolgesi 5. Cadde No:22', warehouseCity: 'Istanbul', warehouseZip: '34953', warehouseCountry: 'TR', warehousePhone: '+90-212-444-2200', warehouseEmail: 'iade@istanbulbulk.com.tr', feedSource: 'api2cart_shopify', shopUrl: 'https://istanbulbulk.com.tr'),
     ];
     for (final s in suppliers) {
       await supplierRepository.upsert(s);
@@ -218,12 +218,20 @@ class SeedService {
     }
 
     // ── Returns (some orders have returns — ~8% return rate) ──
+    final listingMap = {for (final l in listings) l.id: l};
+    final productMap = {for (final p in products) p.id: p};
+    final supplierMap = {for (final s in suppliers) s.id: s};
+    final returnCarriers = ['DPD', 'InPost', 'DHL', 'GLS', 'Poczta Polska'];
     final shippedOrDelivered = orders.where((o) => o.status == OrderStatus.shipped || o.status == OrderStatus.delivered).toList();
     final returns = <ReturnRequest>[];
     for (final o in shippedOrDelivered) {
       if (_rng.nextInt(100) < 8) {
         final reasons = [ReturnReason.noReason, ReturnReason.defective, ReturnReason.wrongItem, ReturnReason.damagedInTransit];
         final returnStatuses = [ReturnStatus.requested, ReturnStatus.approved, ReturnStatus.refunded, ReturnStatus.shipped];
+        final listing = listingMap[o.listingId];
+        final product = listing != null ? productMap[listing.productId] : null;
+        final supId = product?.supplierId;
+        final sup = supId != null ? supplierMap[supId] : null;
         returns.add(ReturnRequest(
           id: 'ret_${o.id}',
           orderId: o.id,
@@ -233,6 +241,15 @@ class SeedService {
           returnShippingCost: 15.0 + _rng.nextInt(20).toDouble(),
           restockingFee: 0,
           requestedAt: o.createdAt?.add(Duration(days: 3 + _rng.nextInt(10))),
+          returnToAddress: sup?.warehouseAddress,
+          returnToCity: sup?.warehouseCity,
+          returnToCountry: sup?.warehouseCountry,
+          returnTrackingNumber: 'RET${100000000 + _rng.nextInt(900000000)}',
+          returnCarrier: returnCarriers[_rng.nextInt(returnCarriers.length)],
+          supplierId: supId,
+          productId: product?.id,
+          sourcePlatformId: product?.sourcePlatformId,
+          targetPlatformId: listing?.targetPlatformId,
         ));
       }
     }

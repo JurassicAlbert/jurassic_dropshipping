@@ -19,6 +19,21 @@ class ReturnRequest with _$ReturnRequest {
     double? restockingFee,
     DateTime? requestedAt,
     DateTime? resolvedAt,
+    /// Customer sends return to this address (supplier's warehouse)
+    String? returnToAddress,
+    String? returnToCity,
+    String? returnToCountry,
+    /// Tracking number for the return shipment (customer → supplier)
+    String? returnTrackingNumber,
+    String? returnCarrier,
+    /// The supplier who receives the return
+    String? supplierId,
+    /// Product that was returned
+    String? productId,
+    /// Which feed/source platform the original order came through
+    String? sourcePlatformId,
+    /// Which marketplace the customer bought from
+    String? targetPlatformId,
   }) = _ReturnRequest;
 
   factory ReturnRequest.fromJson(Map<String, dynamic> json) =>

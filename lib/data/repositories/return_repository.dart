@@ -32,6 +32,15 @@ class ReturnRepository {
       restockingFee: row.restockingFee,
       requestedAt: row.requestedAt,
       resolvedAt: row.resolvedAt,
+      returnToAddress: row.returnToAddress,
+      returnToCity: row.returnToCity,
+      returnToCountry: row.returnToCountry,
+      returnTrackingNumber: row.returnTrackingNumber,
+      returnCarrier: row.returnCarrier,
+      supplierId: row.supplierId,
+      productId: row.productId,
+      sourcePlatformId: row.sourcePlatformId,
+      targetPlatformId: row.targetPlatformId,
     );
   }
 
@@ -62,6 +71,15 @@ class ReturnRepository {
         restockingFee: Value(returnRequest.restockingFee),
         requestedAt: Value(returnRequest.requestedAt),
         resolvedAt: Value(returnRequest.resolvedAt),
+        returnToAddress: Value(returnRequest.returnToAddress),
+        returnToCity: Value(returnRequest.returnToCity),
+        returnToCountry: Value(returnRequest.returnToCountry),
+        returnTrackingNumber: Value(returnRequest.returnTrackingNumber),
+        returnCarrier: Value(returnRequest.returnCarrier),
+        supplierId: Value(returnRequest.supplierId),
+        productId: Value(returnRequest.productId),
+        sourcePlatformId: Value(returnRequest.sourcePlatformId),
+        targetPlatformId: Value(returnRequest.targetPlatformId),
       ),
     );
   }

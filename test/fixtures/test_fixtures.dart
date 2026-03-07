@@ -78,6 +78,14 @@ class Fixtures {
     double? returnShippingCost = 25.0,
     double? restockingFeePercent = 0.0,
     bool acceptsNoReasonReturns = true,
+    String? warehouseAddress,
+    String? warehouseCity,
+    String? warehouseZip,
+    String? warehouseCountry,
+    String? warehousePhone,
+    String? warehouseEmail,
+    String? feedSource,
+    String? shopUrl,
   }) {
     return Supplier(
       id: id ?? 'sup_${_uid()}',
@@ -89,6 +97,14 @@ class Fixtures {
       returnShippingCost: returnShippingCost,
       restockingFeePercent: restockingFeePercent,
       acceptsNoReasonReturns: acceptsNoReasonReturns,
+      warehouseAddress: warehouseAddress,
+      warehouseCity: warehouseCity,
+      warehouseZip: warehouseZip,
+      warehouseCountry: warehouseCountry,
+      warehousePhone: warehousePhone,
+      warehouseEmail: warehouseEmail,
+      feedSource: feedSource,
+      shopUrl: shopUrl,
     );
   }
 
@@ -247,6 +263,15 @@ class Fixtures {
     double? refundAmount = 99.90,
     double? returnShippingCost = 25.0,
     double? restockingFee = 0.0,
+    String? returnToAddress,
+    String? returnToCity,
+    String? returnToCountry,
+    String? returnTrackingNumber,
+    String? returnCarrier,
+    String? supplierId,
+    String? productId,
+    String? sourcePlatformId,
+    String? targetPlatformId,
   }) {
     return ReturnRequest(
       id: id ?? 'ret_${_uid()}',
@@ -257,6 +282,15 @@ class Fixtures {
       returnShippingCost: returnShippingCost,
       restockingFee: restockingFee,
       requestedAt: DateTime.now(),
+      returnToAddress: returnToAddress,
+      returnToCity: returnToCity,
+      returnToCountry: returnToCountry,
+      returnTrackingNumber: returnTrackingNumber,
+      returnCarrier: returnCarrier,
+      supplierId: supplierId,
+      productId: productId,
+      sourcePlatformId: sourcePlatformId,
+      targetPlatformId: targetPlatformId,
     );
   }
 

@@ -21,6 +21,18 @@ class Supplier with _$Supplier {
     double? restockingFeePercent,
     /// Whether supplier accepts no-reason returns.
     @Default(false) bool acceptsNoReasonReturns,
+    /// Warehouse/return address where customers ship returns directly
+    String? warehouseAddress,
+    String? warehouseCity,
+    String? warehouseZip,
+    String? warehouseCountry,
+    /// Contact info for the warehouse
+    String? warehousePhone,
+    String? warehouseEmail,
+    /// The feed/source used to connect to this supplier (e.g. 'cj_api', 'api2cart_shopify', 'manual')
+    String? feedSource,
+    /// External shop URL or identifier
+    String? shopUrl,
   }) = _Supplier;
 
   factory Supplier.fromJson(Map<String, dynamic> json) =>
