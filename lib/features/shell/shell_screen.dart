@@ -11,6 +11,7 @@ class ShellScreen extends StatelessWidget {
     final current = GoRouterState.of(context).uri.path;
     final navItems = [
       (route: '/dashboard', label: 'Dashboard', icon: Icons.dashboard),
+      (route: '/analytics', label: 'Analytics', icon: Icons.analytics),
       (route: '/products', label: 'Products', icon: Icons.inventory_2),
       (route: '/orders', label: 'Orders', icon: Icons.shopping_cart),
       (route: '/suppliers', label: 'Suppliers', icon: Icons.store),
@@ -68,6 +69,7 @@ class ShellScreen extends StatelessWidget {
                   extended: width >= 800,
                   destinations: const [
                     NavigationRailDestination(icon: Icon(Icons.dashboard), label: Text('Dashboard')),
+                    NavigationRailDestination(icon: Icon(Icons.analytics), label: Text('Analytics')),
                     NavigationRailDestination(icon: Icon(Icons.inventory_2), label: Text('Products')),
                     NavigationRailDestination(icon: Icon(Icons.shopping_cart), label: Text('Orders')),
                     NavigationRailDestination(icon: Icon(Icons.store), label: Text('Suppliers')),
@@ -91,6 +93,7 @@ class ShellScreen extends StatelessWidget {
   int _selectedIndex(String path) {
     final routes = [
       '/dashboard',
+      '/analytics',
       '/products',
       '/orders',
       '/suppliers',
@@ -107,6 +110,7 @@ class ShellScreen extends StatelessWidget {
   String _routeAt(int index) {
     return [
       '/dashboard',
+      '/analytics',
       '/products',
       '/orders',
       '/suppliers',

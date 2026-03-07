@@ -5,6 +5,7 @@ import 'package:jurassic_dropshipping/features/decision_log/decision_log_screen.
 import 'package:jurassic_dropshipping/features/orders/orders_screen.dart';
 import 'package:jurassic_dropshipping/features/products/products_screen.dart';
 import 'package:jurassic_dropshipping/features/settings/settings_screen.dart';
+import 'package:jurassic_dropshipping/features/analytics/analytics_screen.dart';
 import 'package:jurassic_dropshipping/features/shell/shell_screen.dart';
 import 'package:jurassic_dropshipping/features/suppliers/suppliers_screen.dart';
 import 'package:jurassic_dropshipping/features/marketplaces/marketplaces_screen.dart';
@@ -17,6 +18,7 @@ final goRouter = GoRouter(
       builder: (context, state, child) => ShellScreen(child: child),
       routes: [
         GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen()),
+        GoRoute(path: '/analytics', builder: (context, state) => const AnalyticsScreen()),
         GoRoute(path: '/products', builder: (context, state) => const ProductsScreen()),
         GoRoute(path: '/orders', builder: (context, state) => const OrdersScreen()),
         GoRoute(path: '/suppliers', builder: (context, state) => const SuppliersScreen()),
