@@ -277,8 +277,92 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ref.read(themeModeProvider.notifier).state = modes.first;
             },
           ),
+          const SizedBox(height: 32),
+          const Divider(),
+          const SizedBox(height: 16),
+          const Text('Developer Tools', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          const Text(
+            'These actions affect the live database.',
+            style: TextStyle(fontSize: 12, color: Colors.orange),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            icon: const Icon(Icons.dataset),
+            label: const Text('Load demo data'),
+            onPressed: () async {
+              final seeder = ref.read(databaseSeederProvider);
+              try {
+                final result = await seeder.seed();
+                _invalidateAllProviders(ref);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Seeded ${result.entitiesCreated} entities.')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Seed failed: $e')),
+                  );
+                }
+              }
+            },
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.delete_forever, color: Colors.red),
+            label: const Text('Clear all data', style: TextStyle(color: Colors.red)),
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Clear all data?'),
+                  content: const Text('This will permanently delete all data from the database.'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                    FilledButton(
+                      style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Delete everything'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed != true) return;
+              final seeder = ref.read(databaseSeederProvider);
+              try {
+                await seeder.dropAll();
+                _invalidateAllProviders(ref);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('All data cleared.')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Clear failed: $e')),
+                  );
+                }
+              }
+            },
+          ),
         ],
       ),
     );
+  }
+
+  void _invalidateAllProviders(WidgetRef ref) {
+    ref.invalidate(listingsProvider);
+    ref.invalidate(ordersProvider);
+    ref.invalidate(rulesProvider);
+    ref.invalidate(suppliersProvider);
+    ref.invalidate(supplierOffersProvider);
+    ref.invalidate(returnRequestsProvider);
+    ref.invalidate(decisionLogsProvider);
+    ref.invalidate(marketplaceAccountsProvider);
+    ref.invalidate(pendingListingsProvider);
+    ref.invalidate(pendingOrdersProvider);
   }
 }
