@@ -178,13 +178,20 @@ class _StatusRow extends StatelessWidget {
   }
 }
 
-class _ProfitChart extends StatelessWidget {
+class _ProfitChart extends StatefulWidget {
   const _ProfitChart({required this.orders});
   final List<Order> orders;
 
   @override
+  State<_ProfitChart> createState() => _ProfitChartState();
+}
+
+class _ProfitChartState extends State<_ProfitChart> {
+  int _selectedDays = 7;
+
+  @override
   Widget build(BuildContext context) {
-    final dailyProfit = _computeDailyProfit(orders);
+    final dailyProfit = _computeDailyProfit(widget.orders, _selectedDays);
     if (dailyProfit.isEmpty) {
       return Card(
         child: Padding(
@@ -214,7 +221,27 @@ class _ProfitChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Profit Trend (daily)', style: TextStyle(fontWeight: FontWeight.w600)),
+            Row(
+              children: [
+                const Text('Profit Trend (daily)', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Spacer(),
+                ChoiceChip(
+                  label: const Text('7 days'),
+                  selected: _selectedDays == 7,
+                  onSelected: (selected) {
+                    if (selected) setState(() => _selectedDays = 7);
+                  },
+                ),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: const Text('30 days'),
+                  selected: _selectedDays == 30,
+                  onSelected: (selected) {
+                    if (selected) setState(() => _selectedDays = 30);
+                  },
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             SizedBox(
               height: 200,
@@ -243,6 +270,18 @@ class _ProfitChart extends StatelessWidget {
                     rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   ),
                   borderData: FlBorderData(show: true),
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((spot) {
+                          return LineTooltipItem(
+                            '${spot.y.toStringAsFixed(2)} PLN',
+                            const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          );
+                        }).toList();
+                      },
+                    ),
+                  ),
                   lineBarsData: [
                     LineChartBarData(
                       spots: spots,
@@ -265,7 +304,7 @@ class _ProfitChart extends StatelessWidget {
     );
   }
 
-  List<_DailyProfit> _computeDailyProfit(List<Order> orders) {
+  List<_DailyProfit> _computeDailyProfit(List<Order> orders, int days) {
     final map = <DateTime, double>{};
     for (final order in orders) {
       if (order.createdAt == null) continue;
@@ -274,8 +313,8 @@ class _ProfitChart extends StatelessWidget {
       map[day] = (map[day] ?? 0) + profit;
     }
     final sorted = map.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
-    final last7 = sorted.length > 7 ? sorted.sublist(sorted.length - 7) : sorted;
-    return last7.map((e) => _DailyProfit(date: e.key, profit: e.value)).toList();
+    final lastN = sorted.length > days ? sorted.sublist(sorted.length - days) : sorted;
+    return lastN.map((e) => _DailyProfit(date: e.key, profit: e.value)).toList();
   }
 }
 
