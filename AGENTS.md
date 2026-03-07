@@ -15,7 +15,9 @@ Jurassic Dropshipping is a single Flutter desktop/mobile app for dropshipping ar
 ### Known notes
 
 - `flutter analyze lib` — clean, no issues.
-- `flutter test` — all 136 tests pass (domain, repositories, services, integration, widget).
+- `flutter test` — all 144 tests pass (domain, repositories, services, integration, widget).
+- Widget tests for screens (in `test/features/`) override Riverpod FutureProviders with mock data. Dashboard tests also override `dbProvider` (in-memory Drift) and `secureStorageProvider` (mock) to satisfy the `automationSchedulerProvider` dependency chain. Settings tests similarly override `secureStorageProvider` since `initState` reads from it.
+- CI/CD is configured in `.github/workflows/ci.yml` — runs analyze, test, web build, and Linux build on push/PR to main.
 - The `path_provider` fallback for Linux/headless environments was fixed in `app_database_storage_io.dart`. The database now falls back to `$HOME/.jurassic_dropshipping/` when XDG dirs are unavailable.
 - `flutter build web` succeeds. The web build uses Drift WASM; `web/sqlite3.wasm` (~714KB) and `web/drift_worker.js` must be present.
 
