@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:jurassic_dropshipping/core/logger.dart';
+import 'package:jurassic_dropshipping/services/dio_rate_limit_interceptor.dart';
+import 'package:jurassic_dropshipping/services/dio_retry_interceptor.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 
 /// Temu Seller API client. 
@@ -11,7 +13,10 @@ class TemuSellerClient {
       : _dio = dio ?? Dio(BaseOptions(
           baseUrl: 'https://seller.temu.com/api',
           connectTimeout: const Duration(seconds: 15),
-        ));
+        )) {
+    _dio.interceptors.insert(0, RetryInterceptor());
+    _dio.interceptors.add(RateLimitInterceptor());
+  }
 
   final SecureStorageService secureStorage;
   final Dio _dio;

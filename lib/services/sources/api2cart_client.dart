@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:jurassic_dropshipping/core/logger.dart';
+import 'package:jurassic_dropshipping/services/dio_rate_limit_interceptor.dart';
+import 'package:jurassic_dropshipping/services/dio_retry_interceptor.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 
 /// API2Cart unified ecommerce API client.
@@ -11,6 +13,8 @@ class Api2CartClient {
           baseUrl: 'https://api.api2cart.com/v1.1',
           connectTimeout: const Duration(seconds: 15),
         )) {
+    _dio.interceptors.insert(0, RetryInterceptor());
+    _dio.interceptors.add(RateLimitInterceptor());
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final apiKey = await secureStorage.read(SecureKeys.api2cartApiKey);
