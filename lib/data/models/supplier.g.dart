@@ -17,6 +17,14 @@ _$SupplierImpl _$$SupplierImplFromJson(Map<String, dynamic> json) =>
       returnShippingCost: (json['returnShippingCost'] as num?)?.toDouble(),
       restockingFeePercent: (json['restockingFeePercent'] as num?)?.toDouble(),
       acceptsNoReasonReturns: json['acceptsNoReasonReturns'] as bool? ?? false,
+      warehouseAddress: json['warehouseAddress'] as String?,
+      warehouseCity: json['warehouseCity'] as String?,
+      warehouseZip: json['warehouseZip'] as String?,
+      warehouseCountry: json['warehouseCountry'] as String?,
+      warehousePhone: json['warehousePhone'] as String?,
+      warehouseEmail: json['warehouseEmail'] as String?,
+      feedSource: json['feedSource'] as String?,
+      shopUrl: json['shopUrl'] as String?,
     );
 
 Map<String, dynamic> _$$SupplierImplToJson(_$SupplierImpl instance) =>
@@ -30,4 +38,12 @@ Map<String, dynamic> _$$SupplierImplToJson(_$SupplierImpl instance) =>
       'returnShippingCost': instance.returnShippingCost,
       'restockingFeePercent': instance.restockingFeePercent,
       'acceptsNoReasonReturns': instance.acceptsNoReasonReturns,
+      'warehouseAddress': instance.warehouseAddress,
+      'warehouseCity': instance.warehouseCity,
+      'warehouseZip': instance.warehouseZip,
+      'warehouseCountry': instance.warehouseCountry,
+      'warehousePhone': instance.warehousePhone,
+      'warehouseEmail': instance.warehouseEmail,
+      'feedSource': instance.feedSource,
+      'shopUrl': instance.shopUrl,
     };

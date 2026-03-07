@@ -41,6 +41,22 @@ mixin _$Supplier {
   /// Whether supplier accepts no-reason returns.
   bool get acceptsNoReasonReturns => throw _privateConstructorUsedError;
 
+  /// Warehouse/return address where customers ship returns directly
+  String? get warehouseAddress => throw _privateConstructorUsedError;
+  String? get warehouseCity => throw _privateConstructorUsedError;
+  String? get warehouseZip => throw _privateConstructorUsedError;
+  String? get warehouseCountry => throw _privateConstructorUsedError;
+
+  /// Contact info for the warehouse
+  String? get warehousePhone => throw _privateConstructorUsedError;
+  String? get warehouseEmail => throw _privateConstructorUsedError;
+
+  /// The feed/source used to connect to this supplier (e.g. 'cj_api', 'api2cart_shopify', 'manual')
+  String? get feedSource => throw _privateConstructorUsedError;
+
+  /// External shop URL or identifier
+  String? get shopUrl => throw _privateConstructorUsedError;
+
   /// Serializes this Supplier to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -66,6 +82,14 @@ abstract class $SupplierCopyWith<$Res> {
     double? returnShippingCost,
     double? restockingFeePercent,
     bool acceptsNoReasonReturns,
+    String? warehouseAddress,
+    String? warehouseCity,
+    String? warehouseZip,
+    String? warehouseCountry,
+    String? warehousePhone,
+    String? warehouseEmail,
+    String? feedSource,
+    String? shopUrl,
   });
 }
 
@@ -93,6 +117,14 @@ class _$SupplierCopyWithImpl<$Res, $Val extends Supplier>
     Object? returnShippingCost = freezed,
     Object? restockingFeePercent = freezed,
     Object? acceptsNoReasonReturns = null,
+    Object? warehouseAddress = freezed,
+    Object? warehouseCity = freezed,
+    Object? warehouseZip = freezed,
+    Object? warehouseCountry = freezed,
+    Object? warehousePhone = freezed,
+    Object? warehouseEmail = freezed,
+    Object? feedSource = freezed,
+    Object? shopUrl = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -132,6 +164,38 @@ class _$SupplierCopyWithImpl<$Res, $Val extends Supplier>
                 ? _value.acceptsNoReasonReturns
                 : acceptsNoReasonReturns // ignore: cast_nullable_to_non_nullable
                       as bool,
+            warehouseAddress: freezed == warehouseAddress
+                ? _value.warehouseAddress
+                : warehouseAddress // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            warehouseCity: freezed == warehouseCity
+                ? _value.warehouseCity
+                : warehouseCity // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            warehouseZip: freezed == warehouseZip
+                ? _value.warehouseZip
+                : warehouseZip // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            warehouseCountry: freezed == warehouseCountry
+                ? _value.warehouseCountry
+                : warehouseCountry // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            warehousePhone: freezed == warehousePhone
+                ? _value.warehousePhone
+                : warehousePhone // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            warehouseEmail: freezed == warehouseEmail
+                ? _value.warehouseEmail
+                : warehouseEmail // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            feedSource: freezed == feedSource
+                ? _value.feedSource
+                : feedSource // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            shopUrl: freezed == shopUrl
+                ? _value.shopUrl
+                : shopUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -157,6 +221,14 @@ abstract class _$$SupplierImplCopyWith<$Res>
     double? returnShippingCost,
     double? restockingFeePercent,
     bool acceptsNoReasonReturns,
+    String? warehouseAddress,
+    String? warehouseCity,
+    String? warehouseZip,
+    String? warehouseCountry,
+    String? warehousePhone,
+    String? warehouseEmail,
+    String? feedSource,
+    String? shopUrl,
   });
 }
 
@@ -183,6 +255,14 @@ class __$$SupplierImplCopyWithImpl<$Res>
     Object? returnShippingCost = freezed,
     Object? restockingFeePercent = freezed,
     Object? acceptsNoReasonReturns = null,
+    Object? warehouseAddress = freezed,
+    Object? warehouseCity = freezed,
+    Object? warehouseZip = freezed,
+    Object? warehouseCountry = freezed,
+    Object? warehousePhone = freezed,
+    Object? warehouseEmail = freezed,
+    Object? feedSource = freezed,
+    Object? shopUrl = freezed,
   }) {
     return _then(
       _$SupplierImpl(
@@ -222,6 +302,38 @@ class __$$SupplierImplCopyWithImpl<$Res>
             ? _value.acceptsNoReasonReturns
             : acceptsNoReasonReturns // ignore: cast_nullable_to_non_nullable
                   as bool,
+        warehouseAddress: freezed == warehouseAddress
+            ? _value.warehouseAddress
+            : warehouseAddress // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        warehouseCity: freezed == warehouseCity
+            ? _value.warehouseCity
+            : warehouseCity // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        warehouseZip: freezed == warehouseZip
+            ? _value.warehouseZip
+            : warehouseZip // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        warehouseCountry: freezed == warehouseCountry
+            ? _value.warehouseCountry
+            : warehouseCountry // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        warehousePhone: freezed == warehousePhone
+            ? _value.warehousePhone
+            : warehousePhone // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        warehouseEmail: freezed == warehouseEmail
+            ? _value.warehouseEmail
+            : warehouseEmail // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        feedSource: freezed == feedSource
+            ? _value.feedSource
+            : feedSource // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        shopUrl: freezed == shopUrl
+            ? _value.shopUrl
+            : shopUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -240,6 +352,14 @@ class _$SupplierImpl implements _Supplier {
     this.returnShippingCost,
     this.restockingFeePercent,
     this.acceptsNoReasonReturns = false,
+    this.warehouseAddress,
+    this.warehouseCity,
+    this.warehouseZip,
+    this.warehouseCountry,
+    this.warehousePhone,
+    this.warehouseEmail,
+    this.feedSource,
+    this.shopUrl,
   });
 
   factory _$SupplierImpl.fromJson(Map<String, dynamic> json) =>
@@ -275,9 +395,33 @@ class _$SupplierImpl implements _Supplier {
   @JsonKey()
   final bool acceptsNoReasonReturns;
 
+  /// Warehouse/return address where customers ship returns directly
+  @override
+  final String? warehouseAddress;
+  @override
+  final String? warehouseCity;
+  @override
+  final String? warehouseZip;
+  @override
+  final String? warehouseCountry;
+
+  /// Contact info for the warehouse
+  @override
+  final String? warehousePhone;
+  @override
+  final String? warehouseEmail;
+
+  /// The feed/source used to connect to this supplier (e.g. 'cj_api', 'api2cart_shopify', 'manual')
+  @override
+  final String? feedSource;
+
+  /// External shop URL or identifier
+  @override
+  final String? shopUrl;
+
   @override
   String toString() {
-    return 'Supplier(id: $id, name: $name, platformType: $platformType, countryCode: $countryCode, rating: $rating, returnWindowDays: $returnWindowDays, returnShippingCost: $returnShippingCost, restockingFeePercent: $restockingFeePercent, acceptsNoReasonReturns: $acceptsNoReasonReturns)';
+    return 'Supplier(id: $id, name: $name, platformType: $platformType, countryCode: $countryCode, rating: $rating, returnWindowDays: $returnWindowDays, returnShippingCost: $returnShippingCost, restockingFeePercent: $restockingFeePercent, acceptsNoReasonReturns: $acceptsNoReasonReturns, warehouseAddress: $warehouseAddress, warehouseCity: $warehouseCity, warehouseZip: $warehouseZip, warehouseCountry: $warehouseCountry, warehousePhone: $warehousePhone, warehouseEmail: $warehouseEmail, feedSource: $feedSource, shopUrl: $shopUrl)';
   }
 
   @override
@@ -299,7 +443,22 @@ class _$SupplierImpl implements _Supplier {
             (identical(other.restockingFeePercent, restockingFeePercent) ||
                 other.restockingFeePercent == restockingFeePercent) &&
             (identical(other.acceptsNoReasonReturns, acceptsNoReasonReturns) ||
-                other.acceptsNoReasonReturns == acceptsNoReasonReturns));
+                other.acceptsNoReasonReturns == acceptsNoReasonReturns) &&
+            (identical(other.warehouseAddress, warehouseAddress) ||
+                other.warehouseAddress == warehouseAddress) &&
+            (identical(other.warehouseCity, warehouseCity) ||
+                other.warehouseCity == warehouseCity) &&
+            (identical(other.warehouseZip, warehouseZip) ||
+                other.warehouseZip == warehouseZip) &&
+            (identical(other.warehouseCountry, warehouseCountry) ||
+                other.warehouseCountry == warehouseCountry) &&
+            (identical(other.warehousePhone, warehousePhone) ||
+                other.warehousePhone == warehousePhone) &&
+            (identical(other.warehouseEmail, warehouseEmail) ||
+                other.warehouseEmail == warehouseEmail) &&
+            (identical(other.feedSource, feedSource) ||
+                other.feedSource == feedSource) &&
+            (identical(other.shopUrl, shopUrl) || other.shopUrl == shopUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -315,6 +474,14 @@ class _$SupplierImpl implements _Supplier {
     returnShippingCost,
     restockingFeePercent,
     acceptsNoReasonReturns,
+    warehouseAddress,
+    warehouseCity,
+    warehouseZip,
+    warehouseCountry,
+    warehousePhone,
+    warehouseEmail,
+    feedSource,
+    shopUrl,
   );
 
   /// Create a copy of Supplier
@@ -342,6 +509,14 @@ abstract class _Supplier implements Supplier {
     final double? returnShippingCost,
     final double? restockingFeePercent,
     final bool acceptsNoReasonReturns,
+    final String? warehouseAddress,
+    final String? warehouseCity,
+    final String? warehouseZip,
+    final String? warehouseCountry,
+    final String? warehousePhone,
+    final String? warehouseEmail,
+    final String? feedSource,
+    final String? shopUrl,
   }) = _$SupplierImpl;
 
   factory _Supplier.fromJson(Map<String, dynamic> json) =
@@ -375,6 +550,30 @@ abstract class _Supplier implements Supplier {
   /// Whether supplier accepts no-reason returns.
   @override
   bool get acceptsNoReasonReturns;
+
+  /// Warehouse/return address where customers ship returns directly
+  @override
+  String? get warehouseAddress;
+  @override
+  String? get warehouseCity;
+  @override
+  String? get warehouseZip;
+  @override
+  String? get warehouseCountry;
+
+  /// Contact info for the warehouse
+  @override
+  String? get warehousePhone;
+  @override
+  String? get warehouseEmail;
+
+  /// The feed/source used to connect to this supplier (e.g. 'cj_api', 'api2cart_shopify', 'manual')
+  @override
+  String? get feedSource;
+
+  /// External shop URL or identifier
+  @override
+  String? get shopUrl;
 
   /// Create a copy of Supplier
   /// with the given fields replaced by the non-null parameter values.

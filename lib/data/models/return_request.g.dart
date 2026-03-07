@@ -22,6 +22,15 @@ _$ReturnRequestImpl _$$ReturnRequestImplFromJson(Map<String, dynamic> json) =>
       resolvedAt: json['resolvedAt'] == null
           ? null
           : DateTime.parse(json['resolvedAt'] as String),
+      returnToAddress: json['returnToAddress'] as String?,
+      returnToCity: json['returnToCity'] as String?,
+      returnToCountry: json['returnToCountry'] as String?,
+      returnTrackingNumber: json['returnTrackingNumber'] as String?,
+      returnCarrier: json['returnCarrier'] as String?,
+      supplierId: json['supplierId'] as String?,
+      productId: json['productId'] as String?,
+      sourcePlatformId: json['sourcePlatformId'] as String?,
+      targetPlatformId: json['targetPlatformId'] as String?,
     );
 
 Map<String, dynamic> _$$ReturnRequestImplToJson(_$ReturnRequestImpl instance) =>
@@ -36,6 +45,15 @@ Map<String, dynamic> _$$ReturnRequestImplToJson(_$ReturnRequestImpl instance) =>
       'restockingFee': instance.restockingFee,
       'requestedAt': instance.requestedAt?.toIso8601String(),
       'resolvedAt': instance.resolvedAt?.toIso8601String(),
+      'returnToAddress': instance.returnToAddress,
+      'returnToCity': instance.returnToCity,
+      'returnToCountry': instance.returnToCountry,
+      'returnTrackingNumber': instance.returnTrackingNumber,
+      'returnCarrier': instance.returnCarrier,
+      'supplierId': instance.supplierId,
+      'productId': instance.productId,
+      'sourcePlatformId': instance.sourcePlatformId,
+      'targetPlatformId': instance.targetPlatformId,
     };
 
 const _$ReturnReasonEnumMap = {

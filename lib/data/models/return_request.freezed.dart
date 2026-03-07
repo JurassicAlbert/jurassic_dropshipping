@@ -32,6 +32,27 @@ mixin _$ReturnRequest {
   DateTime? get requestedAt => throw _privateConstructorUsedError;
   DateTime? get resolvedAt => throw _privateConstructorUsedError;
 
+  /// Customer sends return to this address (supplier's warehouse)
+  String? get returnToAddress => throw _privateConstructorUsedError;
+  String? get returnToCity => throw _privateConstructorUsedError;
+  String? get returnToCountry => throw _privateConstructorUsedError;
+
+  /// Tracking number for the return shipment (customer → supplier)
+  String? get returnTrackingNumber => throw _privateConstructorUsedError;
+  String? get returnCarrier => throw _privateConstructorUsedError;
+
+  /// The supplier who receives the return
+  String? get supplierId => throw _privateConstructorUsedError;
+
+  /// Product that was returned
+  String? get productId => throw _privateConstructorUsedError;
+
+  /// Which feed/source platform the original order came through
+  String? get sourcePlatformId => throw _privateConstructorUsedError;
+
+  /// Which marketplace the customer bought from
+  String? get targetPlatformId => throw _privateConstructorUsedError;
+
   /// Serializes this ReturnRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -60,6 +81,15 @@ abstract class $ReturnRequestCopyWith<$Res> {
     double? restockingFee,
     DateTime? requestedAt,
     DateTime? resolvedAt,
+    String? returnToAddress,
+    String? returnToCity,
+    String? returnToCountry,
+    String? returnTrackingNumber,
+    String? returnCarrier,
+    String? supplierId,
+    String? productId,
+    String? sourcePlatformId,
+    String? targetPlatformId,
   });
 }
 
@@ -88,6 +118,15 @@ class _$ReturnRequestCopyWithImpl<$Res, $Val extends ReturnRequest>
     Object? restockingFee = freezed,
     Object? requestedAt = freezed,
     Object? resolvedAt = freezed,
+    Object? returnToAddress = freezed,
+    Object? returnToCity = freezed,
+    Object? returnToCountry = freezed,
+    Object? returnTrackingNumber = freezed,
+    Object? returnCarrier = freezed,
+    Object? supplierId = freezed,
+    Object? productId = freezed,
+    Object? sourcePlatformId = freezed,
+    Object? targetPlatformId = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -131,6 +170,42 @@ class _$ReturnRequestCopyWithImpl<$Res, $Val extends ReturnRequest>
                 ? _value.resolvedAt
                 : resolvedAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
+            returnToAddress: freezed == returnToAddress
+                ? _value.returnToAddress
+                : returnToAddress // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            returnToCity: freezed == returnToCity
+                ? _value.returnToCity
+                : returnToCity // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            returnToCountry: freezed == returnToCountry
+                ? _value.returnToCountry
+                : returnToCountry // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            returnTrackingNumber: freezed == returnTrackingNumber
+                ? _value.returnTrackingNumber
+                : returnTrackingNumber // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            returnCarrier: freezed == returnCarrier
+                ? _value.returnCarrier
+                : returnCarrier // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            supplierId: freezed == supplierId
+                ? _value.supplierId
+                : supplierId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            productId: freezed == productId
+                ? _value.productId
+                : productId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            sourcePlatformId: freezed == sourcePlatformId
+                ? _value.sourcePlatformId
+                : sourcePlatformId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            targetPlatformId: freezed == targetPlatformId
+                ? _value.targetPlatformId
+                : targetPlatformId // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -157,6 +232,15 @@ abstract class _$$ReturnRequestImplCopyWith<$Res>
     double? restockingFee,
     DateTime? requestedAt,
     DateTime? resolvedAt,
+    String? returnToAddress,
+    String? returnToCity,
+    String? returnToCountry,
+    String? returnTrackingNumber,
+    String? returnCarrier,
+    String? supplierId,
+    String? productId,
+    String? sourcePlatformId,
+    String? targetPlatformId,
   });
 }
 
@@ -184,6 +268,15 @@ class __$$ReturnRequestImplCopyWithImpl<$Res>
     Object? restockingFee = freezed,
     Object? requestedAt = freezed,
     Object? resolvedAt = freezed,
+    Object? returnToAddress = freezed,
+    Object? returnToCity = freezed,
+    Object? returnToCountry = freezed,
+    Object? returnTrackingNumber = freezed,
+    Object? returnCarrier = freezed,
+    Object? supplierId = freezed,
+    Object? productId = freezed,
+    Object? sourcePlatformId = freezed,
+    Object? targetPlatformId = freezed,
   }) {
     return _then(
       _$ReturnRequestImpl(
@@ -227,6 +320,42 @@ class __$$ReturnRequestImplCopyWithImpl<$Res>
             ? _value.resolvedAt
             : resolvedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        returnToAddress: freezed == returnToAddress
+            ? _value.returnToAddress
+            : returnToAddress // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        returnToCity: freezed == returnToCity
+            ? _value.returnToCity
+            : returnToCity // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        returnToCountry: freezed == returnToCountry
+            ? _value.returnToCountry
+            : returnToCountry // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        returnTrackingNumber: freezed == returnTrackingNumber
+            ? _value.returnTrackingNumber
+            : returnTrackingNumber // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        returnCarrier: freezed == returnCarrier
+            ? _value.returnCarrier
+            : returnCarrier // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        supplierId: freezed == supplierId
+            ? _value.supplierId
+            : supplierId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        productId: freezed == productId
+            ? _value.productId
+            : productId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        sourcePlatformId: freezed == sourcePlatformId
+            ? _value.sourcePlatformId
+            : sourcePlatformId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        targetPlatformId: freezed == targetPlatformId
+            ? _value.targetPlatformId
+            : targetPlatformId // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -246,6 +375,15 @@ class _$ReturnRequestImpl implements _ReturnRequest {
     this.restockingFee,
     this.requestedAt,
     this.resolvedAt,
+    this.returnToAddress,
+    this.returnToCity,
+    this.returnToCountry,
+    this.returnTrackingNumber,
+    this.returnCarrier,
+    this.supplierId,
+    this.productId,
+    this.sourcePlatformId,
+    this.targetPlatformId,
   });
 
   factory _$ReturnRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -272,9 +410,39 @@ class _$ReturnRequestImpl implements _ReturnRequest {
   @override
   final DateTime? resolvedAt;
 
+  /// Customer sends return to this address (supplier's warehouse)
+  @override
+  final String? returnToAddress;
+  @override
+  final String? returnToCity;
+  @override
+  final String? returnToCountry;
+
+  /// Tracking number for the return shipment (customer → supplier)
+  @override
+  final String? returnTrackingNumber;
+  @override
+  final String? returnCarrier;
+
+  /// The supplier who receives the return
+  @override
+  final String? supplierId;
+
+  /// Product that was returned
+  @override
+  final String? productId;
+
+  /// Which feed/source platform the original order came through
+  @override
+  final String? sourcePlatformId;
+
+  /// Which marketplace the customer bought from
+  @override
+  final String? targetPlatformId;
+
   @override
   String toString() {
-    return 'ReturnRequest(id: $id, orderId: $orderId, reason: $reason, status: $status, notes: $notes, refundAmount: $refundAmount, returnShippingCost: $returnShippingCost, restockingFee: $restockingFee, requestedAt: $requestedAt, resolvedAt: $resolvedAt)';
+    return 'ReturnRequest(id: $id, orderId: $orderId, reason: $reason, status: $status, notes: $notes, refundAmount: $refundAmount, returnShippingCost: $returnShippingCost, restockingFee: $restockingFee, requestedAt: $requestedAt, resolvedAt: $resolvedAt, returnToAddress: $returnToAddress, returnToCity: $returnToCity, returnToCountry: $returnToCountry, returnTrackingNumber: $returnTrackingNumber, returnCarrier: $returnCarrier, supplierId: $supplierId, productId: $productId, sourcePlatformId: $sourcePlatformId, targetPlatformId: $targetPlatformId)';
   }
 
   @override
@@ -296,12 +464,30 @@ class _$ReturnRequestImpl implements _ReturnRequest {
             (identical(other.requestedAt, requestedAt) ||
                 other.requestedAt == requestedAt) &&
             (identical(other.resolvedAt, resolvedAt) ||
-                other.resolvedAt == resolvedAt));
+                other.resolvedAt == resolvedAt) &&
+            (identical(other.returnToAddress, returnToAddress) ||
+                other.returnToAddress == returnToAddress) &&
+            (identical(other.returnToCity, returnToCity) ||
+                other.returnToCity == returnToCity) &&
+            (identical(other.returnToCountry, returnToCountry) ||
+                other.returnToCountry == returnToCountry) &&
+            (identical(other.returnTrackingNumber, returnTrackingNumber) ||
+                other.returnTrackingNumber == returnTrackingNumber) &&
+            (identical(other.returnCarrier, returnCarrier) ||
+                other.returnCarrier == returnCarrier) &&
+            (identical(other.supplierId, supplierId) ||
+                other.supplierId == supplierId) &&
+            (identical(other.productId, productId) ||
+                other.productId == productId) &&
+            (identical(other.sourcePlatformId, sourcePlatformId) ||
+                other.sourcePlatformId == sourcePlatformId) &&
+            (identical(other.targetPlatformId, targetPlatformId) ||
+                other.targetPlatformId == targetPlatformId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     orderId,
@@ -313,7 +499,16 @@ class _$ReturnRequestImpl implements _ReturnRequest {
     restockingFee,
     requestedAt,
     resolvedAt,
-  );
+    returnToAddress,
+    returnToCity,
+    returnToCountry,
+    returnTrackingNumber,
+    returnCarrier,
+    supplierId,
+    productId,
+    sourcePlatformId,
+    targetPlatformId,
+  ]);
 
   /// Create a copy of ReturnRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -341,6 +536,15 @@ abstract class _ReturnRequest implements ReturnRequest {
     final double? restockingFee,
     final DateTime? requestedAt,
     final DateTime? resolvedAt,
+    final String? returnToAddress,
+    final String? returnToCity,
+    final String? returnToCountry,
+    final String? returnTrackingNumber,
+    final String? returnCarrier,
+    final String? supplierId,
+    final String? productId,
+    final String? sourcePlatformId,
+    final String? targetPlatformId,
   }) = _$ReturnRequestImpl;
 
   factory _ReturnRequest.fromJson(Map<String, dynamic> json) =
@@ -366,6 +570,36 @@ abstract class _ReturnRequest implements ReturnRequest {
   DateTime? get requestedAt;
   @override
   DateTime? get resolvedAt;
+
+  /// Customer sends return to this address (supplier's warehouse)
+  @override
+  String? get returnToAddress;
+  @override
+  String? get returnToCity;
+  @override
+  String? get returnToCountry;
+
+  /// Tracking number for the return shipment (customer → supplier)
+  @override
+  String? get returnTrackingNumber;
+  @override
+  String? get returnCarrier;
+
+  /// The supplier who receives the return
+  @override
+  String? get supplierId;
+
+  /// Product that was returned
+  @override
+  String? get productId;
+
+  /// Which feed/source platform the original order came through
+  @override
+  String? get sourcePlatformId;
+
+  /// Which marketplace the customer bought from
+  @override
+  String? get targetPlatformId;
 
   /// Create a copy of ReturnRequest
   /// with the given fields replaced by the non-null parameter values.

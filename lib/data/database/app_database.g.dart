@@ -4183,6 +4183,94 @@ class $SuppliersTable extends Suppliers
         ),
         defaultValue: const Constant(false),
       );
+  static const VerificationMeta _warehouseAddressMeta = const VerificationMeta(
+    'warehouseAddress',
+  );
+  @override
+  late final GeneratedColumn<String> warehouseAddress = GeneratedColumn<String>(
+    'warehouse_address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _warehouseCityMeta = const VerificationMeta(
+    'warehouseCity',
+  );
+  @override
+  late final GeneratedColumn<String> warehouseCity = GeneratedColumn<String>(
+    'warehouse_city',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _warehouseZipMeta = const VerificationMeta(
+    'warehouseZip',
+  );
+  @override
+  late final GeneratedColumn<String> warehouseZip = GeneratedColumn<String>(
+    'warehouse_zip',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _warehouseCountryMeta = const VerificationMeta(
+    'warehouseCountry',
+  );
+  @override
+  late final GeneratedColumn<String> warehouseCountry = GeneratedColumn<String>(
+    'warehouse_country',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _warehousePhoneMeta = const VerificationMeta(
+    'warehousePhone',
+  );
+  @override
+  late final GeneratedColumn<String> warehousePhone = GeneratedColumn<String>(
+    'warehouse_phone',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _warehouseEmailMeta = const VerificationMeta(
+    'warehouseEmail',
+  );
+  @override
+  late final GeneratedColumn<String> warehouseEmail = GeneratedColumn<String>(
+    'warehouse_email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _feedSourceMeta = const VerificationMeta(
+    'feedSource',
+  );
+  @override
+  late final GeneratedColumn<String> feedSource = GeneratedColumn<String>(
+    'feed_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _shopUrlMeta = const VerificationMeta(
+    'shopUrl',
+  );
+  @override
+  late final GeneratedColumn<String> shopUrl = GeneratedColumn<String>(
+    'shop_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4195,6 +4283,14 @@ class $SuppliersTable extends Suppliers
     returnShippingCost,
     restockingFeePercent,
     acceptsNoReasonReturns,
+    warehouseAddress,
+    warehouseCity,
+    warehouseZip,
+    warehouseCountry,
+    warehousePhone,
+    warehouseEmail,
+    feedSource,
+    shopUrl,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4289,6 +4385,72 @@ class $SuppliersTable extends Suppliers
         ),
       );
     }
+    if (data.containsKey('warehouse_address')) {
+      context.handle(
+        _warehouseAddressMeta,
+        warehouseAddress.isAcceptableOrUnknown(
+          data['warehouse_address']!,
+          _warehouseAddressMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warehouse_city')) {
+      context.handle(
+        _warehouseCityMeta,
+        warehouseCity.isAcceptableOrUnknown(
+          data['warehouse_city']!,
+          _warehouseCityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warehouse_zip')) {
+      context.handle(
+        _warehouseZipMeta,
+        warehouseZip.isAcceptableOrUnknown(
+          data['warehouse_zip']!,
+          _warehouseZipMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warehouse_country')) {
+      context.handle(
+        _warehouseCountryMeta,
+        warehouseCountry.isAcceptableOrUnknown(
+          data['warehouse_country']!,
+          _warehouseCountryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warehouse_phone')) {
+      context.handle(
+        _warehousePhoneMeta,
+        warehousePhone.isAcceptableOrUnknown(
+          data['warehouse_phone']!,
+          _warehousePhoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('warehouse_email')) {
+      context.handle(
+        _warehouseEmailMeta,
+        warehouseEmail.isAcceptableOrUnknown(
+          data['warehouse_email']!,
+          _warehouseEmailMeta,
+        ),
+      );
+    }
+    if (data.containsKey('feed_source')) {
+      context.handle(
+        _feedSourceMeta,
+        feedSource.isAcceptableOrUnknown(data['feed_source']!, _feedSourceMeta),
+      );
+    }
+    if (data.containsKey('shop_url')) {
+      context.handle(
+        _shopUrlMeta,
+        shopUrl.isAcceptableOrUnknown(data['shop_url']!, _shopUrlMeta),
+      );
+    }
     return context;
   }
 
@@ -4338,6 +4500,38 @@ class $SuppliersTable extends Suppliers
         DriftSqlType.bool,
         data['${effectivePrefix}accepts_no_reason_returns'],
       )!,
+      warehouseAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warehouse_address'],
+      ),
+      warehouseCity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warehouse_city'],
+      ),
+      warehouseZip: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warehouse_zip'],
+      ),
+      warehouseCountry: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warehouse_country'],
+      ),
+      warehousePhone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warehouse_phone'],
+      ),
+      warehouseEmail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warehouse_email'],
+      ),
+      feedSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}feed_source'],
+      ),
+      shopUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shop_url'],
+      ),
     );
   }
 
@@ -4358,6 +4552,14 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
   final double? returnShippingCost;
   final double? restockingFeePercent;
   final bool acceptsNoReasonReturns;
+  final String? warehouseAddress;
+  final String? warehouseCity;
+  final String? warehouseZip;
+  final String? warehouseCountry;
+  final String? warehousePhone;
+  final String? warehouseEmail;
+  final String? feedSource;
+  final String? shopUrl;
   const SupplierRow({
     required this.id,
     required this.supplierId,
@@ -4369,6 +4571,14 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
     this.returnShippingCost,
     this.restockingFeePercent,
     required this.acceptsNoReasonReturns,
+    this.warehouseAddress,
+    this.warehouseCity,
+    this.warehouseZip,
+    this.warehouseCountry,
+    this.warehousePhone,
+    this.warehouseEmail,
+    this.feedSource,
+    this.shopUrl,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4393,6 +4603,30 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
       map['restocking_fee_percent'] = Variable<double>(restockingFeePercent);
     }
     map['accepts_no_reason_returns'] = Variable<bool>(acceptsNoReasonReturns);
+    if (!nullToAbsent || warehouseAddress != null) {
+      map['warehouse_address'] = Variable<String>(warehouseAddress);
+    }
+    if (!nullToAbsent || warehouseCity != null) {
+      map['warehouse_city'] = Variable<String>(warehouseCity);
+    }
+    if (!nullToAbsent || warehouseZip != null) {
+      map['warehouse_zip'] = Variable<String>(warehouseZip);
+    }
+    if (!nullToAbsent || warehouseCountry != null) {
+      map['warehouse_country'] = Variable<String>(warehouseCountry);
+    }
+    if (!nullToAbsent || warehousePhone != null) {
+      map['warehouse_phone'] = Variable<String>(warehousePhone);
+    }
+    if (!nullToAbsent || warehouseEmail != null) {
+      map['warehouse_email'] = Variable<String>(warehouseEmail);
+    }
+    if (!nullToAbsent || feedSource != null) {
+      map['feed_source'] = Variable<String>(feedSource);
+    }
+    if (!nullToAbsent || shopUrl != null) {
+      map['shop_url'] = Variable<String>(shopUrl);
+    }
     return map;
   }
 
@@ -4418,6 +4652,30 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
           ? const Value.absent()
           : Value(restockingFeePercent),
       acceptsNoReasonReturns: Value(acceptsNoReasonReturns),
+      warehouseAddress: warehouseAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warehouseAddress),
+      warehouseCity: warehouseCity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warehouseCity),
+      warehouseZip: warehouseZip == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warehouseZip),
+      warehouseCountry: warehouseCountry == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warehouseCountry),
+      warehousePhone: warehousePhone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warehousePhone),
+      warehouseEmail: warehouseEmail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(warehouseEmail),
+      feedSource: feedSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(feedSource),
+      shopUrl: shopUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shopUrl),
     );
   }
 
@@ -4443,6 +4701,14 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
       acceptsNoReasonReturns: serializer.fromJson<bool>(
         json['acceptsNoReasonReturns'],
       ),
+      warehouseAddress: serializer.fromJson<String?>(json['warehouseAddress']),
+      warehouseCity: serializer.fromJson<String?>(json['warehouseCity']),
+      warehouseZip: serializer.fromJson<String?>(json['warehouseZip']),
+      warehouseCountry: serializer.fromJson<String?>(json['warehouseCountry']),
+      warehousePhone: serializer.fromJson<String?>(json['warehousePhone']),
+      warehouseEmail: serializer.fromJson<String?>(json['warehouseEmail']),
+      feedSource: serializer.fromJson<String?>(json['feedSource']),
+      shopUrl: serializer.fromJson<String?>(json['shopUrl']),
     );
   }
   @override
@@ -4459,6 +4725,14 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
       'returnShippingCost': serializer.toJson<double?>(returnShippingCost),
       'restockingFeePercent': serializer.toJson<double?>(restockingFeePercent),
       'acceptsNoReasonReturns': serializer.toJson<bool>(acceptsNoReasonReturns),
+      'warehouseAddress': serializer.toJson<String?>(warehouseAddress),
+      'warehouseCity': serializer.toJson<String?>(warehouseCity),
+      'warehouseZip': serializer.toJson<String?>(warehouseZip),
+      'warehouseCountry': serializer.toJson<String?>(warehouseCountry),
+      'warehousePhone': serializer.toJson<String?>(warehousePhone),
+      'warehouseEmail': serializer.toJson<String?>(warehouseEmail),
+      'feedSource': serializer.toJson<String?>(feedSource),
+      'shopUrl': serializer.toJson<String?>(shopUrl),
     };
   }
 
@@ -4473,6 +4747,14 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
     Value<double?> returnShippingCost = const Value.absent(),
     Value<double?> restockingFeePercent = const Value.absent(),
     bool? acceptsNoReasonReturns,
+    Value<String?> warehouseAddress = const Value.absent(),
+    Value<String?> warehouseCity = const Value.absent(),
+    Value<String?> warehouseZip = const Value.absent(),
+    Value<String?> warehouseCountry = const Value.absent(),
+    Value<String?> warehousePhone = const Value.absent(),
+    Value<String?> warehouseEmail = const Value.absent(),
+    Value<String?> feedSource = const Value.absent(),
+    Value<String?> shopUrl = const Value.absent(),
   }) => SupplierRow(
     id: id ?? this.id,
     supplierId: supplierId ?? this.supplierId,
@@ -4491,6 +4773,24 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
         : this.restockingFeePercent,
     acceptsNoReasonReturns:
         acceptsNoReasonReturns ?? this.acceptsNoReasonReturns,
+    warehouseAddress: warehouseAddress.present
+        ? warehouseAddress.value
+        : this.warehouseAddress,
+    warehouseCity: warehouseCity.present
+        ? warehouseCity.value
+        : this.warehouseCity,
+    warehouseZip: warehouseZip.present ? warehouseZip.value : this.warehouseZip,
+    warehouseCountry: warehouseCountry.present
+        ? warehouseCountry.value
+        : this.warehouseCountry,
+    warehousePhone: warehousePhone.present
+        ? warehousePhone.value
+        : this.warehousePhone,
+    warehouseEmail: warehouseEmail.present
+        ? warehouseEmail.value
+        : this.warehouseEmail,
+    feedSource: feedSource.present ? feedSource.value : this.feedSource,
+    shopUrl: shopUrl.present ? shopUrl.value : this.shopUrl,
   );
   SupplierRow copyWithCompanion(SuppliersCompanion data) {
     return SupplierRow(
@@ -4518,6 +4818,28 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
       acceptsNoReasonReturns: data.acceptsNoReasonReturns.present
           ? data.acceptsNoReasonReturns.value
           : this.acceptsNoReasonReturns,
+      warehouseAddress: data.warehouseAddress.present
+          ? data.warehouseAddress.value
+          : this.warehouseAddress,
+      warehouseCity: data.warehouseCity.present
+          ? data.warehouseCity.value
+          : this.warehouseCity,
+      warehouseZip: data.warehouseZip.present
+          ? data.warehouseZip.value
+          : this.warehouseZip,
+      warehouseCountry: data.warehouseCountry.present
+          ? data.warehouseCountry.value
+          : this.warehouseCountry,
+      warehousePhone: data.warehousePhone.present
+          ? data.warehousePhone.value
+          : this.warehousePhone,
+      warehouseEmail: data.warehouseEmail.present
+          ? data.warehouseEmail.value
+          : this.warehouseEmail,
+      feedSource: data.feedSource.present
+          ? data.feedSource.value
+          : this.feedSource,
+      shopUrl: data.shopUrl.present ? data.shopUrl.value : this.shopUrl,
     );
   }
 
@@ -4533,7 +4855,15 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
           ..write('returnWindowDays: $returnWindowDays, ')
           ..write('returnShippingCost: $returnShippingCost, ')
           ..write('restockingFeePercent: $restockingFeePercent, ')
-          ..write('acceptsNoReasonReturns: $acceptsNoReasonReturns')
+          ..write('acceptsNoReasonReturns: $acceptsNoReasonReturns, ')
+          ..write('warehouseAddress: $warehouseAddress, ')
+          ..write('warehouseCity: $warehouseCity, ')
+          ..write('warehouseZip: $warehouseZip, ')
+          ..write('warehouseCountry: $warehouseCountry, ')
+          ..write('warehousePhone: $warehousePhone, ')
+          ..write('warehouseEmail: $warehouseEmail, ')
+          ..write('feedSource: $feedSource, ')
+          ..write('shopUrl: $shopUrl')
           ..write(')'))
         .toString();
   }
@@ -4550,6 +4880,14 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
     returnShippingCost,
     restockingFeePercent,
     acceptsNoReasonReturns,
+    warehouseAddress,
+    warehouseCity,
+    warehouseZip,
+    warehouseCountry,
+    warehousePhone,
+    warehouseEmail,
+    feedSource,
+    shopUrl,
   );
   @override
   bool operator ==(Object other) =>
@@ -4564,7 +4902,15 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
           other.returnWindowDays == this.returnWindowDays &&
           other.returnShippingCost == this.returnShippingCost &&
           other.restockingFeePercent == this.restockingFeePercent &&
-          other.acceptsNoReasonReturns == this.acceptsNoReasonReturns);
+          other.acceptsNoReasonReturns == this.acceptsNoReasonReturns &&
+          other.warehouseAddress == this.warehouseAddress &&
+          other.warehouseCity == this.warehouseCity &&
+          other.warehouseZip == this.warehouseZip &&
+          other.warehouseCountry == this.warehouseCountry &&
+          other.warehousePhone == this.warehousePhone &&
+          other.warehouseEmail == this.warehouseEmail &&
+          other.feedSource == this.feedSource &&
+          other.shopUrl == this.shopUrl);
 }
 
 class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
@@ -4578,6 +4924,14 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
   final Value<double?> returnShippingCost;
   final Value<double?> restockingFeePercent;
   final Value<bool> acceptsNoReasonReturns;
+  final Value<String?> warehouseAddress;
+  final Value<String?> warehouseCity;
+  final Value<String?> warehouseZip;
+  final Value<String?> warehouseCountry;
+  final Value<String?> warehousePhone;
+  final Value<String?> warehouseEmail;
+  final Value<String?> feedSource;
+  final Value<String?> shopUrl;
   const SuppliersCompanion({
     this.id = const Value.absent(),
     this.supplierId = const Value.absent(),
@@ -4589,6 +4943,14 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     this.returnShippingCost = const Value.absent(),
     this.restockingFeePercent = const Value.absent(),
     this.acceptsNoReasonReturns = const Value.absent(),
+    this.warehouseAddress = const Value.absent(),
+    this.warehouseCity = const Value.absent(),
+    this.warehouseZip = const Value.absent(),
+    this.warehouseCountry = const Value.absent(),
+    this.warehousePhone = const Value.absent(),
+    this.warehouseEmail = const Value.absent(),
+    this.feedSource = const Value.absent(),
+    this.shopUrl = const Value.absent(),
   });
   SuppliersCompanion.insert({
     this.id = const Value.absent(),
@@ -4601,6 +4963,14 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     this.returnShippingCost = const Value.absent(),
     this.restockingFeePercent = const Value.absent(),
     this.acceptsNoReasonReturns = const Value.absent(),
+    this.warehouseAddress = const Value.absent(),
+    this.warehouseCity = const Value.absent(),
+    this.warehouseZip = const Value.absent(),
+    this.warehouseCountry = const Value.absent(),
+    this.warehousePhone = const Value.absent(),
+    this.warehouseEmail = const Value.absent(),
+    this.feedSource = const Value.absent(),
+    this.shopUrl = const Value.absent(),
   }) : supplierId = Value(supplierId),
        name = Value(name),
        platformType = Value(platformType);
@@ -4615,6 +4985,14 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     Expression<double>? returnShippingCost,
     Expression<double>? restockingFeePercent,
     Expression<bool>? acceptsNoReasonReturns,
+    Expression<String>? warehouseAddress,
+    Expression<String>? warehouseCity,
+    Expression<String>? warehouseZip,
+    Expression<String>? warehouseCountry,
+    Expression<String>? warehousePhone,
+    Expression<String>? warehouseEmail,
+    Expression<String>? feedSource,
+    Expression<String>? shopUrl,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -4630,6 +5008,14 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
         'restocking_fee_percent': restockingFeePercent,
       if (acceptsNoReasonReturns != null)
         'accepts_no_reason_returns': acceptsNoReasonReturns,
+      if (warehouseAddress != null) 'warehouse_address': warehouseAddress,
+      if (warehouseCity != null) 'warehouse_city': warehouseCity,
+      if (warehouseZip != null) 'warehouse_zip': warehouseZip,
+      if (warehouseCountry != null) 'warehouse_country': warehouseCountry,
+      if (warehousePhone != null) 'warehouse_phone': warehousePhone,
+      if (warehouseEmail != null) 'warehouse_email': warehouseEmail,
+      if (feedSource != null) 'feed_source': feedSource,
+      if (shopUrl != null) 'shop_url': shopUrl,
     });
   }
 
@@ -4644,6 +5030,14 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     Value<double?>? returnShippingCost,
     Value<double?>? restockingFeePercent,
     Value<bool>? acceptsNoReasonReturns,
+    Value<String?>? warehouseAddress,
+    Value<String?>? warehouseCity,
+    Value<String?>? warehouseZip,
+    Value<String?>? warehouseCountry,
+    Value<String?>? warehousePhone,
+    Value<String?>? warehouseEmail,
+    Value<String?>? feedSource,
+    Value<String?>? shopUrl,
   }) {
     return SuppliersCompanion(
       id: id ?? this.id,
@@ -4657,6 +5051,14 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
       restockingFeePercent: restockingFeePercent ?? this.restockingFeePercent,
       acceptsNoReasonReturns:
           acceptsNoReasonReturns ?? this.acceptsNoReasonReturns,
+      warehouseAddress: warehouseAddress ?? this.warehouseAddress,
+      warehouseCity: warehouseCity ?? this.warehouseCity,
+      warehouseZip: warehouseZip ?? this.warehouseZip,
+      warehouseCountry: warehouseCountry ?? this.warehouseCountry,
+      warehousePhone: warehousePhone ?? this.warehousePhone,
+      warehouseEmail: warehouseEmail ?? this.warehouseEmail,
+      feedSource: feedSource ?? this.feedSource,
+      shopUrl: shopUrl ?? this.shopUrl,
     );
   }
 
@@ -4697,6 +5099,30 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
         acceptsNoReasonReturns.value,
       );
     }
+    if (warehouseAddress.present) {
+      map['warehouse_address'] = Variable<String>(warehouseAddress.value);
+    }
+    if (warehouseCity.present) {
+      map['warehouse_city'] = Variable<String>(warehouseCity.value);
+    }
+    if (warehouseZip.present) {
+      map['warehouse_zip'] = Variable<String>(warehouseZip.value);
+    }
+    if (warehouseCountry.present) {
+      map['warehouse_country'] = Variable<String>(warehouseCountry.value);
+    }
+    if (warehousePhone.present) {
+      map['warehouse_phone'] = Variable<String>(warehousePhone.value);
+    }
+    if (warehouseEmail.present) {
+      map['warehouse_email'] = Variable<String>(warehouseEmail.value);
+    }
+    if (feedSource.present) {
+      map['feed_source'] = Variable<String>(feedSource.value);
+    }
+    if (shopUrl.present) {
+      map['shop_url'] = Variable<String>(shopUrl.value);
+    }
     return map;
   }
 
@@ -4712,7 +5138,15 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
           ..write('returnWindowDays: $returnWindowDays, ')
           ..write('returnShippingCost: $returnShippingCost, ')
           ..write('restockingFeePercent: $restockingFeePercent, ')
-          ..write('acceptsNoReasonReturns: $acceptsNoReasonReturns')
+          ..write('acceptsNoReasonReturns: $acceptsNoReasonReturns, ')
+          ..write('warehouseAddress: $warehouseAddress, ')
+          ..write('warehouseCity: $warehouseCity, ')
+          ..write('warehouseZip: $warehouseZip, ')
+          ..write('warehouseCountry: $warehouseCountry, ')
+          ..write('warehousePhone: $warehousePhone, ')
+          ..write('warehouseEmail: $warehouseEmail, ')
+          ..write('feedSource: $feedSource, ')
+          ..write('shopUrl: $shopUrl')
           ..write(')'))
         .toString();
   }
@@ -6075,6 +6509,105 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _returnToAddressMeta = const VerificationMeta(
+    'returnToAddress',
+  );
+  @override
+  late final GeneratedColumn<String> returnToAddress = GeneratedColumn<String>(
+    'return_to_address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnToCityMeta = const VerificationMeta(
+    'returnToCity',
+  );
+  @override
+  late final GeneratedColumn<String> returnToCity = GeneratedColumn<String>(
+    'return_to_city',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnToCountryMeta = const VerificationMeta(
+    'returnToCountry',
+  );
+  @override
+  late final GeneratedColumn<String> returnToCountry = GeneratedColumn<String>(
+    'return_to_country',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnTrackingNumberMeta =
+      const VerificationMeta('returnTrackingNumber');
+  @override
+  late final GeneratedColumn<String> returnTrackingNumber =
+      GeneratedColumn<String>(
+        'return_tracking_number',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _returnCarrierMeta = const VerificationMeta(
+    'returnCarrier',
+  );
+  @override
+  late final GeneratedColumn<String> returnCarrier = GeneratedColumn<String>(
+    'return_carrier',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourcePlatformIdMeta = const VerificationMeta(
+    'sourcePlatformId',
+  );
+  @override
+  late final GeneratedColumn<String> sourcePlatformId = GeneratedColumn<String>(
+    'source_platform_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _targetPlatformIdMeta = const VerificationMeta(
+    'targetPlatformId',
+  );
+  @override
+  late final GeneratedColumn<String> targetPlatformId = GeneratedColumn<String>(
+    'target_platform_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6088,6 +6621,15 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
     restockingFee,
     requestedAt,
     resolvedAt,
+    returnToAddress,
+    returnToCity,
+    returnToCountry,
+    returnTrackingNumber,
+    returnCarrier,
+    supplierId,
+    productId,
+    sourcePlatformId,
+    targetPlatformId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6184,6 +6726,81 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
         resolvedAt.isAcceptableOrUnknown(data['resolved_at']!, _resolvedAtMeta),
       );
     }
+    if (data.containsKey('return_to_address')) {
+      context.handle(
+        _returnToAddressMeta,
+        returnToAddress.isAcceptableOrUnknown(
+          data['return_to_address']!,
+          _returnToAddressMeta,
+        ),
+      );
+    }
+    if (data.containsKey('return_to_city')) {
+      context.handle(
+        _returnToCityMeta,
+        returnToCity.isAcceptableOrUnknown(
+          data['return_to_city']!,
+          _returnToCityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('return_to_country')) {
+      context.handle(
+        _returnToCountryMeta,
+        returnToCountry.isAcceptableOrUnknown(
+          data['return_to_country']!,
+          _returnToCountryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('return_tracking_number')) {
+      context.handle(
+        _returnTrackingNumberMeta,
+        returnTrackingNumber.isAcceptableOrUnknown(
+          data['return_tracking_number']!,
+          _returnTrackingNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('return_carrier')) {
+      context.handle(
+        _returnCarrierMeta,
+        returnCarrier.isAcceptableOrUnknown(
+          data['return_carrier']!,
+          _returnCarrierMeta,
+        ),
+      );
+    }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    }
+    if (data.containsKey('source_platform_id')) {
+      context.handle(
+        _sourcePlatformIdMeta,
+        sourcePlatformId.isAcceptableOrUnknown(
+          data['source_platform_id']!,
+          _sourcePlatformIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('target_platform_id')) {
+      context.handle(
+        _targetPlatformIdMeta,
+        targetPlatformId.isAcceptableOrUnknown(
+          data['target_platform_id']!,
+          _targetPlatformIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6237,6 +6854,42 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}resolved_at'],
       ),
+      returnToAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_to_address'],
+      ),
+      returnToCity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_to_city'],
+      ),
+      returnToCountry: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_to_country'],
+      ),
+      returnTrackingNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_tracking_number'],
+      ),
+      returnCarrier: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_carrier'],
+      ),
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      ),
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      ),
+      sourcePlatformId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_platform_id'],
+      ),
+      targetPlatformId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_platform_id'],
+      ),
     );
   }
 
@@ -6258,6 +6911,15 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
   final double? restockingFee;
   final DateTime? requestedAt;
   final DateTime? resolvedAt;
+  final String? returnToAddress;
+  final String? returnToCity;
+  final String? returnToCountry;
+  final String? returnTrackingNumber;
+  final String? returnCarrier;
+  final String? supplierId;
+  final String? productId;
+  final String? sourcePlatformId;
+  final String? targetPlatformId;
   const ReturnRow({
     required this.id,
     required this.returnId,
@@ -6270,6 +6932,15 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     this.restockingFee,
     this.requestedAt,
     this.resolvedAt,
+    this.returnToAddress,
+    this.returnToCity,
+    this.returnToCountry,
+    this.returnTrackingNumber,
+    this.returnCarrier,
+    this.supplierId,
+    this.productId,
+    this.sourcePlatformId,
+    this.targetPlatformId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6296,6 +6967,33 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     }
     if (!nullToAbsent || resolvedAt != null) {
       map['resolved_at'] = Variable<DateTime>(resolvedAt);
+    }
+    if (!nullToAbsent || returnToAddress != null) {
+      map['return_to_address'] = Variable<String>(returnToAddress);
+    }
+    if (!nullToAbsent || returnToCity != null) {
+      map['return_to_city'] = Variable<String>(returnToCity);
+    }
+    if (!nullToAbsent || returnToCountry != null) {
+      map['return_to_country'] = Variable<String>(returnToCountry);
+    }
+    if (!nullToAbsent || returnTrackingNumber != null) {
+      map['return_tracking_number'] = Variable<String>(returnTrackingNumber);
+    }
+    if (!nullToAbsent || returnCarrier != null) {
+      map['return_carrier'] = Variable<String>(returnCarrier);
+    }
+    if (!nullToAbsent || supplierId != null) {
+      map['supplier_id'] = Variable<String>(supplierId);
+    }
+    if (!nullToAbsent || productId != null) {
+      map['product_id'] = Variable<String>(productId);
+    }
+    if (!nullToAbsent || sourcePlatformId != null) {
+      map['source_platform_id'] = Variable<String>(sourcePlatformId);
+    }
+    if (!nullToAbsent || targetPlatformId != null) {
+      map['target_platform_id'] = Variable<String>(targetPlatformId);
     }
     return map;
   }
@@ -6325,6 +7023,33 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
       resolvedAt: resolvedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(resolvedAt),
+      returnToAddress: returnToAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnToAddress),
+      returnToCity: returnToCity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnToCity),
+      returnToCountry: returnToCountry == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnToCountry),
+      returnTrackingNumber: returnTrackingNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnTrackingNumber),
+      returnCarrier: returnCarrier == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnCarrier),
+      supplierId: supplierId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supplierId),
+      productId: productId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(productId),
+      sourcePlatformId: sourcePlatformId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourcePlatformId),
+      targetPlatformId: targetPlatformId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetPlatformId),
     );
   }
 
@@ -6347,6 +7072,17 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
       restockingFee: serializer.fromJson<double?>(json['restockingFee']),
       requestedAt: serializer.fromJson<DateTime?>(json['requestedAt']),
       resolvedAt: serializer.fromJson<DateTime?>(json['resolvedAt']),
+      returnToAddress: serializer.fromJson<String?>(json['returnToAddress']),
+      returnToCity: serializer.fromJson<String?>(json['returnToCity']),
+      returnToCountry: serializer.fromJson<String?>(json['returnToCountry']),
+      returnTrackingNumber: serializer.fromJson<String?>(
+        json['returnTrackingNumber'],
+      ),
+      returnCarrier: serializer.fromJson<String?>(json['returnCarrier']),
+      supplierId: serializer.fromJson<String?>(json['supplierId']),
+      productId: serializer.fromJson<String?>(json['productId']),
+      sourcePlatformId: serializer.fromJson<String?>(json['sourcePlatformId']),
+      targetPlatformId: serializer.fromJson<String?>(json['targetPlatformId']),
     );
   }
   @override
@@ -6364,6 +7100,15 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
       'restockingFee': serializer.toJson<double?>(restockingFee),
       'requestedAt': serializer.toJson<DateTime?>(requestedAt),
       'resolvedAt': serializer.toJson<DateTime?>(resolvedAt),
+      'returnToAddress': serializer.toJson<String?>(returnToAddress),
+      'returnToCity': serializer.toJson<String?>(returnToCity),
+      'returnToCountry': serializer.toJson<String?>(returnToCountry),
+      'returnTrackingNumber': serializer.toJson<String?>(returnTrackingNumber),
+      'returnCarrier': serializer.toJson<String?>(returnCarrier),
+      'supplierId': serializer.toJson<String?>(supplierId),
+      'productId': serializer.toJson<String?>(productId),
+      'sourcePlatformId': serializer.toJson<String?>(sourcePlatformId),
+      'targetPlatformId': serializer.toJson<String?>(targetPlatformId),
     };
   }
 
@@ -6379,6 +7124,15 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     Value<double?> restockingFee = const Value.absent(),
     Value<DateTime?> requestedAt = const Value.absent(),
     Value<DateTime?> resolvedAt = const Value.absent(),
+    Value<String?> returnToAddress = const Value.absent(),
+    Value<String?> returnToCity = const Value.absent(),
+    Value<String?> returnToCountry = const Value.absent(),
+    Value<String?> returnTrackingNumber = const Value.absent(),
+    Value<String?> returnCarrier = const Value.absent(),
+    Value<String?> supplierId = const Value.absent(),
+    Value<String?> productId = const Value.absent(),
+    Value<String?> sourcePlatformId = const Value.absent(),
+    Value<String?> targetPlatformId = const Value.absent(),
   }) => ReturnRow(
     id: id ?? this.id,
     returnId: returnId ?? this.returnId,
@@ -6395,6 +7149,27 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
         : this.restockingFee,
     requestedAt: requestedAt.present ? requestedAt.value : this.requestedAt,
     resolvedAt: resolvedAt.present ? resolvedAt.value : this.resolvedAt,
+    returnToAddress: returnToAddress.present
+        ? returnToAddress.value
+        : this.returnToAddress,
+    returnToCity: returnToCity.present ? returnToCity.value : this.returnToCity,
+    returnToCountry: returnToCountry.present
+        ? returnToCountry.value
+        : this.returnToCountry,
+    returnTrackingNumber: returnTrackingNumber.present
+        ? returnTrackingNumber.value
+        : this.returnTrackingNumber,
+    returnCarrier: returnCarrier.present
+        ? returnCarrier.value
+        : this.returnCarrier,
+    supplierId: supplierId.present ? supplierId.value : this.supplierId,
+    productId: productId.present ? productId.value : this.productId,
+    sourcePlatformId: sourcePlatformId.present
+        ? sourcePlatformId.value
+        : this.sourcePlatformId,
+    targetPlatformId: targetPlatformId.present
+        ? targetPlatformId.value
+        : this.targetPlatformId,
   );
   ReturnRow copyWithCompanion(ReturnsCompanion data) {
     return ReturnRow(
@@ -6419,6 +7194,31 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
       resolvedAt: data.resolvedAt.present
           ? data.resolvedAt.value
           : this.resolvedAt,
+      returnToAddress: data.returnToAddress.present
+          ? data.returnToAddress.value
+          : this.returnToAddress,
+      returnToCity: data.returnToCity.present
+          ? data.returnToCity.value
+          : this.returnToCity,
+      returnToCountry: data.returnToCountry.present
+          ? data.returnToCountry.value
+          : this.returnToCountry,
+      returnTrackingNumber: data.returnTrackingNumber.present
+          ? data.returnTrackingNumber.value
+          : this.returnTrackingNumber,
+      returnCarrier: data.returnCarrier.present
+          ? data.returnCarrier.value
+          : this.returnCarrier,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      sourcePlatformId: data.sourcePlatformId.present
+          ? data.sourcePlatformId.value
+          : this.sourcePlatformId,
+      targetPlatformId: data.targetPlatformId.present
+          ? data.targetPlatformId.value
+          : this.targetPlatformId,
     );
   }
 
@@ -6435,7 +7235,16 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
           ..write('returnShippingCost: $returnShippingCost, ')
           ..write('restockingFee: $restockingFee, ')
           ..write('requestedAt: $requestedAt, ')
-          ..write('resolvedAt: $resolvedAt')
+          ..write('resolvedAt: $resolvedAt, ')
+          ..write('returnToAddress: $returnToAddress, ')
+          ..write('returnToCity: $returnToCity, ')
+          ..write('returnToCountry: $returnToCountry, ')
+          ..write('returnTrackingNumber: $returnTrackingNumber, ')
+          ..write('returnCarrier: $returnCarrier, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('productId: $productId, ')
+          ..write('sourcePlatformId: $sourcePlatformId, ')
+          ..write('targetPlatformId: $targetPlatformId')
           ..write(')'))
         .toString();
   }
@@ -6453,6 +7262,15 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     restockingFee,
     requestedAt,
     resolvedAt,
+    returnToAddress,
+    returnToCity,
+    returnToCountry,
+    returnTrackingNumber,
+    returnCarrier,
+    supplierId,
+    productId,
+    sourcePlatformId,
+    targetPlatformId,
   );
   @override
   bool operator ==(Object other) =>
@@ -6468,7 +7286,16 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
           other.returnShippingCost == this.returnShippingCost &&
           other.restockingFee == this.restockingFee &&
           other.requestedAt == this.requestedAt &&
-          other.resolvedAt == this.resolvedAt);
+          other.resolvedAt == this.resolvedAt &&
+          other.returnToAddress == this.returnToAddress &&
+          other.returnToCity == this.returnToCity &&
+          other.returnToCountry == this.returnToCountry &&
+          other.returnTrackingNumber == this.returnTrackingNumber &&
+          other.returnCarrier == this.returnCarrier &&
+          other.supplierId == this.supplierId &&
+          other.productId == this.productId &&
+          other.sourcePlatformId == this.sourcePlatformId &&
+          other.targetPlatformId == this.targetPlatformId);
 }
 
 class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
@@ -6483,6 +7310,15 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
   final Value<double?> restockingFee;
   final Value<DateTime?> requestedAt;
   final Value<DateTime?> resolvedAt;
+  final Value<String?> returnToAddress;
+  final Value<String?> returnToCity;
+  final Value<String?> returnToCountry;
+  final Value<String?> returnTrackingNumber;
+  final Value<String?> returnCarrier;
+  final Value<String?> supplierId;
+  final Value<String?> productId;
+  final Value<String?> sourcePlatformId;
+  final Value<String?> targetPlatformId;
   const ReturnsCompanion({
     this.id = const Value.absent(),
     this.returnId = const Value.absent(),
@@ -6495,6 +7331,15 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     this.restockingFee = const Value.absent(),
     this.requestedAt = const Value.absent(),
     this.resolvedAt = const Value.absent(),
+    this.returnToAddress = const Value.absent(),
+    this.returnToCity = const Value.absent(),
+    this.returnToCountry = const Value.absent(),
+    this.returnTrackingNumber = const Value.absent(),
+    this.returnCarrier = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.sourcePlatformId = const Value.absent(),
+    this.targetPlatformId = const Value.absent(),
   });
   ReturnsCompanion.insert({
     this.id = const Value.absent(),
@@ -6508,6 +7353,15 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     this.restockingFee = const Value.absent(),
     this.requestedAt = const Value.absent(),
     this.resolvedAt = const Value.absent(),
+    this.returnToAddress = const Value.absent(),
+    this.returnToCity = const Value.absent(),
+    this.returnToCountry = const Value.absent(),
+    this.returnTrackingNumber = const Value.absent(),
+    this.returnCarrier = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.sourcePlatformId = const Value.absent(),
+    this.targetPlatformId = const Value.absent(),
   }) : returnId = Value(returnId),
        orderId = Value(orderId),
        reason = Value(reason),
@@ -6524,6 +7378,15 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     Expression<double>? restockingFee,
     Expression<DateTime>? requestedAt,
     Expression<DateTime>? resolvedAt,
+    Expression<String>? returnToAddress,
+    Expression<String>? returnToCity,
+    Expression<String>? returnToCountry,
+    Expression<String>? returnTrackingNumber,
+    Expression<String>? returnCarrier,
+    Expression<String>? supplierId,
+    Expression<String>? productId,
+    Expression<String>? sourcePlatformId,
+    Expression<String>? targetPlatformId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -6538,6 +7401,16 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
       if (restockingFee != null) 'restocking_fee': restockingFee,
       if (requestedAt != null) 'requested_at': requestedAt,
       if (resolvedAt != null) 'resolved_at': resolvedAt,
+      if (returnToAddress != null) 'return_to_address': returnToAddress,
+      if (returnToCity != null) 'return_to_city': returnToCity,
+      if (returnToCountry != null) 'return_to_country': returnToCountry,
+      if (returnTrackingNumber != null)
+        'return_tracking_number': returnTrackingNumber,
+      if (returnCarrier != null) 'return_carrier': returnCarrier,
+      if (supplierId != null) 'supplier_id': supplierId,
+      if (productId != null) 'product_id': productId,
+      if (sourcePlatformId != null) 'source_platform_id': sourcePlatformId,
+      if (targetPlatformId != null) 'target_platform_id': targetPlatformId,
     });
   }
 
@@ -6553,6 +7426,15 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     Value<double?>? restockingFee,
     Value<DateTime?>? requestedAt,
     Value<DateTime?>? resolvedAt,
+    Value<String?>? returnToAddress,
+    Value<String?>? returnToCity,
+    Value<String?>? returnToCountry,
+    Value<String?>? returnTrackingNumber,
+    Value<String?>? returnCarrier,
+    Value<String?>? supplierId,
+    Value<String?>? productId,
+    Value<String?>? sourcePlatformId,
+    Value<String?>? targetPlatformId,
   }) {
     return ReturnsCompanion(
       id: id ?? this.id,
@@ -6566,6 +7448,15 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
       restockingFee: restockingFee ?? this.restockingFee,
       requestedAt: requestedAt ?? this.requestedAt,
       resolvedAt: resolvedAt ?? this.resolvedAt,
+      returnToAddress: returnToAddress ?? this.returnToAddress,
+      returnToCity: returnToCity ?? this.returnToCity,
+      returnToCountry: returnToCountry ?? this.returnToCountry,
+      returnTrackingNumber: returnTrackingNumber ?? this.returnTrackingNumber,
+      returnCarrier: returnCarrier ?? this.returnCarrier,
+      supplierId: supplierId ?? this.supplierId,
+      productId: productId ?? this.productId,
+      sourcePlatformId: sourcePlatformId ?? this.sourcePlatformId,
+      targetPlatformId: targetPlatformId ?? this.targetPlatformId,
     );
   }
 
@@ -6605,6 +7496,35 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     if (resolvedAt.present) {
       map['resolved_at'] = Variable<DateTime>(resolvedAt.value);
     }
+    if (returnToAddress.present) {
+      map['return_to_address'] = Variable<String>(returnToAddress.value);
+    }
+    if (returnToCity.present) {
+      map['return_to_city'] = Variable<String>(returnToCity.value);
+    }
+    if (returnToCountry.present) {
+      map['return_to_country'] = Variable<String>(returnToCountry.value);
+    }
+    if (returnTrackingNumber.present) {
+      map['return_tracking_number'] = Variable<String>(
+        returnTrackingNumber.value,
+      );
+    }
+    if (returnCarrier.present) {
+      map['return_carrier'] = Variable<String>(returnCarrier.value);
+    }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (sourcePlatformId.present) {
+      map['source_platform_id'] = Variable<String>(sourcePlatformId.value);
+    }
+    if (targetPlatformId.present) {
+      map['target_platform_id'] = Variable<String>(targetPlatformId.value);
+    }
     return map;
   }
 
@@ -6621,7 +7541,16 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
           ..write('returnShippingCost: $returnShippingCost, ')
           ..write('restockingFee: $restockingFee, ')
           ..write('requestedAt: $requestedAt, ')
-          ..write('resolvedAt: $resolvedAt')
+          ..write('resolvedAt: $resolvedAt, ')
+          ..write('returnToAddress: $returnToAddress, ')
+          ..write('returnToCity: $returnToCity, ')
+          ..write('returnToCountry: $returnToCountry, ')
+          ..write('returnTrackingNumber: $returnTrackingNumber, ')
+          ..write('returnCarrier: $returnCarrier, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('productId: $productId, ')
+          ..write('sourcePlatformId: $sourcePlatformId, ')
+          ..write('targetPlatformId: $targetPlatformId')
           ..write(')'))
         .toString();
   }
@@ -8488,6 +9417,14 @@ typedef $$SuppliersTableCreateCompanionBuilder =
       Value<double?> returnShippingCost,
       Value<double?> restockingFeePercent,
       Value<bool> acceptsNoReasonReturns,
+      Value<String?> warehouseAddress,
+      Value<String?> warehouseCity,
+      Value<String?> warehouseZip,
+      Value<String?> warehouseCountry,
+      Value<String?> warehousePhone,
+      Value<String?> warehouseEmail,
+      Value<String?> feedSource,
+      Value<String?> shopUrl,
     });
 typedef $$SuppliersTableUpdateCompanionBuilder =
     SuppliersCompanion Function({
@@ -8501,6 +9438,14 @@ typedef $$SuppliersTableUpdateCompanionBuilder =
       Value<double?> returnShippingCost,
       Value<double?> restockingFeePercent,
       Value<bool> acceptsNoReasonReturns,
+      Value<String?> warehouseAddress,
+      Value<String?> warehouseCity,
+      Value<String?> warehouseZip,
+      Value<String?> warehouseCountry,
+      Value<String?> warehousePhone,
+      Value<String?> warehouseEmail,
+      Value<String?> feedSource,
+      Value<String?> shopUrl,
     });
 
 class $$SuppliersTableFilterComposer
@@ -8559,6 +9504,46 @@ class $$SuppliersTableFilterComposer
 
   ColumnFilters<bool> get acceptsNoReasonReturns => $composableBuilder(
     column: $table.acceptsNoReasonReturns,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warehouseAddress => $composableBuilder(
+    column: $table.warehouseAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warehouseCity => $composableBuilder(
+    column: $table.warehouseCity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warehouseZip => $composableBuilder(
+    column: $table.warehouseZip,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warehouseCountry => $composableBuilder(
+    column: $table.warehouseCountry,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warehousePhone => $composableBuilder(
+    column: $table.warehousePhone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warehouseEmail => $composableBuilder(
+    column: $table.warehouseEmail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get feedSource => $composableBuilder(
+    column: $table.feedSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shopUrl => $composableBuilder(
+    column: $table.shopUrl,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -8621,6 +9606,46 @@ class $$SuppliersTableOrderingComposer
     column: $table.acceptsNoReasonReturns,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get warehouseAddress => $composableBuilder(
+    column: $table.warehouseAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warehouseCity => $composableBuilder(
+    column: $table.warehouseCity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warehouseZip => $composableBuilder(
+    column: $table.warehouseZip,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warehouseCountry => $composableBuilder(
+    column: $table.warehouseCountry,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warehousePhone => $composableBuilder(
+    column: $table.warehousePhone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warehouseEmail => $composableBuilder(
+    column: $table.warehouseEmail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get feedSource => $composableBuilder(
+    column: $table.feedSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shopUrl => $composableBuilder(
+    column: $table.shopUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SuppliersTableAnnotationComposer
@@ -8675,6 +9700,44 @@ class $$SuppliersTableAnnotationComposer
     column: $table.acceptsNoReasonReturns,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get warehouseAddress => $composableBuilder(
+    column: $table.warehouseAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warehouseCity => $composableBuilder(
+    column: $table.warehouseCity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warehouseZip => $composableBuilder(
+    column: $table.warehouseZip,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warehouseCountry => $composableBuilder(
+    column: $table.warehouseCountry,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warehousePhone => $composableBuilder(
+    column: $table.warehousePhone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get warehouseEmail => $composableBuilder(
+    column: $table.warehouseEmail,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get feedSource => $composableBuilder(
+    column: $table.feedSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get shopUrl =>
+      $composableBuilder(column: $table.shopUrl, builder: (column) => column);
 }
 
 class $$SuppliersTableTableManager
@@ -8718,6 +9781,14 @@ class $$SuppliersTableTableManager
                 Value<double?> returnShippingCost = const Value.absent(),
                 Value<double?> restockingFeePercent = const Value.absent(),
                 Value<bool> acceptsNoReasonReturns = const Value.absent(),
+                Value<String?> warehouseAddress = const Value.absent(),
+                Value<String?> warehouseCity = const Value.absent(),
+                Value<String?> warehouseZip = const Value.absent(),
+                Value<String?> warehouseCountry = const Value.absent(),
+                Value<String?> warehousePhone = const Value.absent(),
+                Value<String?> warehouseEmail = const Value.absent(),
+                Value<String?> feedSource = const Value.absent(),
+                Value<String?> shopUrl = const Value.absent(),
               }) => SuppliersCompanion(
                 id: id,
                 supplierId: supplierId,
@@ -8729,6 +9800,14 @@ class $$SuppliersTableTableManager
                 returnShippingCost: returnShippingCost,
                 restockingFeePercent: restockingFeePercent,
                 acceptsNoReasonReturns: acceptsNoReasonReturns,
+                warehouseAddress: warehouseAddress,
+                warehouseCity: warehouseCity,
+                warehouseZip: warehouseZip,
+                warehouseCountry: warehouseCountry,
+                warehousePhone: warehousePhone,
+                warehouseEmail: warehouseEmail,
+                feedSource: feedSource,
+                shopUrl: shopUrl,
               ),
           createCompanionCallback:
               ({
@@ -8742,6 +9821,14 @@ class $$SuppliersTableTableManager
                 Value<double?> returnShippingCost = const Value.absent(),
                 Value<double?> restockingFeePercent = const Value.absent(),
                 Value<bool> acceptsNoReasonReturns = const Value.absent(),
+                Value<String?> warehouseAddress = const Value.absent(),
+                Value<String?> warehouseCity = const Value.absent(),
+                Value<String?> warehouseZip = const Value.absent(),
+                Value<String?> warehouseCountry = const Value.absent(),
+                Value<String?> warehousePhone = const Value.absent(),
+                Value<String?> warehouseEmail = const Value.absent(),
+                Value<String?> feedSource = const Value.absent(),
+                Value<String?> shopUrl = const Value.absent(),
               }) => SuppliersCompanion.insert(
                 id: id,
                 supplierId: supplierId,
@@ -8753,6 +9840,14 @@ class $$SuppliersTableTableManager
                 returnShippingCost: returnShippingCost,
                 restockingFeePercent: restockingFeePercent,
                 acceptsNoReasonReturns: acceptsNoReasonReturns,
+                warehouseAddress: warehouseAddress,
+                warehouseCity: warehouseCity,
+                warehouseZip: warehouseZip,
+                warehouseCountry: warehouseCountry,
+                warehousePhone: warehousePhone,
+                warehouseEmail: warehouseEmail,
+                feedSource: feedSource,
+                shopUrl: shopUrl,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -9397,6 +10492,15 @@ typedef $$ReturnsTableCreateCompanionBuilder =
       Value<double?> restockingFee,
       Value<DateTime?> requestedAt,
       Value<DateTime?> resolvedAt,
+      Value<String?> returnToAddress,
+      Value<String?> returnToCity,
+      Value<String?> returnToCountry,
+      Value<String?> returnTrackingNumber,
+      Value<String?> returnCarrier,
+      Value<String?> supplierId,
+      Value<String?> productId,
+      Value<String?> sourcePlatformId,
+      Value<String?> targetPlatformId,
     });
 typedef $$ReturnsTableUpdateCompanionBuilder =
     ReturnsCompanion Function({
@@ -9411,6 +10515,15 @@ typedef $$ReturnsTableUpdateCompanionBuilder =
       Value<double?> restockingFee,
       Value<DateTime?> requestedAt,
       Value<DateTime?> resolvedAt,
+      Value<String?> returnToAddress,
+      Value<String?> returnToCity,
+      Value<String?> returnToCountry,
+      Value<String?> returnTrackingNumber,
+      Value<String?> returnCarrier,
+      Value<String?> supplierId,
+      Value<String?> productId,
+      Value<String?> sourcePlatformId,
+      Value<String?> targetPlatformId,
     });
 
 class $$ReturnsTableFilterComposer
@@ -9474,6 +10587,51 @@ class $$ReturnsTableFilterComposer
 
   ColumnFilters<DateTime> get resolvedAt => $composableBuilder(
     column: $table.resolvedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnToAddress => $composableBuilder(
+    column: $table.returnToAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnToCity => $composableBuilder(
+    column: $table.returnToCity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnToCountry => $composableBuilder(
+    column: $table.returnToCountry,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnTrackingNumber => $composableBuilder(
+    column: $table.returnTrackingNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnCarrier => $composableBuilder(
+    column: $table.returnCarrier,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourcePlatformId => $composableBuilder(
+    column: $table.sourcePlatformId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetPlatformId => $composableBuilder(
+    column: $table.targetPlatformId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -9541,6 +10699,51 @@ class $$ReturnsTableOrderingComposer
     column: $table.resolvedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get returnToAddress => $composableBuilder(
+    column: $table.returnToAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get returnToCity => $composableBuilder(
+    column: $table.returnToCity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get returnToCountry => $composableBuilder(
+    column: $table.returnToCountry,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get returnTrackingNumber => $composableBuilder(
+    column: $table.returnTrackingNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get returnCarrier => $composableBuilder(
+    column: $table.returnCarrier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourcePlatformId => $composableBuilder(
+    column: $table.sourcePlatformId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetPlatformId => $composableBuilder(
+    column: $table.targetPlatformId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ReturnsTableAnnotationComposer
@@ -9594,6 +10797,49 @@ class $$ReturnsTableAnnotationComposer
     column: $table.resolvedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get returnToAddress => $composableBuilder(
+    column: $table.returnToAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get returnToCity => $composableBuilder(
+    column: $table.returnToCity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get returnToCountry => $composableBuilder(
+    column: $table.returnToCountry,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get returnTrackingNumber => $composableBuilder(
+    column: $table.returnTrackingNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get returnCarrier => $composableBuilder(
+    column: $table.returnCarrier,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<String> get sourcePlatformId => $composableBuilder(
+    column: $table.sourcePlatformId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get targetPlatformId => $composableBuilder(
+    column: $table.targetPlatformId,
+    builder: (column) => column,
+  );
 }
 
 class $$ReturnsTableTableManager
@@ -9635,6 +10881,15 @@ class $$ReturnsTableTableManager
                 Value<double?> restockingFee = const Value.absent(),
                 Value<DateTime?> requestedAt = const Value.absent(),
                 Value<DateTime?> resolvedAt = const Value.absent(),
+                Value<String?> returnToAddress = const Value.absent(),
+                Value<String?> returnToCity = const Value.absent(),
+                Value<String?> returnToCountry = const Value.absent(),
+                Value<String?> returnTrackingNumber = const Value.absent(),
+                Value<String?> returnCarrier = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
+                Value<String?> productId = const Value.absent(),
+                Value<String?> sourcePlatformId = const Value.absent(),
+                Value<String?> targetPlatformId = const Value.absent(),
               }) => ReturnsCompanion(
                 id: id,
                 returnId: returnId,
@@ -9647,6 +10902,15 @@ class $$ReturnsTableTableManager
                 restockingFee: restockingFee,
                 requestedAt: requestedAt,
                 resolvedAt: resolvedAt,
+                returnToAddress: returnToAddress,
+                returnToCity: returnToCity,
+                returnToCountry: returnToCountry,
+                returnTrackingNumber: returnTrackingNumber,
+                returnCarrier: returnCarrier,
+                supplierId: supplierId,
+                productId: productId,
+                sourcePlatformId: sourcePlatformId,
+                targetPlatformId: targetPlatformId,
               ),
           createCompanionCallback:
               ({
@@ -9661,6 +10925,15 @@ class $$ReturnsTableTableManager
                 Value<double?> restockingFee = const Value.absent(),
                 Value<DateTime?> requestedAt = const Value.absent(),
                 Value<DateTime?> resolvedAt = const Value.absent(),
+                Value<String?> returnToAddress = const Value.absent(),
+                Value<String?> returnToCity = const Value.absent(),
+                Value<String?> returnToCountry = const Value.absent(),
+                Value<String?> returnTrackingNumber = const Value.absent(),
+                Value<String?> returnCarrier = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
+                Value<String?> productId = const Value.absent(),
+                Value<String?> sourcePlatformId = const Value.absent(),
+                Value<String?> targetPlatformId = const Value.absent(),
               }) => ReturnsCompanion.insert(
                 id: id,
                 returnId: returnId,
@@ -9673,6 +10946,15 @@ class $$ReturnsTableTableManager
                 restockingFee: restockingFee,
                 requestedAt: requestedAt,
                 resolvedAt: resolvedAt,
+                returnToAddress: returnToAddress,
+                returnToCity: returnToCity,
+                returnToCountry: returnToCountry,
+                returnTrackingNumber: returnTrackingNumber,
+                returnCarrier: returnCarrier,
+                supplierId: supplierId,
+                productId: productId,
+                sourcePlatformId: sourcePlatformId,
+                targetPlatformId: targetPlatformId,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
