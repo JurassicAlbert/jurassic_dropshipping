@@ -29,6 +29,7 @@ import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
 import 'package:jurassic_dropshipping/services/automation_scheduler.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/data/seed/database_seeder.dart';
+import 'package:jurassic_dropshipping/services/seed_service.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 import 'package:jurassic_dropshipping/services/sources/api2cart_client.dart';
 import 'package:jurassic_dropshipping/services/sources/api2cart_source_platform.dart';
@@ -66,6 +67,18 @@ final databaseSeederProvider = Provider<DatabaseSeeder>((ref) => DatabaseSeeder(
   decisionLogRepo: ref.watch(decisionLogRepositoryProvider),
   rulesRepo: ref.watch(rulesRepositoryProvider),
   marketplaceAccountRepo: ref.watch(marketplaceAccountRepositoryProvider),
+));
+
+final seedServiceProvider = Provider<SeedService>((ref) => SeedService(
+  db: ref.watch(dbProvider),
+  productRepository: ref.watch(productRepositoryProvider),
+  listingRepository: ref.watch(listingRepositoryProvider),
+  orderRepository: ref.watch(orderRepositoryProvider),
+  supplierRepository: ref.watch(supplierRepositoryProvider),
+  supplierOfferRepository: ref.watch(supplierOfferRepositoryProvider),
+  returnRepository: ref.watch(returnRepositoryProvider),
+  decisionLogRepository: ref.watch(decisionLogRepositoryProvider),
+  rulesRepository: ref.watch(rulesRepositoryProvider),
 ));
 
 final cjClientProvider = Provider<CjDropshippingClient>((ref) => CjDropshippingClient(secureStorage: ref.watch(secureStorageProvider)));

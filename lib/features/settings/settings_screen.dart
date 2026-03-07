@@ -291,13 +291,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             icon: const Icon(Icons.dataset),
             label: const Text('Load demo data'),
             onPressed: () async {
-              final seeder = ref.read(databaseSeederProvider);
+              final seedService = ref.read(seedServiceProvider);
               try {
-                final result = await seeder.seed();
+                final result = await seedService.seedAll();
                 _invalidateAllProviders(ref);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Seeded ${result.entitiesCreated} entities.')),
+                    SnackBar(content: Text('Seeded ${result.total} entities (${result.orders} orders, ${result.listings} listings, ${result.products} products).')),
                   );
                 }
               } catch (e) {
@@ -312,12 +312,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 12),
           OutlinedButton.icon(
             icon: const Icon(Icons.delete_forever, color: Colors.red),
-            label: const Text('Clear all data', style: TextStyle(color: Colors.red)),
+            label: const Text('Drop all data', style: TextStyle(color: Colors.red)),
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Clear all data?'),
+                  title: const Text('Drop all data?'),
                   content: const Text('This will permanently delete all data from the database.'),
                   actions: [
                     TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
@@ -330,19 +330,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               );
               if (confirmed != true) return;
-              final seeder = ref.read(databaseSeederProvider);
+              final seedService = ref.read(seedServiceProvider);
               try {
-                await seeder.dropAll();
+                await seedService.dropAll();
                 _invalidateAllProviders(ref);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('All data cleared.')),
+                    const SnackBar(content: Text('All data dropped.')),
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Clear failed: $e')),
+                    SnackBar(content: Text('Drop failed: $e')),
                   );
                 }
               }
