@@ -28,6 +28,7 @@ import 'package:jurassic_dropshipping/services/price_refresh_service.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
 import 'package:jurassic_dropshipping/services/automation_scheduler.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
+import 'package:jurassic_dropshipping/data/seed/database_seeder.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 import 'package:jurassic_dropshipping/services/sources/api2cart_client.dart';
 import 'package:jurassic_dropshipping/services/sources/api2cart_source_platform.dart';
@@ -53,6 +54,19 @@ final supplierRepositoryProvider = Provider<SupplierRepository>((ref) => Supplie
 final supplierOfferRepositoryProvider = Provider<SupplierOfferRepository>((ref) => SupplierOfferRepository(ref.watch(dbProvider)));
 final returnRepositoryProvider = Provider<ReturnRepository>((ref) => ReturnRepository(ref.watch(dbProvider)));
 final marketplaceAccountRepositoryProvider = Provider<MarketplaceAccountRepository>((ref) => MarketplaceAccountRepository(ref.watch(dbProvider)));
+
+final databaseSeederProvider = Provider<DatabaseSeeder>((ref) => DatabaseSeeder(
+  db: ref.watch(dbProvider),
+  productRepo: ref.watch(productRepositoryProvider),
+  listingRepo: ref.watch(listingRepositoryProvider),
+  orderRepo: ref.watch(orderRepositoryProvider),
+  supplierRepo: ref.watch(supplierRepositoryProvider),
+  supplierOfferRepo: ref.watch(supplierOfferRepositoryProvider),
+  returnRepo: ref.watch(returnRepositoryProvider),
+  decisionLogRepo: ref.watch(decisionLogRepositoryProvider),
+  rulesRepo: ref.watch(rulesRepositoryProvider),
+  marketplaceAccountRepo: ref.watch(marketplaceAccountRepositoryProvider),
+));
 
 final cjClientProvider = Provider<CjDropshippingClient>((ref) => CjDropshippingClient(secureStorage: ref.watch(secureStorageProvider)));
 final allegroClientProvider = Provider<AllegroClient>((ref) => AllegroClient(secureStorage: ref.watch(secureStorageProvider)));
