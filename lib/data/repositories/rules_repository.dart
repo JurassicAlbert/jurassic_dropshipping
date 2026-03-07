@@ -15,6 +15,12 @@ class RulesRepository {
     return (list ?? []).map((e) => e as String).toList();
   }
 
+  static Map<String, double> _jsonMap(String? json) {
+    if (json == null || json.isEmpty) return {};
+    final map = jsonDecode(json) as Map<String, dynamic>?;
+    return (map ?? {}).map((k, v) => MapEntry(k, (v as num).toDouble()));
+  }
+
   static UserRules _rowToRules(UserRulesRow row) {
     return UserRules(
       minProfitPercent: row.minProfitPercent,
@@ -27,6 +33,7 @@ class RulesRepository {
       blacklistedSupplierIds: _jsonList(row.blacklistedSupplierIds),
       defaultMarkupPercent: row.defaultMarkupPercent,
       searchKeywords: _jsonList(row.searchKeywords),
+      marketplaceFees: _jsonMap(row.marketplaceFeesJson),
     );
   }
 
@@ -44,6 +51,7 @@ class RulesRepository {
     final blacklistedProducts = jsonEncode(rules.blacklistedProductIds);
     final blacklistedSuppliers = jsonEncode(rules.blacklistedSupplierIds);
     final keywords = jsonEncode(rules.searchKeywords);
+    final feesJson = jsonEncode(rules.marketplaceFees);
     if (existing != null) {
       await (_db.update(_db.userRulesTable)..where((t) => t.id.equals(existing.id))).write(
         UserRulesTableCompanion(
@@ -57,6 +65,7 @@ class RulesRepository {
           blacklistedSupplierIds: Value(blacklistedSuppliers),
           defaultMarkupPercent: Value(rules.defaultMarkupPercent),
           searchKeywords: Value(keywords),
+          marketplaceFeesJson: Value(feesJson),
         ),
       );
     } else {

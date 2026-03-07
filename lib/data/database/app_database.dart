@@ -87,6 +87,7 @@ class UserRulesTable extends Table {
   TextColumn get blacklistedSupplierIds => text()();
   RealColumn get defaultMarkupPercent => real()();
   TextColumn get searchKeywords => text()();
+  TextColumn get marketplaceFeesJson => text().withDefault(const Constant('{}'))();
 }
 
 @DataClassName('SupplierRow')
@@ -163,7 +164,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -184,6 +185,10 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(orders, orders.promisedDeliveryMin);
         await m.addColumn(orders, orders.promisedDeliveryMax);
         await m.createTable(returns);
+      }
+      if (from < 4) {
+        // v3 -> v4: added per-platform marketplace fees
+        await m.addColumn(userRulesTable, userRulesTable.marketplaceFeesJson);
       }
     },
   );

@@ -14,6 +14,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _keywordsController = TextEditingController();
   final _minProfitController = TextEditingController();
   final _markupController = TextEditingController();
+  final _allegroFeeController = TextEditingController();
+  final _temuFeeController = TextEditingController();
   final _cjEmailController = TextEditingController();
   final _cjApiKeyController = TextEditingController();
   final _allegroClientIdController = TextEditingController();
@@ -43,6 +45,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _keywordsController.dispose();
     _minProfitController.dispose();
     _markupController.dispose();
+    _allegroFeeController.dispose();
+    _temuFeeController.dispose();
     _cjEmailController.dispose();
     _cjApiKeyController.dispose();
     _allegroClientIdController.dispose();
@@ -61,6 +65,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _keywordsController.text = rules.searchKeywords.join(', ');
         _minProfitController.text = rules.minProfitPercent.toString();
         _markupController.text = rules.defaultMarkupPercent.toString();
+        _allegroFeeController.text = (rules.marketplaceFees['allegro'] ?? 10.0).toString();
+        _temuFeeController.text = (rules.marketplaceFees['temu'] ?? 10.0).toString();
       }
     });
     return SingleChildScrollView(
@@ -92,14 +98,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             decoration: const InputDecoration(labelText: 'Default markup %', border: OutlineInputBorder()),
             keyboardType: TextInputType.number,
           ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _allegroFeeController,
+            decoration: const InputDecoration(labelText: 'Allegro fee %', border: OutlineInputBorder()),
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _temuFeeController,
+            decoration: const InputDecoration(labelText: 'Temu fee %', border: OutlineInputBorder()),
+            keyboardType: TextInputType.number,
+          ),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: () async {
               final rules = await ref.read(rulesRepositoryProvider).get();
+              final fees = Map<String, double>.from(rules.marketplaceFees);
+              final allegroFee = double.tryParse(_allegroFeeController.text);
+              final temuFee = double.tryParse(_temuFeeController.text);
+              if (allegroFee != null) fees['allegro'] = allegroFee;
+              if (temuFee != null) fees['temu'] = temuFee;
               final updated = rules.copyWith(
                 searchKeywords: _keywordsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
                 minProfitPercent: double.tryParse(_minProfitController.text) ?? rules.minProfitPercent,
                 defaultMarkupPercent: double.tryParse(_markupController.text) ?? rules.defaultMarkupPercent,
+                marketplaceFees: fees,
               );
               await ref.read(rulesRepositoryProvider).save(updated);
               ref.invalidate(rulesProvider);

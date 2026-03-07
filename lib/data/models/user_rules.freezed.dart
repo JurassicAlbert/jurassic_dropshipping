@@ -32,6 +32,7 @@ mixin _$UserRules {
   List<String> get blacklistedSupplierIds => throw _privateConstructorUsedError;
   double get defaultMarkupPercent => throw _privateConstructorUsedError;
   List<String> get searchKeywords => throw _privateConstructorUsedError;
+  Map<String, double> get marketplaceFees => throw _privateConstructorUsedError;
 
   /// Serializes this UserRules to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -59,6 +60,7 @@ abstract class $UserRulesCopyWith<$Res> {
     List<String> blacklistedSupplierIds,
     double defaultMarkupPercent,
     List<String> searchKeywords,
+    Map<String, double> marketplaceFees,
   });
 }
 
@@ -87,6 +89,7 @@ class _$UserRulesCopyWithImpl<$Res, $Val extends UserRules>
     Object? blacklistedSupplierIds = null,
     Object? defaultMarkupPercent = null,
     Object? searchKeywords = null,
+    Object? marketplaceFees = null,
   }) {
     return _then(
       _value.copyWith(
@@ -130,6 +133,10 @@ class _$UserRulesCopyWithImpl<$Res, $Val extends UserRules>
                 ? _value.searchKeywords
                 : searchKeywords // ignore: cast_nullable_to_non_nullable
                       as List<String>,
+            marketplaceFees: null == marketplaceFees
+                ? _value.marketplaceFees
+                : marketplaceFees // ignore: cast_nullable_to_non_nullable
+                      as Map<String, double>,
           )
           as $Val,
     );
@@ -156,6 +163,7 @@ abstract class _$$UserRulesImplCopyWith<$Res>
     List<String> blacklistedSupplierIds,
     double defaultMarkupPercent,
     List<String> searchKeywords,
+    Map<String, double> marketplaceFees,
   });
 }
 
@@ -183,6 +191,7 @@ class __$$UserRulesImplCopyWithImpl<$Res>
     Object? blacklistedSupplierIds = null,
     Object? defaultMarkupPercent = null,
     Object? searchKeywords = null,
+    Object? marketplaceFees = null,
   }) {
     return _then(
       _$UserRulesImpl(
@@ -226,6 +235,10 @@ class __$$UserRulesImplCopyWithImpl<$Res>
             ? _value._searchKeywords
             : searchKeywords // ignore: cast_nullable_to_non_nullable
                   as List<String>,
+        marketplaceFees: null == marketplaceFees
+            ? _value._marketplaceFees
+            : marketplaceFees // ignore: cast_nullable_to_non_nullable
+                  as Map<String, double>,
       ),
     );
   }
@@ -245,10 +258,12 @@ class _$UserRulesImpl implements _UserRules {
     final List<String> blacklistedSupplierIds = const [],
     this.defaultMarkupPercent = 30.0,
     final List<String> searchKeywords = const [],
+    final Map<String, double> marketplaceFees = const {},
   }) : _preferredSupplierCountries = preferredSupplierCountries,
        _blacklistedProductIds = blacklistedProductIds,
        _blacklistedSupplierIds = blacklistedSupplierIds,
-       _searchKeywords = searchKeywords;
+       _searchKeywords = searchKeywords,
+       _marketplaceFees = marketplaceFees;
 
   factory _$UserRulesImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserRulesImplFromJson(json);
@@ -309,9 +324,18 @@ class _$UserRulesImpl implements _UserRules {
     return EqualUnmodifiableListView(_searchKeywords);
   }
 
+  final Map<String, double> _marketplaceFees;
+  @override
+  @JsonKey()
+  Map<String, double> get marketplaceFees {
+    if (_marketplaceFees is EqualUnmodifiableMapView) return _marketplaceFees;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_marketplaceFees);
+  }
+
   @override
   String toString() {
-    return 'UserRules(minProfitPercent: $minProfitPercent, maxSourcePrice: $maxSourcePrice, preferredSupplierCountries: $preferredSupplierCountries, manualApprovalListings: $manualApprovalListings, manualApprovalOrders: $manualApprovalOrders, scanIntervalMinutes: $scanIntervalMinutes, blacklistedProductIds: $blacklistedProductIds, blacklistedSupplierIds: $blacklistedSupplierIds, defaultMarkupPercent: $defaultMarkupPercent, searchKeywords: $searchKeywords)';
+    return 'UserRules(minProfitPercent: $minProfitPercent, maxSourcePrice: $maxSourcePrice, preferredSupplierCountries: $preferredSupplierCountries, manualApprovalListings: $manualApprovalListings, manualApprovalOrders: $manualApprovalOrders, scanIntervalMinutes: $scanIntervalMinutes, blacklistedProductIds: $blacklistedProductIds, blacklistedSupplierIds: $blacklistedSupplierIds, defaultMarkupPercent: $defaultMarkupPercent, searchKeywords: $searchKeywords, marketplaceFees: $marketplaceFees)';
   }
 
   @override
@@ -346,6 +370,10 @@ class _$UserRulesImpl implements _UserRules {
             const DeepCollectionEquality().equals(
               other._searchKeywords,
               _searchKeywords,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._marketplaceFees,
+              _marketplaceFees,
             ));
   }
 
@@ -363,6 +391,7 @@ class _$UserRulesImpl implements _UserRules {
     const DeepCollectionEquality().hash(_blacklistedSupplierIds),
     defaultMarkupPercent,
     const DeepCollectionEquality().hash(_searchKeywords),
+    const DeepCollectionEquality().hash(_marketplaceFees),
   );
 
   /// Create a copy of UserRules
@@ -391,6 +420,7 @@ abstract class _UserRules implements UserRules {
     final List<String> blacklistedSupplierIds,
     final double defaultMarkupPercent,
     final List<String> searchKeywords,
+    final Map<String, double> marketplaceFees,
   }) = _$UserRulesImpl;
 
   factory _UserRules.fromJson(Map<String, dynamic> json) =
@@ -416,6 +446,8 @@ abstract class _UserRules implements UserRules {
   double get defaultMarkupPercent;
   @override
   List<String> get searchKeywords;
+  @override
+  Map<String, double> get marketplaceFees;
 
   /// Create a copy of UserRules
   /// with the given fields replaced by the non-null parameter values.

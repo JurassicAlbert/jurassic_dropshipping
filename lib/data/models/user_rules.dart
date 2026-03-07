@@ -16,6 +16,7 @@ class UserRules with _$UserRules {
     @Default([]) List<String> blacklistedSupplierIds,
     @Default(30.0) double defaultMarkupPercent,
     @Default([]) List<String> searchKeywords,
+    @Default({}) Map<String, double> marketplaceFees,
   }) = _UserRules;
 
   factory UserRules.fromJson(Map<String, dynamic> json) =>

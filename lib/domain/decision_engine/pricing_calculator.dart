@@ -37,6 +37,17 @@ class PricingCalculator {
     return profitMarginPercent(sellingPrice, sourceCost) >= rules.minProfitPercent;
   }
 
+  double getFeeForPlatform(String platformId, UserRules rules) {
+    return rules.marketplaceFees[platformId] ?? marketplaceFeePercent;
+  }
+
+  double calculateSellingPriceForPlatform(double sourceCost, UserRules rules, String platformId) {
+    final markup = rules.defaultMarkupPercent / 100;
+    final fee = getFeeForPlatform(platformId, rules) / 100;
+    if (fee >= 1) return sourceCost * (1 + markup);
+    return sourceCost * (1 + markup) / (1 - fee);
+  }
+
   /// Calculate minimum selling price that remains profitable even after a potential return.
   /// Accounts for: source cost + desired profit + marketplace fee + return risk buffer.
   /// returnRatePercent: expected return rate (e.g. 5.0 = 5%)

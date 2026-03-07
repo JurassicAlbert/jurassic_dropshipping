@@ -3393,6 +3393,18 @@ class $UserRulesTableTable extends UserRulesTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _marketplaceFeesJsonMeta =
+      const VerificationMeta('marketplaceFeesJson');
+  @override
+  late final GeneratedColumn<String> marketplaceFeesJson =
+      GeneratedColumn<String>(
+        'marketplace_fees_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('{}'),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3406,6 +3418,7 @@ class $UserRulesTableTable extends UserRulesTable
     blacklistedSupplierIds,
     defaultMarkupPercent,
     searchKeywords,
+    marketplaceFeesJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3530,6 +3543,15 @@ class $UserRulesTableTable extends UserRulesTable
     } else if (isInserting) {
       context.missing(_searchKeywordsMeta);
     }
+    if (data.containsKey('marketplace_fees_json')) {
+      context.handle(
+        _marketplaceFeesJsonMeta,
+        marketplaceFeesJson.isAcceptableOrUnknown(
+          data['marketplace_fees_json']!,
+          _marketplaceFeesJsonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3583,6 +3605,10 @@ class $UserRulesTableTable extends UserRulesTable
         DriftSqlType.string,
         data['${effectivePrefix}search_keywords'],
       )!,
+      marketplaceFeesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}marketplace_fees_json'],
+      )!,
     );
   }
 
@@ -3604,6 +3630,7 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
   final String blacklistedSupplierIds;
   final double defaultMarkupPercent;
   final String searchKeywords;
+  final String marketplaceFeesJson;
   const UserRulesRow({
     required this.id,
     required this.minProfitPercent,
@@ -3616,6 +3643,7 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     required this.blacklistedSupplierIds,
     required this.defaultMarkupPercent,
     required this.searchKeywords,
+    required this.marketplaceFeesJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3635,6 +3663,7 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     map['blacklisted_supplier_ids'] = Variable<String>(blacklistedSupplierIds);
     map['default_markup_percent'] = Variable<double>(defaultMarkupPercent);
     map['search_keywords'] = Variable<String>(searchKeywords);
+    map['marketplace_fees_json'] = Variable<String>(marketplaceFeesJson);
     return map;
   }
 
@@ -3653,6 +3682,7 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
       blacklistedSupplierIds: Value(blacklistedSupplierIds),
       defaultMarkupPercent: Value(defaultMarkupPercent),
       searchKeywords: Value(searchKeywords),
+      marketplaceFeesJson: Value(marketplaceFeesJson),
     );
   }
 
@@ -3687,6 +3717,9 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
         json['defaultMarkupPercent'],
       ),
       searchKeywords: serializer.fromJson<String>(json['searchKeywords']),
+      marketplaceFeesJson: serializer.fromJson<String>(
+        json['marketplaceFeesJson'],
+      ),
     );
   }
   @override
@@ -3708,6 +3741,7 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
       ),
       'defaultMarkupPercent': serializer.toJson<double>(defaultMarkupPercent),
       'searchKeywords': serializer.toJson<String>(searchKeywords),
+      'marketplaceFeesJson': serializer.toJson<String>(marketplaceFeesJson),
     };
   }
 
@@ -3723,6 +3757,7 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     String? blacklistedSupplierIds,
     double? defaultMarkupPercent,
     String? searchKeywords,
+    String? marketplaceFeesJson,
   }) => UserRulesRow(
     id: id ?? this.id,
     minProfitPercent: minProfitPercent ?? this.minProfitPercent,
@@ -3740,6 +3775,7 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
         blacklistedSupplierIds ?? this.blacklistedSupplierIds,
     defaultMarkupPercent: defaultMarkupPercent ?? this.defaultMarkupPercent,
     searchKeywords: searchKeywords ?? this.searchKeywords,
+    marketplaceFeesJson: marketplaceFeesJson ?? this.marketplaceFeesJson,
   );
   UserRulesRow copyWithCompanion(UserRulesTableCompanion data) {
     return UserRulesRow(
@@ -3774,6 +3810,9 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
       searchKeywords: data.searchKeywords.present
           ? data.searchKeywords.value
           : this.searchKeywords,
+      marketplaceFeesJson: data.marketplaceFeesJson.present
+          ? data.marketplaceFeesJson.value
+          : this.marketplaceFeesJson,
     );
   }
 
@@ -3790,7 +3829,8 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
           ..write('blacklistedProductIds: $blacklistedProductIds, ')
           ..write('blacklistedSupplierIds: $blacklistedSupplierIds, ')
           ..write('defaultMarkupPercent: $defaultMarkupPercent, ')
-          ..write('searchKeywords: $searchKeywords')
+          ..write('searchKeywords: $searchKeywords, ')
+          ..write('marketplaceFeesJson: $marketplaceFeesJson')
           ..write(')'))
         .toString();
   }
@@ -3808,6 +3848,7 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     blacklistedSupplierIds,
     defaultMarkupPercent,
     searchKeywords,
+    marketplaceFeesJson,
   );
   @override
   bool operator ==(Object other) =>
@@ -3823,7 +3864,8 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
           other.blacklistedProductIds == this.blacklistedProductIds &&
           other.blacklistedSupplierIds == this.blacklistedSupplierIds &&
           other.defaultMarkupPercent == this.defaultMarkupPercent &&
-          other.searchKeywords == this.searchKeywords);
+          other.searchKeywords == this.searchKeywords &&
+          other.marketplaceFeesJson == this.marketplaceFeesJson);
 }
 
 class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
@@ -3838,6 +3880,7 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
   final Value<String> blacklistedSupplierIds;
   final Value<double> defaultMarkupPercent;
   final Value<String> searchKeywords;
+  final Value<String> marketplaceFeesJson;
   const UserRulesTableCompanion({
     this.id = const Value.absent(),
     this.minProfitPercent = const Value.absent(),
@@ -3850,6 +3893,7 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     this.blacklistedSupplierIds = const Value.absent(),
     this.defaultMarkupPercent = const Value.absent(),
     this.searchKeywords = const Value.absent(),
+    this.marketplaceFeesJson = const Value.absent(),
   });
   UserRulesTableCompanion.insert({
     this.id = const Value.absent(),
@@ -3863,6 +3907,7 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     required String blacklistedSupplierIds,
     required double defaultMarkupPercent,
     required String searchKeywords,
+    this.marketplaceFeesJson = const Value.absent(),
   }) : minProfitPercent = Value(minProfitPercent),
        preferredSupplierCountries = Value(preferredSupplierCountries),
        manualApprovalListings = Value(manualApprovalListings),
@@ -3884,6 +3929,7 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     Expression<String>? blacklistedSupplierIds,
     Expression<double>? defaultMarkupPercent,
     Expression<String>? searchKeywords,
+    Expression<String>? marketplaceFeesJson,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3904,6 +3950,8 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
       if (defaultMarkupPercent != null)
         'default_markup_percent': defaultMarkupPercent,
       if (searchKeywords != null) 'search_keywords': searchKeywords,
+      if (marketplaceFeesJson != null)
+        'marketplace_fees_json': marketplaceFeesJson,
     });
   }
 
@@ -3919,6 +3967,7 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     Value<String>? blacklistedSupplierIds,
     Value<double>? defaultMarkupPercent,
     Value<String>? searchKeywords,
+    Value<String>? marketplaceFeesJson,
   }) {
     return UserRulesTableCompanion(
       id: id ?? this.id,
@@ -3936,6 +3985,7 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
           blacklistedSupplierIds ?? this.blacklistedSupplierIds,
       defaultMarkupPercent: defaultMarkupPercent ?? this.defaultMarkupPercent,
       searchKeywords: searchKeywords ?? this.searchKeywords,
+      marketplaceFeesJson: marketplaceFeesJson ?? this.marketplaceFeesJson,
     );
   }
 
@@ -3987,6 +4037,11 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     if (searchKeywords.present) {
       map['search_keywords'] = Variable<String>(searchKeywords.value);
     }
+    if (marketplaceFeesJson.present) {
+      map['marketplace_fees_json'] = Variable<String>(
+        marketplaceFeesJson.value,
+      );
+    }
     return map;
   }
 
@@ -4003,7 +4058,8 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
           ..write('blacklistedProductIds: $blacklistedProductIds, ')
           ..write('blacklistedSupplierIds: $blacklistedSupplierIds, ')
           ..write('defaultMarkupPercent: $defaultMarkupPercent, ')
-          ..write('searchKeywords: $searchKeywords')
+          ..write('searchKeywords: $searchKeywords, ')
+          ..write('marketplaceFeesJson: $marketplaceFeesJson')
           ..write(')'))
         .toString();
   }
@@ -8082,6 +8138,7 @@ typedef $$UserRulesTableTableCreateCompanionBuilder =
       required String blacklistedSupplierIds,
       required double defaultMarkupPercent,
       required String searchKeywords,
+      Value<String> marketplaceFeesJson,
     });
 typedef $$UserRulesTableTableUpdateCompanionBuilder =
     UserRulesTableCompanion Function({
@@ -8096,6 +8153,7 @@ typedef $$UserRulesTableTableUpdateCompanionBuilder =
       Value<String> blacklistedSupplierIds,
       Value<double> defaultMarkupPercent,
       Value<String> searchKeywords,
+      Value<String> marketplaceFeesJson,
     });
 
 class $$UserRulesTableTableFilterComposer
@@ -8159,6 +8217,11 @@ class $$UserRulesTableTableFilterComposer
 
   ColumnFilters<String> get searchKeywords => $composableBuilder(
     column: $table.searchKeywords,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get marketplaceFeesJson => $composableBuilder(
+    column: $table.marketplaceFeesJson,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -8226,6 +8289,11 @@ class $$UserRulesTableTableOrderingComposer
     column: $table.searchKeywords,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get marketplaceFeesJson => $composableBuilder(
+    column: $table.marketplaceFeesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserRulesTableTableAnnotationComposer
@@ -8289,6 +8357,11 @@ class $$UserRulesTableTableAnnotationComposer
     column: $table.searchKeywords,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get marketplaceFeesJson => $composableBuilder(
+    column: $table.marketplaceFeesJson,
+    builder: (column) => column,
+  );
 }
 
 class $$UserRulesTableTableTableManager
@@ -8335,6 +8408,7 @@ class $$UserRulesTableTableTableManager
                 Value<String> blacklistedSupplierIds = const Value.absent(),
                 Value<double> defaultMarkupPercent = const Value.absent(),
                 Value<String> searchKeywords = const Value.absent(),
+                Value<String> marketplaceFeesJson = const Value.absent(),
               }) => UserRulesTableCompanion(
                 id: id,
                 minProfitPercent: minProfitPercent,
@@ -8347,6 +8421,7 @@ class $$UserRulesTableTableTableManager
                 blacklistedSupplierIds: blacklistedSupplierIds,
                 defaultMarkupPercent: defaultMarkupPercent,
                 searchKeywords: searchKeywords,
+                marketplaceFeesJson: marketplaceFeesJson,
               ),
           createCompanionCallback:
               ({
@@ -8361,6 +8436,7 @@ class $$UserRulesTableTableTableManager
                 required String blacklistedSupplierIds,
                 required double defaultMarkupPercent,
                 required String searchKeywords,
+                Value<String> marketplaceFeesJson = const Value.absent(),
               }) => UserRulesTableCompanion.insert(
                 id: id,
                 minProfitPercent: minProfitPercent,
@@ -8373,6 +8449,7 @@ class $$UserRulesTableTableTableManager
                 blacklistedSupplierIds: blacklistedSupplierIds,
                 defaultMarkupPercent: defaultMarkupPercent,
                 searchKeywords: searchKeywords,
+                marketplaceFeesJson: marketplaceFeesJson,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
