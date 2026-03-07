@@ -79,7 +79,7 @@ final scannerProvider = Provider<Scanner>((ref) => Scanner(
   listingDecider: ref.watch(listingDeciderProvider),
   supplierSelector: ref.watch(supplierSelectorProvider),
   sources: ref.watch(sourcesListProvider),
-  targetPlatformId: 'allegro',
+  targetPlatformIds: ref.watch(targetsListProvider).map((t) => t.id).toList(),
 ));
 
 final orderSyncServiceProvider = Provider<OrderSyncService>((ref) => OrderSyncService(

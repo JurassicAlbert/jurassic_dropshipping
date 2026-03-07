@@ -20,8 +20,11 @@ class Scanner {
     required this.listingDecider,
     required this.supplierSelector,
     required this.sources,
-    this.targetPlatformId = '', // set when publishing to a specific target
-  });
+    List<String> targetPlatformIds = const [],
+    @Deprecated('Use targetPlatformIds instead') String targetPlatformId = '',
+  }) : targetPlatformIds = targetPlatformIds.isNotEmpty
+           ? targetPlatformIds
+           : (targetPlatformId.isNotEmpty ? [targetPlatformId] : ['allegro']);
 
   final ProductRepository productRepository;
   final ListingRepository listingRepository;
@@ -31,7 +34,7 @@ class Scanner {
   final ListingDecider listingDecider;
   final SupplierSelector supplierSelector;
   final List<SourcePlatform> sources;
-  final String targetPlatformId;
+  final List<String> targetPlatformIds;
 
   /// Run a scan: load rules, search each source, decide and persist listings.
   Future<ScanResult> run() async {
@@ -73,12 +76,15 @@ class Scanner {
             criteriaSnapshot: accept.criteriaSnapshot,
             createdAt: DateTime.now(),
           ));
-          final listing = accept.listing.copyWith(
-            targetPlatformId: targetPlatformId,
-            decisionLogId: logId,
-          );
-          await listingRepository.insert(listing);
-          listingsCreated++;
+          for (final targetId in targetPlatformIds) {
+            final listing = accept.listing.copyWith(
+              targetPlatformId: targetId,
+              decisionLogId: logId,
+              id: '${accept.listing.id}_$targetId',
+            );
+            await listingRepository.insert(listing);
+            listingsCreated++;
+          }
         }
       } catch (e, st) {
         appLogger.e('Scanner: source ${source.id} failed', error: e, stackTrace: st);
