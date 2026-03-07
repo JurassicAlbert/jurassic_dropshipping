@@ -90,6 +90,8 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
+            _buildOrderKpis(ordersAsync, returnsAsync),
+            const SizedBox(height: 12),
             ordersAsync.when(
               data: (orders) => _ProfitChart(orders: orders),
               loading: () => const SizedBox.shrink(),
@@ -166,6 +168,18 @@ class DashboardScreen extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     return _KpiCard(orders: orders, listings: listings, returns: returns);
+  }
+
+  static Widget _buildOrderKpis(
+    AsyncValue<List<Order>> ordersAsync,
+    AsyncValue<List<ReturnRequest>> returnsAsync,
+  ) {
+    final orders = ordersAsync.valueOrNull;
+    final returns = returnsAsync.valueOrNull;
+    if (orders == null || returns == null) {
+      return const SizedBox.shrink();
+    }
+    return _OrderKpiGrid(orders: orders, returns: returns);
   }
 
   static String _formatTime(DateTime dt) {
@@ -454,4 +468,76 @@ class _DailyProfit {
   const _DailyProfit({required this.date, required this.profit});
   final DateTime date;
   final double profit;
+}
+
+class _OrderKpiGrid extends StatelessWidget {
+  const _OrderKpiGrid({required this.orders, required this.returns});
+  final List<Order> orders;
+  final List<ReturnRequest> returns;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalRevenue = orders.fold<double>(0, (s, o) => s + o.sellingPrice);
+    final totalCost = orders.fold<double>(0, (s, o) => s + o.sourceCost);
+    final marginPct = totalRevenue > 0 ? ((totalRevenue - totalCost) / totalRevenue * 100) : 0.0;
+
+    final shippedOrDelivered = orders.where((o) =>
+        o.status == OrderStatus.shipped || o.status == OrderStatus.delivered).length;
+    final returnRate = shippedOrDelivered > 0
+        ? (returns.length / shippedOrDelivered * 100)
+        : 0.0;
+
+    final now = DateTime.now();
+    final weekAgo = now.subtract(const Duration(days: 7));
+    final revenueThisWeek = orders
+        .where((o) => o.createdAt != null && o.createdAt!.isAfter(weekAgo))
+        .fold<double>(0, (s, o) => s + o.sellingPrice);
+
+    final avgOrderValue = orders.isEmpty ? 0.0 : totalRevenue / orders.length;
+
+    final cards = <_MiniKpi>[
+      _MiniKpi(label: 'Profit Margin', value: '${marginPct.toStringAsFixed(1)}%', icon: Icons.pie_chart, color: Colors.indigo),
+      _MiniKpi(label: 'Return Rate', value: '${returnRate.toStringAsFixed(1)}%', icon: Icons.assignment_return, color: Colors.orange),
+      _MiniKpi(label: 'Revenue This Week', value: '${revenueThisWeek.toStringAsFixed(2)} PLN', icon: Icons.calendar_today, color: Colors.teal),
+      _MiniKpi(label: 'Avg Order Value', value: '${avgOrderValue.toStringAsFixed(2)} PLN', icon: Icons.shopping_bag, color: Colors.deepPurple),
+    ];
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: cards.map((kpi) => SizedBox(
+        width: 170,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(kpi.icon, size: 16, color: kpi.color),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(kpi.label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(kpi.value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        ),
+      )).toList(),
+    );
+  }
+}
+
+class _MiniKpi {
+  const _MiniKpi({required this.label, required this.value, required this.icon, required this.color});
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
 }
