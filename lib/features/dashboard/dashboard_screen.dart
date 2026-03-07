@@ -2,7 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
+import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
+import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -12,6 +14,7 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final listingsAsync = ref.watch(listingsProvider);
     final ordersAsync = ref.watch(ordersProvider);
+    final returnsAsync = ref.watch(returnRequestsProvider);
     final rulesAsync = ref.watch(rulesProvider);
     final automation = ref.watch(automationSchedulerProvider);
 
@@ -19,6 +22,7 @@ class DashboardScreen extends ConsumerWidget {
       onRefresh: () async {
         ref.invalidate(listingsProvider);
         ref.invalidate(ordersProvider);
+        ref.invalidate(returnRequestsProvider);
         ref.invalidate(rulesProvider);
       },
       child: SingleChildScrollView(
@@ -54,6 +58,8 @@ class DashboardScreen extends ConsumerWidget {
                 onRetry: () => ref.invalidate(listingsProvider),
               ),
             ),
+            const SizedBox(height: 12),
+            _buildKpiCard(listingsAsync, ordersAsync, returnsAsync),
             const SizedBox(height: 12),
             ordersAsync.when(
               data: (orders) {
@@ -146,6 +152,20 @@ class DashboardScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  static Widget _buildKpiCard(
+    AsyncValue<List<Listing>> listingsAsync,
+    AsyncValue<List<Order>> ordersAsync,
+    AsyncValue<List<ReturnRequest>> returnsAsync,
+  ) {
+    final listings = listingsAsync.valueOrNull;
+    final orders = ordersAsync.valueOrNull;
+    final returns = returnsAsync.valueOrNull;
+    if (listings == null || orders == null || returns == null) {
+      return const SizedBox.shrink();
+    }
+    return _KpiCard(orders: orders, listings: listings, returns: returns);
   }
 
   static String _formatTime(DateTime dt) {
@@ -323,6 +343,111 @@ class _ProfitChartState extends State<_ProfitChart> {
     final lastN = sorted.length > days ? sorted.sublist(sorted.length - days) : sorted;
     return lastN.map((e) => _DailyProfit(date: e.key, profit: e.value)).toList();
   }
+}
+
+class _KpiCard extends StatelessWidget {
+  const _KpiCard({required this.orders, required this.listings, required this.returns});
+  final List<Order> orders;
+  final List<Listing> listings;
+  final List<ReturnRequest> returns;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalRevenue = orders.fold<double>(0, (s, o) => s + o.sellingPrice);
+    final totalCost = orders.fold<double>(0, (s, o) => s + o.sourceCost);
+    final totalProfit = totalRevenue - totalCost;
+    final avgProfit = orders.isEmpty ? 0.0 : totalProfit / orders.length;
+    final marginPct = totalRevenue > 0 ? (totalProfit / totalRevenue * 100) : 0.0;
+    final returnRate = orders.isEmpty ? 0.0 : (returns.length / orders.length * 100);
+    final activeListings = listings.where((l) => l.status == ListingStatus.active).length;
+
+    final now = DateTime.now();
+    final weekAgo = now.subtract(const Duration(days: 7));
+    final twoWeeksAgo = now.subtract(const Duration(days: 14));
+    final ordersThisWeek = orders.where((o) => o.createdAt != null && o.createdAt!.isAfter(weekAgo)).length;
+    final ordersLastWeek = orders.where((o) => o.createdAt != null && o.createdAt!.isAfter(twoWeeksAgo) && o.createdAt!.isBefore(weekAgo)).length;
+
+    final tiles = <_KpiTile>[
+      _KpiTile(label: 'Total Profit', value: '${totalProfit.toStringAsFixed(2)} PLN', icon: Icons.trending_up),
+      _KpiTile(label: 'Avg Profit / Order', value: '${avgProfit.toStringAsFixed(2)} PLN', icon: Icons.receipt_long),
+      _KpiTile(label: 'Profit Margin', value: '${marginPct.toStringAsFixed(1)}%', icon: Icons.pie_chart),
+      _KpiTile(label: 'Return Rate', value: '${returnRate.toStringAsFixed(1)}%', icon: Icons.assignment_return),
+      _KpiTile(label: 'Active Listings', value: '$activeListings', icon: Icons.storefront),
+      _KpiTile(
+        label: 'Orders This Week',
+        value: '$ordersThisWeek',
+        icon: Icons.shopping_cart,
+        trend: ordersLastWeek > 0
+            ? '${ordersThisWeek >= ordersLastWeek ? '+' : ''}${ordersThisWeek - ordersLastWeek} vs last week'
+            : null,
+        trendUp: ordersThisWeek >= ordersLastWeek,
+      ),
+    ];
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Key Performance Indicators', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: tiles
+                  .map((t) => SizedBox(
+                        width: 160,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(t.icon, size: 16, color: Theme.of(context).colorScheme.primary),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(t.label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(t.value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            if (t.trend != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                t.trend!,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: t.trendUp ? Colors.green : Colors.red,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _KpiTile {
+  const _KpiTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.trend,
+    this.trendUp = true,
+  });
+  final String label;
+  final String value;
+  final IconData icon;
+  final String? trend;
+  final bool trendUp;
 }
 
 class _DailyProfit {
