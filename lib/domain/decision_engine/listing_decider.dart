@@ -1,3 +1,4 @@
+import 'package:jurassic_dropshipping/core/logger.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/product.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
@@ -34,6 +35,26 @@ class ListingDecider {
     if (!pricingCalculator.meetsMinProfit(sellingPrice, sourceCost, rules)) {
       return ListingDecisionReject(
         reason: 'Profit margin ${margin.toStringAsFixed(1)}% < ${rules.minProfitPercent}%',
+      );
+    }
+
+    final absoluteProfit = pricingCalculator.profitAfterFee(sellingPrice, sourceCost);
+    if (absoluteProfit < 5.0) {
+      return ListingDecisionReject(
+        reason: 'Absolute profit ${absoluteProfit.toStringAsFixed(2)} PLN < 5 PLN minimum',
+      );
+    }
+
+    if (sellingPrice > sourceCost * 10) {
+      return ListingDecisionReject(
+        reason: 'Selling price ${sellingPrice.toStringAsFixed(2)} exceeds 10x source cost ${sourceCost.toStringAsFixed(2)} — possible data error',
+      );
+    }
+
+    if (margin >= rules.minProfitPercent && margin < rules.minProfitPercent + 5) {
+      appLogger.w(
+        'ListingDecider: borderline margin ${margin.toStringAsFixed(1)}% for product ${product.id} '
+        '(min ${rules.minProfitPercent}%, threshold ${(rules.minProfitPercent + 5).toStringAsFixed(1)}%)',
       );
     }
 

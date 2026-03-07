@@ -37,6 +37,20 @@ class PricingCalculator {
     return profitMarginPercent(sellingPrice, sourceCost) >= rules.minProfitPercent;
   }
 
+  /// Calculate minimum selling price that remains profitable even after a potential return.
+  /// Accounts for: source cost + desired profit + marketplace fee + return risk buffer.
+  /// returnRatePercent: expected return rate (e.g. 5.0 = 5%)
+  double calculateSafeSellingPrice(
+    double sourceCost,
+    UserRules rules, {
+    double returnRatePercent = 5.0,
+    double avgReturnShippingCost = 20.0,
+  }) {
+    final basePrice = calculateSellingPrice(sourceCost, rules);
+    final returnBuffer = (returnRatePercent / 100) * (basePrice + avgReturnShippingCost);
+    return basePrice + returnBuffer;
+  }
+
   /// Calculate the financial impact of a no-reason return.
   /// Returns the net loss: refund given minus what seller keeps.
   ReturnCostEstimate estimateReturnCost({
