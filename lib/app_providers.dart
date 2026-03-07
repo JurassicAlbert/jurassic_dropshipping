@@ -24,7 +24,6 @@ import 'package:jurassic_dropshipping/services/allegro_oauth_service.dart';
 import 'package:jurassic_dropshipping/services/price_refresh_service.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
 import 'package:jurassic_dropshipping/services/automation_scheduler.dart';
-import 'package:jurassic_dropshipping/services/order_sync_scheduler.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 import 'package:jurassic_dropshipping/services/sources/api2cart_client.dart';
@@ -96,12 +95,6 @@ final fulfillmentServiceProvider = Provider<FulfillmentService>((ref) => Fulfill
 
 final allegroOAuthProvider = Provider<AllegroOAuthService>((ref) => AllegroOAuthService(
   secureStorage: ref.watch(secureStorageProvider),
-));
-
-final orderSyncSchedulerProvider = Provider<OrderSyncScheduler>((ref) => OrderSyncScheduler(
-  orderSyncService: ref.watch(orderSyncServiceProvider),
-  fulfillmentService: ref.watch(fulfillmentServiceProvider),
-  rulesRepository: ref.watch(rulesRepositoryProvider),
 ));
 
 final priceRefreshServiceProvider = Provider<PriceRefreshService>((ref) => PriceRefreshService(
