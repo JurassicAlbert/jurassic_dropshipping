@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
@@ -25,9 +27,12 @@ import '../mocks/mock_target_platform.dart';
 void main() {
   late AppDatabase db;
   late AutomationScheduler scheduler;
+  late Directory hiveTempDir;
 
   setUp(() async {
     Fixtures.reset();
+    hiveTempDir = await Directory.systemTemp.createTemp('hive_test_');
+    Hive.init(hiveTempDir.path);
     db = createTestDatabase();
 
     final rulesRepo = RulesRepository(db);
@@ -86,7 +91,11 @@ void main() {
 
   tearDown(() async {
     scheduler.stopAll();
+    await Hive.close();
     await db.close();
+    if (hiveTempDir.existsSync()) {
+      hiveTempDir.deleteSync(recursive: true);
+    }
   });
 
   group('AutomationScheduler', () {
