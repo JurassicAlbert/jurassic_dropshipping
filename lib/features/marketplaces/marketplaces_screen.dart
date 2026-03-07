@@ -16,12 +16,14 @@ class MarketplacesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersAsync = ref.watch(ordersProvider);
+    final accountsAsync = ref.watch(marketplaceAccountsProvider);
     final targets = ref.watch(targetsListProvider);
     final registeredIds = targets.map((t) => t.id).toSet();
 
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(ordersProvider);
+        ref.invalidate(marketplaceAccountsProvider);
       },
       child: ordersAsync.when(
         data: (orders) {
@@ -34,7 +36,15 @@ class MarketplacesScreen extends ConsumerWidget {
             );
           }
 
-          final allIds = {...byPlatform.keys, ...registeredIds};
+          final accounts = accountsAsync.valueOrNull ?? [];
+          final accountsByPlatform = <String, List<String>>{};
+          for (final a in accounts) {
+            accountsByPlatform
+                .putIfAbsent(a.platformId, () => [])
+                .add(a.displayName);
+          }
+
+          final allIds = {...byPlatform.keys, ...registeredIds, ...accountsByPlatform.keys};
           final sortedIds = allIds.toList()..sort();
 
           if (sortedIds.isEmpty) {
@@ -53,6 +63,7 @@ class MarketplacesScreen extends ConsumerWidget {
               final stats = byPlatform[platformId];
               final isConnected = registeredIds.contains(platformId);
               final displayName = _marketplaceNames[platformId] ?? platformId;
+              final platformAccounts = accountsByPlatform[platformId];
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -79,11 +90,25 @@ class MarketplacesScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  subtitle: stats != null
-                      ? Text(
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (stats != null)
+                        Text(
                           'Orders: ${stats.count} · Revenue: ${stats.revenue.toStringAsFixed(2)} PLN · Profit: ${stats.profit.toStringAsFixed(2)} PLN',
                         )
-                      : const Text('No orders yet'),
+                      else
+                        const Text('No orders yet'),
+                      if (platformAccounts != null && platformAccounts.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            'Accounts: ${platformAccounts.join(', ')}',
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               );
             },

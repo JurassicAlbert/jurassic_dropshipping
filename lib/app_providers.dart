@@ -6,8 +6,10 @@ import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/data/models/supplier.dart';
 import 'package:jurassic_dropshipping/data/models/supplier_offer.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
+import 'package:jurassic_dropshipping/data/models/marketplace_account.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/marketplace_account_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
@@ -47,6 +49,7 @@ final rulesRepositoryProvider = Provider<RulesRepository>((ref) => RulesReposito
 final supplierRepositoryProvider = Provider<SupplierRepository>((ref) => SupplierRepository(ref.watch(dbProvider)));
 final supplierOfferRepositoryProvider = Provider<SupplierOfferRepository>((ref) => SupplierOfferRepository(ref.watch(dbProvider)));
 final returnRepositoryProvider = Provider<ReturnRepository>((ref) => ReturnRepository(ref.watch(dbProvider)));
+final marketplaceAccountRepositoryProvider = Provider<MarketplaceAccountRepository>((ref) => MarketplaceAccountRepository(ref.watch(dbProvider)));
 
 final cjClientProvider = Provider<CjDropshippingClient>((ref) => CjDropshippingClient(secureStorage: ref.watch(secureStorageProvider)));
 final allegroClientProvider = Provider<AllegroClient>((ref) => AllegroClient(secureStorage: ref.watch(secureStorageProvider)));
@@ -119,3 +122,4 @@ final decisionLogsProvider = FutureProvider<List<DecisionLog>>((ref) => ref.watc
 final suppliersProvider = FutureProvider<List<Supplier>>((ref) => ref.watch(supplierRepositoryProvider).getAll());
 final supplierOffersProvider = FutureProvider<List<SupplierOffer>>((ref) => ref.watch(supplierOfferRepositoryProvider).getAll());
 final returnRequestsProvider = FutureProvider<List<ReturnRequest>>((ref) => ref.watch(returnRepositoryProvider).getAll());
+final marketplaceAccountsProvider = FutureProvider<List<MarketplaceAccount>>((ref) => ref.watch(marketplaceAccountRepositoryProvider).getAll());
