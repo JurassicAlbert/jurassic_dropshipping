@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
+import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 
 class DecisionLogScreen extends ConsumerWidget {
   const DecisionLogScreen({super.key});
@@ -28,7 +29,10 @@ class DecisionLogScreen extends ConsumerWidget {
                 },
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => ErrorCard(
+          message: 'Failed to load data. Please try again.',
+          onRetry: () => ref.invalidate(decisionLogsProvider),
+        ),
       ),
     );
   }

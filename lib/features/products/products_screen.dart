@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
+import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 
 class ProductsScreen extends ConsumerWidget {
   const ProductsScreen({super.key});
@@ -50,7 +51,10 @@ class ProductsScreen extends ConsumerWidget {
                 },
               ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => ErrorCard(
+          message: 'Failed to load data. Please try again.',
+          onRetry: () => ref.invalidate(listingsProvider),
+        ),
       ),
     );
   }

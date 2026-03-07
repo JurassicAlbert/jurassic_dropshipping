@@ -4,6 +4,7 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart';
+import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 
 class ApprovalScreen extends ConsumerWidget {
   const ApprovalScreen({super.key});
@@ -33,7 +34,10 @@ class ApprovalScreen extends ConsumerWidget {
                       children: listings.map((l) => _ListingApprovalTile(key: ValueKey(l.id), listing: l)).toList(),
                     ),
               loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-              error: (e, _) => Card(child: Padding(padding: const EdgeInsets.all(16), child: Text('Error: $e'))),
+              error: (e, _) => ErrorCard(
+                message: 'Failed to load data. Please try again.',
+                onRetry: () => ref.invalidate(pendingListingsProvider),
+              ),
             ),
             const SizedBox(height: 24),
             const Text('Pending orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
@@ -45,7 +49,10 @@ class ApprovalScreen extends ConsumerWidget {
                       children: orders.map((o) => _OrderApprovalTile(key: ValueKey(o.id), order: o)).toList(),
                     ),
               loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-              error: (e, _) => Card(child: Padding(padding: const EdgeInsets.all(16), child: Text('Error: $e'))),
+              error: (e, _) => ErrorCard(
+                message: 'Failed to load data. Please try again.',
+                onRetry: () => ref.invalidate(pendingOrdersProvider),
+              ),
             ),
           ],
         ),

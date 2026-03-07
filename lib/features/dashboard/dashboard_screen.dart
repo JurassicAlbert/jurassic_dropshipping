@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
+import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -48,7 +49,10 @@ class DashboardScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-              error: (e, _) => Card(child: Padding(padding: const EdgeInsets.all(16), child: Text('Error: $e'))),
+              error: (e, _) => ErrorCard(
+                message: 'Failed to load data. Please try again.',
+                onRetry: () => ref.invalidate(listingsProvider),
+              ),
             ),
             const SizedBox(height: 12),
             ordersAsync.when(
@@ -74,7 +78,10 @@ class DashboardScreen extends ConsumerWidget {
                 );
               },
               loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-              error: (e, _) => Card(child: Padding(padding: const EdgeInsets.all(16), child: Text('Error: $e'))),
+              error: (e, _) => ErrorCard(
+                message: 'Failed to load data. Please try again.',
+                onRetry: () => ref.invalidate(ordersProvider),
+              ),
             ),
             const SizedBox(height: 12),
             ordersAsync.when(
