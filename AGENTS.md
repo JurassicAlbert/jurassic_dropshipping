@@ -16,7 +16,7 @@ Jurassic Dropshipping is a single Flutter desktop/mobile app for dropshipping ar
 
 - `flutter analyze lib` reports 2 info-level `use_build_context_synchronously` warnings in `lib/features/settings/settings_screen.dart`. These are non-blocking.
 - `flutter test` fails because `test/widget_test.dart` references `MyApp` which was renamed to `JurassicDropshippingApp` in a later commit. This is a pre-existing issue.
-- The Dashboard shows `MissingPlatformDirectoryException` errors at runtime. This is a pre-existing issue in the app's `path_provider` usage on Linux. The app UI and navigation still work; only DB-backed views (Dashboard, Products, Orders, etc.) show this error. The Settings page renders fully.
+- The `path_provider` fallback for Linux/headless environments was fixed in `app_database_storage_io.dart`. The database now falls back to `$HOME/.jurassic_dropshipping/` when XDG dirs are unavailable.
 
 ### Code generation
 
