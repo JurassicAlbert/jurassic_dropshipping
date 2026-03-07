@@ -12,11 +12,12 @@ Jurassic Dropshipping is a single Flutter desktop/mobile app for dropshipping ar
 - Run with: `LIBGL_ALWAYS_SOFTWARE=1 DISPLAY=:1 ./build/linux/x64/release/bundle/jurassic_dropshipping`
 - Or use `flutter run -d linux` for debug mode (also needs `LIBGL_ALWAYS_SOFTWARE=1`).
 
-### Known pre-existing issues
+### Known notes
 
-- `flutter analyze lib` reports 2 info-level `use_build_context_synchronously` warnings in `lib/features/settings/settings_screen.dart`. These are non-blocking.
-- `flutter test` fails because `test/widget_test.dart` references `MyApp` which was renamed to `JurassicDropshippingApp` in a later commit. This is a pre-existing issue.
+- `flutter analyze lib` — clean, no issues.
+- `flutter test` — all 136 tests pass (domain, repositories, services, integration, widget).
 - The `path_provider` fallback for Linux/headless environments was fixed in `app_database_storage_io.dart`. The database now falls back to `$HOME/.jurassic_dropshipping/` when XDG dirs are unavailable.
+- `flutter build web` succeeds. The web build uses Drift WASM; `web/sqlite3.wasm` (~714KB) and `web/drift_worker.js` must be present.
 
 ### Code generation
 
