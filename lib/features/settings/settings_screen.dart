@@ -263,6 +263,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
             child: const Text('Save API2Cart credentials'),
           ),
+          const SizedBox(height: 24),
+          const Text('Appearance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          SegmentedButton<ThemeMode>(
+            segments: const [
+              ButtonSegment(value: ThemeMode.system, label: Text('System')),
+              ButtonSegment(value: ThemeMode.light, label: Text('Light')),
+              ButtonSegment(value: ThemeMode.dark, label: Text('Dark')),
+            ],
+            selected: {ref.watch(themeModeProvider)},
+            onSelectionChanged: (modes) {
+              ref.read(themeModeProvider.notifier).state = modes.first;
+            },
+          ),
         ],
       ),
     );
