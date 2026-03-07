@@ -159,6 +159,32 @@ class MarketplaceAccounts extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(storage.openAppDatabaseConnection());
 
+  /// For testing: pass a custom [QueryExecutor] (e.g. NativeDatabase.memory()).
+  AppDatabase.forTesting(super.e);
+
   @override
   int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 2) {
+        // v1 -> v2: added marketplaceAccountId to listings/orders, MarketplaceAccounts table
+        await m.addColumn(listings, listings.marketplaceAccountId);
+        await m.addColumn(orders, orders.marketplaceAccountId);
+        await m.createTable(marketplaceAccounts);
+      }
+      if (from < 3) {
+        // v2 -> v3: added promised delivery fields, Returns table
+        await m.addColumn(listings, listings.promisedMinDays);
+        await m.addColumn(listings, listings.promisedMaxDays);
+        await m.addColumn(orders, orders.promisedDeliveryMin);
+        await m.addColumn(orders, orders.promisedDeliveryMax);
+        await m.createTable(returns);
+      }
+    },
+  );
 }
