@@ -2,9 +2,44 @@
 
 Personal dropshipping arbitrage app (Flutter) – automate sourcing, listing, and order fulfillment for the Polish market. Single-user; optional manual approval for listings and orders.
 
+## Features
+
+- **Multi-source product sourcing**: CJ Dropshipping (API v2), API2Cart (Shopify, WooCommerce, Magento, etc.)
+- **Multi-target listing**: Allegro (REST API + OAuth), Temu (seller API — forward-looking)
+- **Decision engine**: automated product scanning, supplier selection, pricing with configurable rules
+- **Safety guardrails**: minimum profit floor (5 PLN), max source price, 10x sanity check, return risk buffer, blacklists — see [MONEY_SAFETY.md](docs/MONEY_SAFETY.md)
+- **Returns management**: track return requests, reasons, refund amounts, restocking fees
+- **Supplier & offer tracking**: supplier return policies, per-offer cost/shipping/carrier data, stale price detection
+- **Marketplace accounts**: manage connected marketplace accounts (Allegro, Temu, etc.)
+- **Price refresh**: automatic stale offer price refresh from source platforms
+- **Automation scheduler**: timer-based scanner, order sync, and price refresh with configurable intervals
+- **Shipping estimator**: delivery window estimation from carrier days + handling time
+- **Approval queues**: optional manual approval for listings and orders before publishing/fulfilling
+- **Dashboard**: summary cards, profit trend chart (fl_chart), scan + sync + automation controls
+- **Web panel**: full app runs in the browser via Flutter web + Drift WASM
+
+## Architecture overview
+
+```
+lib/
+├── core/              # AppError, Result<T,E>, logger
+├── data/
+│   ├── database/      # Drift schema + platform-conditional connections
+│   ├── models/        # Freezed models (Product, Order, Listing, Supplier, etc.)
+│   └── repositories/  # CRUD repositories (Product, Listing, Order, Supplier, etc.)
+├── domain/
+│   ├── decision_engine/  # Scanner, ListingDecider, SupplierSelector, PricingCalculator
+│   ├── platforms.dart    # SourcePlatform / TargetPlatform interfaces
+│   └── shipping_estimator.dart
+├── features/          # UI screens (dashboard, products, orders, suppliers, etc.)
+└── services/          # API clients (CJ, API2Cart, Allegro, Temu), OAuth, sync, fulfillment
+```
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full architecture diagram and data flow.
+
 ## Setup
 
-- Flutter SDK (see `environment.sdk` in [pubspec.yaml](pubspec.yaml)).
+- Flutter SDK >= 3.11.0 (see `environment.sdk` in [pubspec.yaml](pubspec.yaml)).
 - Copy [.env.example](.env.example) to `.env` if you need env-based config (API base URLs). **Do not commit API keys** – use the app Settings and secure storage.
 
 ## Run
@@ -16,7 +51,7 @@ flutter run   # pick Android, desktop (Windows/macOS/Linux), or Chrome (web)
 
 ### Web panel
 
-Run the full app in the browser (dashboard, products, orders, approval queue, decision log, settings):
+Run the full app in the browser (dashboard, products, orders, suppliers, marketplaces, returns, approval queue, decision log, settings):
 
 ```bash
 flutter run -d chrome
@@ -35,14 +70,33 @@ After changing models or the Drift schema:
 dart run build_runner build --delete-conflicting-outputs
 ```
 
+## Analyze
+
+```bash
+flutter analyze lib
+```
+
+## Test
+
+```bash
+flutter test               # all 136 tests
+flutter test test/domain/  # decision engine + shipping estimator (50)
+flutter test test/data/    # repositories (57)
+flutter test test/services/ # services (22)
+flutter test test/integration/ # integration (6)
+```
+
 ## Documentation
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) – High-level architecture and data flow.
 - [docs/DECISION_LOGIC.md](docs/DECISION_LOGIC.md) – Listing and supplier decision rules.
 - [docs/ADDING_A_MARKETPLACE.md](docs/ADDING_A_MARKETPLACE.md) – How to add a new source or target platform.
+- [docs/MONEY_SAFETY.md](docs/MONEY_SAFETY.md) – Financial safety guardrails, return risk, and monitoring checklist.
 
 ## Integrations
 
 - **Source**: CJ Dropshipping (API v2). Configure email + API key in Settings.
-- **Target**: Allegro REST API. Configure OAuth tokens (access/refresh) and client credentials in code/secure storage; full Allegro OAuth flow in app can be added later.
+- **Source**: API2Cart (unified ecommerce API). Configure API key + store key in Settings.
+- **Target**: Allegro REST API. Full OAuth flow in app (Client ID/Secret + authorization code exchange).
+- **Target**: Temu Seller API (forward-looking — placeholder endpoints until public API is available).
 - **Stubs**: Temu (source) and Amazon (target) are stubs for future implementation.
