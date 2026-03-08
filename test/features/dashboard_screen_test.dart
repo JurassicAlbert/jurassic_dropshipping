@@ -34,6 +34,12 @@ void main() {
     }
 
     testWidgets('shows Dashboard title', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       await tester.pumpWidget(
         ProviderScope(
           overrides: baseOverrides(db),
@@ -45,6 +51,12 @@ void main() {
     });
 
     testWidgets('shows listing counts when data loaded', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       final listings = [
         Fixtures.listing(status: ListingStatus.active),
         Fixtures.listing(status: ListingStatus.active),
@@ -62,6 +74,12 @@ void main() {
     });
 
     testWidgets('shows order summary when data loaded', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       final orders = [
         Fixtures.order(sellingPrice: 100.0, sourceCost: 60.0),
         Fixtures.order(sellingPrice: 50.0, sourceCost: 25.0),
@@ -78,6 +96,12 @@ void main() {
     });
 
     testWidgets('shows no order data message in chart', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       await tester.pumpWidget(
         ProviderScope(
           overrides: baseOverrides(db),

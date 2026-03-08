@@ -25,141 +25,139 @@ class DashboardScreen extends ConsumerWidget {
         ref.invalidate(returnRequestsProvider);
         ref.invalidate(rulesProvider);
       },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('Dashboard', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            listingsAsync.when(
-              data: (listings) {
-                final active = listings.where((l) => l.status.name == 'active').length;
-                final pending = listings.where((l) => l.status.name == 'pendingApproval').length;
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 800;
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Dashboard', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+
+                // ─── Top KPI stat cards ───
+                _buildTopKpis(context, listingsAsync, ordersAsync, returnsAsync, isWide),
+                const SizedBox(height: 16),
+
+                // ─── Responsive grid for chart + automation ───
+                if (isWide)
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text('Listings', style: TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 8),
-                        Text('Active: $active'),
-                        Text('Pending approval: $pending'),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-              error: (e, _) => ErrorCard(
-                message: 'Failed to load data. Please try again.',
-                onRetry: () => ref.invalidate(listingsProvider),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildKpiCard(listingsAsync, ordersAsync, returnsAsync),
-            const SizedBox(height: 12),
-            ordersAsync.when(
-              data: (orders) {
-                final pending = orders.where((o) => o.status.name == 'pending' || o.status.name == 'pendingApproval').length;
-                final totalSales = orders.fold<double>(0, (s, o) => s + o.sellingPrice);
-                final totalCost = orders.fold<double>(0, (s, o) => s + o.sourceCost);
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Orders', style: TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 8),
-                        Text('Pending: $pending'),
-                        Text('Total sales: ${totalSales.toStringAsFixed(2)} PLN'),
-                        Text('Total cost: ${totalCost.toStringAsFixed(2)} PLN'),
-                        Text('Est. profit: ${(totalSales - totalCost).toStringAsFixed(2)} PLN'),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-              error: (e, _) => ErrorCard(
-                message: 'Failed to load data. Please try again.',
-                onRetry: () => ref.invalidate(ordersProvider),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildOrderKpis(ordersAsync, returnsAsync),
-            const SizedBox(height: 12),
-            ordersAsync.when(
-              data: (orders) => _ProfitChart(orders: orders),
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Automation', style: TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-                    _StatusRow(label: 'Scanner', running: automation.isScanRunning, lastTime: automation.lastScanTime),
-                    _StatusRow(label: 'Order Sync', running: automation.isSyncRunning, lastTime: automation.lastSyncTime),
-                    _StatusRow(label: 'Price Refresh', running: automation.isPriceRefreshRunning, lastTime: automation.lastPriceRefreshTime),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        FilledButton(
-                          onPressed: (automation.isScanRunning && automation.isSyncRunning)
-                              ? null
-                              : () => automation.startAll(),
-                          child: const Text('Start all'),
+                        Expanded(
+                          flex: 3,
+                          child: ordersAsync.when(
+                            data: (orders) => _ProfitChart(orders: orders),
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, _) => const SizedBox.shrink(),
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        OutlinedButton(
-                          onPressed: (automation.isScanRunning || automation.isSyncRunning || automation.isPriceRefreshRunning)
-                              ? () => automation.stopAll()
-                              : null,
-                          child: const Text('Stop all'),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: _AutomationCard(automation: automation),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            rulesAsync.when(
-              data: (rules) => Card(
-                child: ListTile(
-                  title: const Text('Run scan'),
-                  subtitle: Text('Keywords: ${rules.searchKeywords.join(", ").isEmpty ? "none" : rules.searchKeywords.join(", ")}'),
-                  trailing: FilledButton(
-                    onPressed: () async {
-                      final scanner = ref.read(scannerProvider);
-                      await scanner.run();
-                      ref.invalidate(listingsProvider);
-                    },
-                    child: const Text('Scan'),
+                  )
+                else ...[
+                  ordersAsync.when(
+                    data: (orders) => _ProfitChart(orders: orders),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
                   ),
+                  const SizedBox(height: 12),
+                  _AutomationCard(automation: automation),
+                ],
+
+                const SizedBox(height: 16),
+
+                // ─── Summary cards ───
+                if (isWide)
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: listingsAsync.when(
+                            data: (listings) => _ListingsSummaryCard(listings: listings),
+                            loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))),
+                            error: (e, _) => ErrorCard(
+                              message: 'Failed to load data. Please try again.',
+                              onRetry: () => ref.invalidate(listingsProvider),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ordersAsync.when(
+                            data: (orders) => _OrdersSummaryCard(orders: orders),
+                            loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))),
+                            error: (e, _) => ErrorCard(
+                              message: 'Failed to load data. Please try again.',
+                              onRetry: () => ref.invalidate(ordersProvider),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  listingsAsync.when(
+                    data: (listings) => _ListingsSummaryCard(listings: listings),
+                    loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))),
+                    error: (e, _) => ErrorCard(
+                      message: 'Failed to load data. Please try again.',
+                      onRetry: () => ref.invalidate(listingsProvider),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ordersAsync.when(
+                    data: (orders) => _OrdersSummaryCard(orders: orders),
+                    loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))),
+                    error: (e, _) => ErrorCard(
+                      message: 'Failed to load data. Please try again.',
+                      onRetry: () => ref.invalidate(ordersProvider),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 16),
+                rulesAsync.when(
+                  data: (rules) => Card(
+                    child: ListTile(
+                      title: const Text('Run scan'),
+                      subtitle: Text('Keywords: ${rules.searchKeywords.join(", ").isEmpty ? "none" : rules.searchKeywords.join(", ")}'),
+                      trailing: FilledButton(
+                        onPressed: () async {
+                          final scanner = ref.read(scannerProvider);
+                          await scanner.run();
+                          ref.invalidate(listingsProvider);
+                        },
+                        child: const Text('Scan'),
+                      ),
+                    ),
+                  ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                 ),
-              ),
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  static Widget _buildKpiCard(
+  static Widget _buildTopKpis(
+    BuildContext context,
     AsyncValue<List<Listing>> listingsAsync,
     AsyncValue<List<Order>> ordersAsync,
     AsyncValue<List<ReturnRequest>> returnsAsync,
+    bool isWide,
   ) {
     final listings = listingsAsync.valueOrNull;
     final orders = ordersAsync.valueOrNull;
@@ -167,23 +165,262 @@ class DashboardScreen extends ConsumerWidget {
     if (listings == null || orders == null || returns == null) {
       return const SizedBox.shrink();
     }
-    return _KpiCard(orders: orders, listings: listings, returns: returns);
-  }
 
-  static Widget _buildOrderKpis(
-    AsyncValue<List<Order>> ordersAsync,
-    AsyncValue<List<ReturnRequest>> returnsAsync,
-  ) {
-    final orders = ordersAsync.valueOrNull;
-    final returns = returnsAsync.valueOrNull;
-    if (orders == null || returns == null) {
-      return const SizedBox.shrink();
+    final totalRevenue = orders.fold<double>(0, (s, o) => s + o.sellingPrice);
+    final totalCost = orders.fold<double>(0, (s, o) => s + o.sourceCost);
+    final totalProfit = totalRevenue - totalCost;
+    final marginPct = totalRevenue > 0 ? (totalProfit / totalRevenue * 100) : 0.0;
+    final shippedOrDelivered = orders.where((o) => o.status == OrderStatus.shipped || o.status == OrderStatus.delivered).length;
+    final returnRate = shippedOrDelivered > 0 ? (returns.length / shippedOrDelivered * 100) : 0.0;
+
+    final now = DateTime.now();
+    final weekAgo = now.subtract(const Duration(days: 7));
+    final twoWeeksAgo = now.subtract(const Duration(days: 14));
+    final revenueThisWeek = orders.where((o) => o.createdAt != null && o.createdAt!.isAfter(weekAgo)).fold<double>(0, (s, o) => s + o.sellingPrice);
+    final revenueLastWeek = orders.where((o) => o.createdAt != null && o.createdAt!.isAfter(twoWeeksAgo) && o.createdAt!.isBefore(weekAgo)).fold<double>(0, (s, o) => s + o.sellingPrice);
+    final avgOrderValue = orders.isEmpty ? 0.0 : totalRevenue / orders.length;
+    final avgOrderLastWeek = () {
+      final lastWeekOrders = orders.where((o) => o.createdAt != null && o.createdAt!.isAfter(twoWeeksAgo) && o.createdAt!.isBefore(weekAgo)).toList();
+      if (lastWeekOrders.isEmpty) return 0.0;
+      return lastWeekOrders.fold<double>(0, (s, o) => s + o.sellingPrice) / lastWeekOrders.length;
+    }();
+
+    final cs = Theme.of(context).colorScheme;
+
+    final kpis = [
+      _StyledKpiData(
+        icon: Icons.pie_chart,
+        value: '${marginPct.toStringAsFixed(1)}%',
+        label: 'Profit Margin',
+        trendUp: marginPct >= 20,
+        containerColor: cs.primaryContainer,
+        onContainerColor: cs.onPrimaryContainer,
+      ),
+      _StyledKpiData(
+        icon: Icons.assignment_return,
+        value: '${returnRate.toStringAsFixed(1)}%',
+        label: 'Return Rate',
+        trendUp: returnRate <= 5,
+        containerColor: cs.secondaryContainer,
+        onContainerColor: cs.onSecondaryContainer,
+      ),
+      _StyledKpiData(
+        icon: Icons.calendar_today,
+        value: '${revenueThisWeek.toStringAsFixed(0)} PLN',
+        label: 'Weekly Revenue',
+        trendUp: revenueThisWeek >= revenueLastWeek,
+        containerColor: cs.tertiaryContainer,
+        onContainerColor: cs.onTertiaryContainer,
+      ),
+      _StyledKpiData(
+        icon: Icons.shopping_bag,
+        value: '${avgOrderValue.toStringAsFixed(0)} PLN',
+        label: 'Avg Order Value',
+        trendUp: avgOrderValue >= avgOrderLastWeek,
+        containerColor: cs.errorContainer,
+        onContainerColor: cs.onErrorContainer,
+      ),
+    ];
+
+    if (isWide) {
+      return Row(
+        children: [
+          for (var i = 0; i < kpis.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(child: _StyledKpiCard(data: kpis[i])),
+          ],
+        ],
+      );
     }
-    return _OrderKpiGrid(orders: orders, returns: returns);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _StyledKpiCard(data: kpis[0])),
+            const SizedBox(width: 12),
+            Expanded(child: _StyledKpiCard(data: kpis[1])),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _StyledKpiCard(data: kpis[2])),
+            const SizedBox(width: 12),
+            Expanded(child: _StyledKpiCard(data: kpis[3])),
+          ],
+        ),
+      ],
+    );
   }
 
   static String _formatTime(DateTime dt) {
     return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+  }
+}
+
+// ─── Styled KPI Card ─────────────────────────────────────────────────────────
+
+class _StyledKpiData {
+  const _StyledKpiData({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.trendUp,
+    required this.containerColor,
+    required this.onContainerColor,
+  });
+  final IconData icon;
+  final String value;
+  final String label;
+  final bool trendUp;
+  final Color containerColor;
+  final Color onContainerColor;
+}
+
+class _StyledKpiCard extends StatelessWidget {
+  const _StyledKpiCard({required this.data});
+  final _StyledKpiData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: data.containerColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(data.icon, size: 20, color: data.onContainerColor),
+                const Spacer(),
+                Icon(
+                  data.trendUp ? Icons.arrow_upward : Icons.arrow_downward,
+                  size: 18,
+                  color: data.trendUp ? Colors.green.shade700 : Colors.red.shade700,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              data.value,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: data.onContainerColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              data.label,
+              style: TextStyle(fontSize: 13, color: data.onContainerColor.withAlpha(180)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Listings Summary Card ───────────────────────────────────────────────────
+
+class _ListingsSummaryCard extends StatelessWidget {
+  const _ListingsSummaryCard({required this.listings});
+  final List<Listing> listings;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = listings.where((l) => l.status.name == 'active').length;
+    final pending = listings.where((l) => l.status.name == 'pendingApproval').length;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Listings', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Text('Active: $active'),
+            Text('Pending approval: $pending'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Orders Summary Card ─────────────────────────────────────────────────────
+
+class _OrdersSummaryCard extends StatelessWidget {
+  const _OrdersSummaryCard({required this.orders});
+  final List<Order> orders;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = orders.where((o) => o.status.name == 'pending' || o.status.name == 'pendingApproval').length;
+    final totalSales = orders.fold<double>(0, (s, o) => s + o.sellingPrice);
+    final totalCost = orders.fold<double>(0, (s, o) => s + o.sourceCost);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Orders', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Text('Pending: $pending'),
+            Text('Total sales: ${totalSales.toStringAsFixed(2)} PLN'),
+            Text('Total cost: ${totalCost.toStringAsFixed(2)} PLN'),
+            Text('Est. profit: ${(totalSales - totalCost).toStringAsFixed(2)} PLN'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Automation Card ─────────────────────────────────────────────────────────
+
+class _AutomationCard extends StatelessWidget {
+  const _AutomationCard({required this.automation});
+  final dynamic automation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Automation', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            _StatusRow(label: 'Scanner', running: automation.isScanRunning, lastTime: automation.lastScanTime),
+            _StatusRow(label: 'Order Sync', running: automation.isSyncRunning, lastTime: automation.lastSyncTime),
+            _StatusRow(label: 'Price Refresh', running: automation.isPriceRefreshRunning, lastTime: automation.lastPriceRefreshTime),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                FilledButton(
+                  onPressed: (automation.isScanRunning && automation.isSyncRunning)
+                      ? null
+                      : () => automation.startAll(),
+                  child: const Text('Start all'),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: (automation.isScanRunning || automation.isSyncRunning || automation.isPriceRefreshRunning)
+                      ? () => automation.stopAll()
+                      : null,
+                  child: const Text('Stop all'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -359,185 +596,8 @@ class _ProfitChartState extends State<_ProfitChart> {
   }
 }
 
-class _KpiCard extends StatelessWidget {
-  const _KpiCard({required this.orders, required this.listings, required this.returns});
-  final List<Order> orders;
-  final List<Listing> listings;
-  final List<ReturnRequest> returns;
-
-  @override
-  Widget build(BuildContext context) {
-    final totalRevenue = orders.fold<double>(0, (s, o) => s + o.sellingPrice);
-    final totalCost = orders.fold<double>(0, (s, o) => s + o.sourceCost);
-    final totalProfit = totalRevenue - totalCost;
-    final avgProfit = orders.isEmpty ? 0.0 : totalProfit / orders.length;
-    final marginPct = totalRevenue > 0 ? (totalProfit / totalRevenue * 100) : 0.0;
-    final returnRate = orders.isEmpty ? 0.0 : (returns.length / orders.length * 100);
-    final activeListings = listings.where((l) => l.status == ListingStatus.active).length;
-
-    final now = DateTime.now();
-    final weekAgo = now.subtract(const Duration(days: 7));
-    final twoWeeksAgo = now.subtract(const Duration(days: 14));
-    final ordersThisWeek = orders.where((o) => o.createdAt != null && o.createdAt!.isAfter(weekAgo)).length;
-    final ordersLastWeek = orders.where((o) => o.createdAt != null && o.createdAt!.isAfter(twoWeeksAgo) && o.createdAt!.isBefore(weekAgo)).length;
-
-    final tiles = <_KpiTile>[
-      _KpiTile(label: 'Total Profit', value: '${totalProfit.toStringAsFixed(2)} PLN', icon: Icons.trending_up),
-      _KpiTile(label: 'Avg Profit / Order', value: '${avgProfit.toStringAsFixed(2)} PLN', icon: Icons.receipt_long),
-      _KpiTile(label: 'Profit Margin', value: '${marginPct.toStringAsFixed(1)}%', icon: Icons.pie_chart),
-      _KpiTile(label: 'Return Rate', value: '${returnRate.toStringAsFixed(1)}%', icon: Icons.assignment_return),
-      _KpiTile(label: 'Active Listings', value: '$activeListings', icon: Icons.storefront),
-      _KpiTile(
-        label: 'Orders This Week',
-        value: '$ordersThisWeek',
-        icon: Icons.shopping_cart,
-        trend: ordersLastWeek > 0
-            ? '${ordersThisWeek >= ordersLastWeek ? '+' : ''}${ordersThisWeek - ordersLastWeek} vs last week'
-            : null,
-        trendUp: ordersThisWeek >= ordersLastWeek,
-      ),
-    ];
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Key Performance Indicators', style: TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: tiles
-                  .map((t) => SizedBox(
-                        width: 160,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(t.icon, size: 16, color: Theme.of(context).colorScheme.primary),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(t.label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(t.value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            if (t.trend != null) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                t.trend!,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: t.trendUp ? Colors.green : Colors.red,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _KpiTile {
-  const _KpiTile({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.trend,
-    this.trendUp = true,
-  });
-  final String label;
-  final String value;
-  final IconData icon;
-  final String? trend;
-  final bool trendUp;
-}
-
 class _DailyProfit {
   const _DailyProfit({required this.date, required this.profit});
   final DateTime date;
   final double profit;
-}
-
-class _OrderKpiGrid extends StatelessWidget {
-  const _OrderKpiGrid({required this.orders, required this.returns});
-  final List<Order> orders;
-  final List<ReturnRequest> returns;
-
-  @override
-  Widget build(BuildContext context) {
-    final totalRevenue = orders.fold<double>(0, (s, o) => s + o.sellingPrice);
-    final totalCost = orders.fold<double>(0, (s, o) => s + o.sourceCost);
-    final marginPct = totalRevenue > 0 ? ((totalRevenue - totalCost) / totalRevenue * 100) : 0.0;
-
-    final shippedOrDelivered = orders.where((o) =>
-        o.status == OrderStatus.shipped || o.status == OrderStatus.delivered).length;
-    final returnRate = shippedOrDelivered > 0
-        ? (returns.length / shippedOrDelivered * 100)
-        : 0.0;
-
-    final now = DateTime.now();
-    final weekAgo = now.subtract(const Duration(days: 7));
-    final revenueThisWeek = orders
-        .where((o) => o.createdAt != null && o.createdAt!.isAfter(weekAgo))
-        .fold<double>(0, (s, o) => s + o.sellingPrice);
-
-    final avgOrderValue = orders.isEmpty ? 0.0 : totalRevenue / orders.length;
-
-    final cards = <_MiniKpi>[
-      _MiniKpi(label: 'Profit Margin', value: '${marginPct.toStringAsFixed(1)}%', icon: Icons.pie_chart, color: Colors.indigo),
-      _MiniKpi(label: 'Return Rate', value: '${returnRate.toStringAsFixed(1)}%', icon: Icons.assignment_return, color: Colors.orange),
-      _MiniKpi(label: 'Revenue This Week', value: '${revenueThisWeek.toStringAsFixed(2)} PLN', icon: Icons.calendar_today, color: Colors.teal),
-      _MiniKpi(label: 'Avg Order Value', value: '${avgOrderValue.toStringAsFixed(2)} PLN', icon: Icons.shopping_bag, color: Colors.deepPurple),
-    ];
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: cards.map((kpi) => SizedBox(
-        width: 170,
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(kpi.icon, size: 16, color: kpi.color),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(kpi.label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(kpi.value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-        ),
-      )).toList(),
-    );
-  }
-}
-
-class _MiniKpi {
-  const _MiniKpi({required this.label, required this.value, required this.icon, required this.color});
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
 }
