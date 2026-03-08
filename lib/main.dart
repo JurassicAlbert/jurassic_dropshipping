@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/app_router.dart';
+import 'package:jurassic_dropshipping/features/auth/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +36,7 @@ class JurassicDropshippingApp extends ConsumerWidget {
       ),
       themeMode: themeMode,
       routerConfig: goRouter,
+      builder: (context, child) => AuthGate(child: child ?? const SizedBox()),
     );
   }
 }

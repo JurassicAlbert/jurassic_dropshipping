@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
+import 'package:jurassic_dropshipping/services/auth_service.dart';
 import 'package:jurassic_dropshipping/data/models/decision_log.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
@@ -41,6 +42,8 @@ import 'package:jurassic_dropshipping/services/targets/temu_seller_client.dart';
 import 'package:jurassic_dropshipping/services/targets/temu_target_platform.dart';
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
+
+final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
 final dbProvider = Provider<AppDatabase>((ref) => AppDatabase());
 
