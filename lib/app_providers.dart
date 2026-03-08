@@ -25,9 +25,11 @@ import 'package:jurassic_dropshipping/domain/decision_engine/scanner.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/supplier_selector.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart';
 import 'package:jurassic_dropshipping/services/allegro_oauth_service.dart';
+import 'package:jurassic_dropshipping/services/marketplace_listing_sync_service.dart';
 import 'package:jurassic_dropshipping/services/price_refresh_service.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
 import 'package:jurassic_dropshipping/services/automation_scheduler.dart';
+import 'package:jurassic_dropshipping/services/order_cancellation_service.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/data/seed/database_seeder.dart';
 import 'package:jurassic_dropshipping/services/seed_service.dart';
@@ -115,10 +117,20 @@ final scannerProvider = Provider<Scanner>((ref) => Scanner(
   targetPlatformIds: ref.watch(targetsListProvider).map((t) => t.id).toList(),
 ));
 
+final orderCancellationServiceProvider = Provider<OrderCancellationService>((ref) => OrderCancellationService(
+  orderRepository: ref.watch(orderRepositoryProvider),
+  listingRepository: ref.watch(listingRepositoryProvider),
+  productRepository: ref.watch(productRepositoryProvider),
+  returnRepository: ref.watch(returnRepositoryProvider),
+  targets: ref.watch(targetsListProvider),
+  sources: ref.watch(sourcesListProvider),
+));
+
 final orderSyncServiceProvider = Provider<OrderSyncService>((ref) => OrderSyncService(
   orderRepository: ref.watch(orderRepositoryProvider),
   rulesRepository: ref.watch(rulesRepositoryProvider),
   targets: ref.watch(targetsListProvider),
+  orderCancellationService: ref.watch(orderCancellationServiceProvider),
 ));
 
 final fulfillmentServiceProvider = Provider<FulfillmentService>((ref) => FulfillmentService(
@@ -127,6 +139,7 @@ final fulfillmentServiceProvider = Provider<FulfillmentService>((ref) => Fulfill
   productRepository: ref.watch(productRepositoryProvider),
   sources: ref.watch(sourcesListProvider),
   targets: ref.watch(targetsListProvider),
+  orderCancellationService: ref.watch(orderCancellationServiceProvider),
 ));
 
 final allegroOAuthProvider = Provider<AllegroOAuthService>((ref) => AllegroOAuthService(
@@ -138,12 +151,20 @@ final priceRefreshServiceProvider = Provider<PriceRefreshService>((ref) => Price
   sources: ref.watch(sourcesListProvider),
 ));
 
+final marketplaceListingSyncServiceProvider = Provider<MarketplaceListingSyncService>((ref) => MarketplaceListingSyncService(
+  listingRepository: ref.watch(listingRepositoryProvider),
+  productRepository: ref.watch(productRepositoryProvider),
+  sources: ref.watch(sourcesListProvider),
+  targets: ref.watch(targetsListProvider),
+));
+
 final automationSchedulerProvider = Provider<AutomationScheduler>((ref) => AutomationScheduler(
   scanner: ref.watch(scannerProvider),
   orderSyncService: ref.watch(orderSyncServiceProvider),
   fulfillmentService: ref.watch(fulfillmentServiceProvider),
   rulesRepository: ref.watch(rulesRepositoryProvider),
   priceRefreshService: ref.watch(priceRefreshServiceProvider),
+  marketplaceListingSyncService: ref.watch(marketplaceListingSyncServiceProvider),
 ));
 
 final listingsProvider = FutureProvider<List<Listing>>((ref) => ref.watch(listingRepositoryProvider).getAll());
@@ -151,6 +172,53 @@ final ordersProvider = FutureProvider<List<Order>>((ref) => ref.watch(orderRepos
 final rulesProvider = FutureProvider<UserRules>((ref) => ref.watch(rulesRepositoryProvider).get());
 final pendingListingsProvider = FutureProvider<List<Listing>>((ref) => ref.watch(listingRepositoryProvider).getPendingApproval());
 final pendingOrdersProvider = FutureProvider<List<Order>>((ref) => ref.watch(orderRepositoryProvider).getPendingApproval());
+
+/// Fresh stock at source for an order (for display on approval screen). Null if unknown or refresh failed.
+final orderStockAtSourceProvider = FutureProvider.family<int?, String>((ref, orderId) async {
+  final orderRepo = ref.read(orderRepositoryProvider);
+  final listingRepo = ref.read(listingRepositoryProvider);
+  final productRepo = ref.read(productRepositoryProvider);
+  final sources = ref.read(sourcesListProvider);
+  final order = await orderRepo.getByLocalId(orderId);
+  if (order == null) return null;
+  final listing = await listingRepo.getByLocalId(order.listingId) ??
+      await listingRepo.getByTargetListingId(order.targetPlatformId, order.listingId);
+  if (listing == null) return null;
+  final product = await productRepo.getByLocalId(listing.productId);
+  if (product == null || product.variants.isEmpty) return null;
+  final sourceList = sources.where((s) => s.id == product.sourcePlatformId).toList();
+  final source = sourceList.isEmpty ? null : sourceList.first;
+  if (source == null) return null;
+  try {
+    final fresh = await source.getProduct(product.sourceId);
+    if (fresh == null || fresh.variants.isEmpty) return null;
+    return fresh.variants.fold<int>(0, (s, v) => s + v.stock);
+  } catch (_) {
+    return null;
+  }
+});
+
+/// Fresh stock at source for a listing (for display on approval screen). Null if unknown or refresh failed.
+final listingStockAtSourceProvider = FutureProvider.family<int?, String>((ref, listingId) async {
+  final listingRepo = ref.read(listingRepositoryProvider);
+  final productRepo = ref.read(productRepositoryProvider);
+  final sources = ref.read(sourcesListProvider);
+  final listing = await listingRepo.getByLocalId(listingId);
+  if (listing == null) return null;
+  final product = await productRepo.getByLocalId(listing.productId);
+  if (product == null || product.variants.isEmpty) return null;
+  final sourceList = sources.where((s) => s.id == product.sourcePlatformId).toList();
+  final source = sourceList.isEmpty ? null : sourceList.first;
+  if (source == null) return null;
+  try {
+    final fresh = await source.getProduct(product.sourceId);
+    if (fresh == null || fresh.variants.isEmpty) return null;
+    return fresh.variants.fold<int>(0, (s, v) => s + v.stock);
+  } catch (_) {
+    return null;
+  }
+});
+
 final decisionLogsProvider = FutureProvider<List<DecisionLog>>((ref) => ref.watch(decisionLogRepositoryProvider).getAll(limit: 100));
 final suppliersProvider = FutureProvider<List<Supplier>>((ref) => ref.watch(supplierRepositoryProvider).getAll());
 final supplierOffersProvider = FutureProvider<List<SupplierOffer>>((ref) => ref.watch(supplierOfferRepositoryProvider).getAll());

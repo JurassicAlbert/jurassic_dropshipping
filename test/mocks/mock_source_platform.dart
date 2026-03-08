@@ -13,6 +13,9 @@ class MockSourcePlatform implements SourcePlatform {
   String get displayName => 'Mock Source';
 
   @override
+  Future<bool> isConfigured() async => true;
+
+  @override
   Future<List<Product>> searchProducts(List<String> keywords, {SourceSearchFilters? filters}) async {
     return products;
   }
@@ -36,4 +39,7 @@ class MockSourcePlatform implements SourcePlatform {
   Future<SourceOrderResult?> getOrderStatus(String sourceOrderId) async {
     return SourceOrderResult(sourceOrderId: sourceOrderId);
   }
+
+  @override
+  Future<bool> cancelOrder(String sourceOrderId) async => true;
 }

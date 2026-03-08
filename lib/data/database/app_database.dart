@@ -59,6 +59,7 @@ class Orders extends Table {
   TextColumn get marketplaceAccountId => text().nullable()();
   DateTimeColumn get promisedDeliveryMin => dateTime().nullable()();
   DateTimeColumn get promisedDeliveryMax => dateTime().nullable()();
+  DateTimeColumn get deliveredAt => dateTime().nullable()();
   DateTimeColumn get approvedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 }
@@ -88,6 +89,8 @@ class UserRulesTable extends Table {
   RealColumn get defaultMarkupPercent => real()();
   TextColumn get searchKeywords => text()();
   TextColumn get marketplaceFeesJson => text().withDefault(const Constant('{}'))();
+  TextColumn get sellerReturnAddressJson => text().nullable()();
+  TextColumn get marketplaceReturnPolicyJson => text().withDefault(const Constant('{}'))();
 }
 
 @DataClassName('SupplierRow')
@@ -151,6 +154,7 @@ class Returns extends Table {
   TextColumn get productId => text().nullable()();
   TextColumn get sourcePlatformId => text().nullable()();
   TextColumn get targetPlatformId => text().nullable()();
+  TextColumn get returnDestination => text().nullable()();
 }
 
 @DataClassName('MarketplaceAccountRow')
@@ -181,7 +185,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -226,6 +230,18 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(returns, returns.productId);
         await m.addColumn(returns, returns.sourcePlatformId);
         await m.addColumn(returns, returns.targetPlatformId);
+      }
+      if (from < 6) {
+        // v5 -> v6: deliveredAt, fulfillment delay, seller return address, marketplace return policy, return destination
+        await m.addColumn(orders, orders.deliveredAt);
+        await customStatement('ALTER TABLE user_rules ADD COLUMN fulfillment_delay_minutes INTEGER NOT NULL DEFAULT 0');
+        await m.addColumn(userRulesTable, userRulesTable.sellerReturnAddressJson);
+        await m.addColumn(userRulesTable, userRulesTable.marketplaceReturnPolicyJson);
+        await m.addColumn(returns, returns.returnDestination);
+      }
+      if (from < 7) {
+        // v6 -> v7: remove fulfillment delay (orders fulfilled immediately to avoid OOS during wait)
+        await customStatement('ALTER TABLE user_rules DROP COLUMN fulfillment_delay_minutes');
       }
     },
   );

@@ -352,6 +352,7 @@ mixin _$Order {
   String? get marketplaceAccountId => throw _privateConstructorUsedError;
   DateTime? get promisedDeliveryMin => throw _privateConstructorUsedError;
   DateTime? get promisedDeliveryMax => throw _privateConstructorUsedError;
+  DateTime? get deliveredAt => throw _privateConstructorUsedError;
   DateTime? get approvedAt => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
@@ -384,6 +385,7 @@ abstract class $OrderCopyWith<$Res> {
     String? marketplaceAccountId,
     DateTime? promisedDeliveryMin,
     DateTime? promisedDeliveryMax,
+    DateTime? deliveredAt,
     DateTime? approvedAt,
     DateTime? createdAt,
   });
@@ -420,6 +422,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? marketplaceAccountId = freezed,
     Object? promisedDeliveryMin = freezed,
     Object? promisedDeliveryMax = freezed,
+    Object? deliveredAt = freezed,
     Object? approvedAt = freezed,
     Object? createdAt = freezed,
   }) {
@@ -481,6 +484,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.promisedDeliveryMax
                 : promisedDeliveryMax // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
+            deliveredAt: freezed == deliveredAt
+                ? _value.deliveredAt
+                : deliveredAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             approvedAt: freezed == approvedAt
                 ? _value.approvedAt
                 : approvedAt // ignore: cast_nullable_to_non_nullable
@@ -528,6 +535,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     String? marketplaceAccountId,
     DateTime? promisedDeliveryMin,
     DateTime? promisedDeliveryMax,
+    DateTime? deliveredAt,
     DateTime? approvedAt,
     DateTime? createdAt,
   });
@@ -564,6 +572,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? marketplaceAccountId = freezed,
     Object? promisedDeliveryMin = freezed,
     Object? promisedDeliveryMax = freezed,
+    Object? deliveredAt = freezed,
     Object? approvedAt = freezed,
     Object? createdAt = freezed,
   }) {
@@ -625,6 +634,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.promisedDeliveryMax
             : promisedDeliveryMax // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        deliveredAt: freezed == deliveredAt
+            ? _value.deliveredAt
+            : deliveredAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         approvedAt: freezed == approvedAt
             ? _value.approvedAt
             : approvedAt // ignore: cast_nullable_to_non_nullable
@@ -656,6 +669,7 @@ class _$OrderImpl implements _Order {
     this.marketplaceAccountId,
     this.promisedDeliveryMin,
     this.promisedDeliveryMax,
+    this.deliveredAt,
     this.approvedAt,
     this.createdAt,
   });
@@ -692,13 +706,15 @@ class _$OrderImpl implements _Order {
   @override
   final DateTime? promisedDeliveryMax;
   @override
+  final DateTime? deliveredAt;
+  @override
   final DateTime? approvedAt;
   @override
   final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'Order(id: $id, listingId: $listingId, targetOrderId: $targetOrderId, targetPlatformId: $targetPlatformId, customerAddress: $customerAddress, status: $status, sourceOrderId: $sourceOrderId, sourceCost: $sourceCost, sellingPrice: $sellingPrice, trackingNumber: $trackingNumber, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedDeliveryMin: $promisedDeliveryMin, promisedDeliveryMax: $promisedDeliveryMax, approvedAt: $approvedAt, createdAt: $createdAt)';
+    return 'Order(id: $id, listingId: $listingId, targetOrderId: $targetOrderId, targetPlatformId: $targetPlatformId, customerAddress: $customerAddress, status: $status, sourceOrderId: $sourceOrderId, sourceCost: $sourceCost, sellingPrice: $sellingPrice, trackingNumber: $trackingNumber, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedDeliveryMin: $promisedDeliveryMin, promisedDeliveryMax: $promisedDeliveryMax, deliveredAt: $deliveredAt, approvedAt: $approvedAt, createdAt: $createdAt)';
   }
 
   @override
@@ -732,6 +748,8 @@ class _$OrderImpl implements _Order {
                 other.promisedDeliveryMin == promisedDeliveryMin) &&
             (identical(other.promisedDeliveryMax, promisedDeliveryMax) ||
                 other.promisedDeliveryMax == promisedDeliveryMax) &&
+            (identical(other.deliveredAt, deliveredAt) ||
+                other.deliveredAt == deliveredAt) &&
             (identical(other.approvedAt, approvedAt) ||
                 other.approvedAt == approvedAt) &&
             (identical(other.createdAt, createdAt) ||
@@ -756,6 +774,7 @@ class _$OrderImpl implements _Order {
     marketplaceAccountId,
     promisedDeliveryMin,
     promisedDeliveryMax,
+    deliveredAt,
     approvedAt,
     createdAt,
   );
@@ -790,6 +809,7 @@ abstract class _Order implements Order {
     final String? marketplaceAccountId,
     final DateTime? promisedDeliveryMin,
     final DateTime? promisedDeliveryMax,
+    final DateTime? deliveredAt,
     final DateTime? approvedAt,
     final DateTime? createdAt,
   }) = _$OrderImpl;
@@ -824,6 +844,8 @@ abstract class _Order implements Order {
   DateTime? get promisedDeliveryMin;
   @override
   DateTime? get promisedDeliveryMax;
+  @override
+  DateTime? get deliveredAt;
   @override
   DateTime? get approvedAt;
   @override

@@ -41,7 +41,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         return switch (_statusFilter) {
           'pending' => o.status == OrderStatus.pending,
           'shipped' => o.status == OrderStatus.shipped,
-          'failed' => o.status == OrderStatus.failed,
+          'failed' => o.status == OrderStatus.failed || o.status == OrderStatus.failedOutOfStock,
           _ => true,
         };
       }).toList();
@@ -159,6 +159,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         color = Colors.green;
         break;
       case OrderStatus.failed:
+      case OrderStatus.failedOutOfStock:
         color = Colors.red;
         break;
       case OrderStatus.cancelled:

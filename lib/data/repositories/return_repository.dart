@@ -20,6 +20,14 @@ class ReturnRepository {
     );
   }
 
+  static ReturnDestination? _returnDestinationFromString(String? s) {
+    if (s == null || s.isEmpty) return null;
+    return ReturnDestination.values.firstWhere(
+      (e) => e.name == s,
+      orElse: () => ReturnDestination.toSupplier,
+    );
+  }
+
   static ReturnRequest _rowToReturnRequest(ReturnRow row) {
     return ReturnRequest(
       id: row.returnId,
@@ -41,6 +49,7 @@ class ReturnRepository {
       productId: row.productId,
       sourcePlatformId: row.sourcePlatformId,
       targetPlatformId: row.targetPlatformId,
+      returnDestination: _returnDestinationFromString(row.returnDestination),
     );
   }
 
@@ -80,6 +89,7 @@ class ReturnRepository {
         productId: Value(returnRequest.productId),
         sourcePlatformId: Value(returnRequest.sourcePlatformId),
         targetPlatformId: Value(returnRequest.targetPlatformId),
+        returnDestination: Value(returnRequest.returnDestination?.name),
       ),
     );
   }

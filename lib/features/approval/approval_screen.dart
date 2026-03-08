@@ -79,11 +79,30 @@ class _ListingApprovalTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final targets = ref.watch(targetsListProvider);
     final listingRepo = ref.read(listingRepositoryProvider);
+    final stockAsync = ref.watch(listingStockAtSourceProvider(listing.id));
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         title: Text(listing.id),
-        subtitle: Text('${listing.sellingPrice.toStringAsFixed(2)} PLN · ${listing.sourceCost.toStringAsFixed(2)} cost'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${listing.sellingPrice.toStringAsFixed(2)} PLN · ${listing.sourceCost.toStringAsFixed(2)} cost'),
+            stockAsync.when(
+              data: (stock) => stock != null
+                  ? Text(
+                      stock == 0 ? 'Out of stock at supplier' : 'Stock at supplier: $stock',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: stock == 0 ? Theme.of(context).colorScheme.error : null,
+                          ),
+                    )
+                  : const SizedBox.shrink(),
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -138,20 +157,48 @@ class _OrderApprovalTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fulfillment = ref.read(fulfillmentServiceProvider);
-    final orderRepo = ref.read(orderRepositoryProvider);
+    final orderCancellation = ref.read(orderCancellationServiceProvider);
+    final stockAsync = ref.watch(orderStockAtSourceProvider(order.id));
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         title: Text(order.targetOrderId),
-        subtitle: Text('${order.sellingPrice.toStringAsFixed(2)} PLN · ${order.customerAddress.name}'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${order.sellingPrice.toStringAsFixed(2)} PLN · ${order.customerAddress.name}'),
+            stockAsync.when(
+              data: (stock) => stock != null
+                  ? Text(
+                      stock == 0 ? 'Out of stock at supplier' : 'Stock at supplier: $stock',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: stock == 0 ? Theme.of(context).colorScheme.error : null,
+                          ),
+                    )
+                  : const SizedBox.shrink(),
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextButton(
               onPressed: () async {
-                await orderRepo.updateStatus(order.id, OrderStatus.cancelled);
+                final ok = await orderCancellation.cancelOrder(order);
                 ref.invalidate(pendingOrdersProvider);
                 ref.invalidate(ordersProvider);
+                if (context.mounted && !ok) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Could not cancel on marketplace. Please cancel the order manually on the marketplace.',
+                      ),
+                    ),
+                  );
+                }
               },
               child: const Text('Reject'),
             ),

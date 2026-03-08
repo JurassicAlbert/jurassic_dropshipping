@@ -14,6 +14,9 @@ class TemuTargetPlatform implements TargetPlatform {
   String get displayName => 'Temu';
 
   @override
+  Future<bool> isConfigured() async => false;
+
+  @override
   Future<String> createListing(ListingDraft draft) async {
     final body = {
       'title': draft.title,
@@ -30,8 +33,8 @@ class TemuTargetPlatform implements TargetPlatform {
   }
 
   @override
-  Future<void> updateListing(String listingId, {double? price, int? stock}) async {
-    await _client.updateListing(listingId, price: price, stock: stock);
+  Future<void> updateListing(String listingId, {double? price, int? stock, String? title, String? description}) async {
+    await _client.updateListing(listingId, price: price, stock: stock, title: title, description: description);
   }
 
   @override
@@ -66,6 +69,16 @@ class TemuTargetPlatform implements TargetPlatform {
   @override
   Future<void> updateTracking(String orderId, String trackingNumber) async {
     await _client.updateTracking(orderId, trackingNumber);
+  }
+
+  @override
+  Future<void> cancelOrder(String targetOrderId) async {
+    await _client.cancelOrder(targetOrderId);
+  }
+
+  @override
+  Future<OrderStatus?> getOrderStatus(String targetOrderId) async {
+    return _client.getOrderStatus(targetOrderId);
   }
 
   @override

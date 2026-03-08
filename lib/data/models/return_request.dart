@@ -6,6 +6,9 @@ part 'return_request.g.dart';
 enum ReturnStatus { requested, approved, shipped, received, refunded, rejected }
 enum ReturnReason { noReason, defective, wrongItem, damagedInTransit, other }
 
+/// Where the customer sends the return package.
+enum ReturnDestination { toSupplier, toSeller }
+
 @freezed
 class ReturnRequest with _$ReturnRequest {
   const factory ReturnRequest({
@@ -34,6 +37,8 @@ class ReturnRequest with _$ReturnRequest {
     String? sourcePlatformId,
     /// Which marketplace the customer bought from
     String? targetPlatformId,
+    /// Where customer sends the return (supplier warehouse vs seller address)
+    ReturnDestination? returnDestination,
   }) = _ReturnRequest;
 
   factory ReturnRequest.fromJson(Map<String, dynamic> json) =>

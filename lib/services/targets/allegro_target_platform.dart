@@ -15,6 +15,9 @@ class AllegroTargetPlatform implements TargetPlatform {
   String get displayName => 'Allegro';
 
   @override
+  Future<bool> isConfigured() => _client.isConfigured();
+
+  @override
   Future<String> createListing(ListingDraft draft) async {
     final body = <String, dynamic>{
       'name': draft.title,
@@ -61,8 +64,8 @@ class AllegroTargetPlatform implements TargetPlatform {
   }
 
   @override
-  Future<void> updateListing(String listingId, {double? price, int? stock}) async {
-    await _client.updateOffer(listingId, price: price, stock: stock);
+  Future<void> updateListing(String listingId, {double? price, int? stock, String? title, String? description}) async {
+    await _client.updateOffer(listingId, price: price, stock: stock, title: title, description: description);
   }
 
   @override
@@ -106,6 +109,29 @@ class AllegroTargetPlatform implements TargetPlatform {
   @override
   Future<void> updateTracking(String orderId, String trackingNumber) async {
     await _client.setShipmentTracking(orderId, trackingNumber, 'OTHER');
+  }
+
+  @override
+  Future<void> cancelOrder(String targetOrderId) async {
+    await _client.putFulfillmentStatus(targetOrderId, 'CANCELLED');
+  }
+
+  @override
+  Future<OrderStatus?> getOrderStatus(String targetOrderId) async {
+    final form = await _client.getCheckoutForm(targetOrderId);
+    if (form == null) return null;
+    final status = form['status'] as String?;
+    final fulfillment = form['fulfillment'] as Map<String, dynamic>?;
+    final fulfillmentStatus = fulfillment?['status'] as String?;
+    if (status == 'CANCELLED') return OrderStatus.cancelled;
+    if (fulfillmentStatus == 'CANCELLED') return OrderStatus.cancelled;
+    if (fulfillmentStatus == 'SENT') return OrderStatus.shipped;
+    if (fulfillmentStatus == 'READY_FOR_SHIPMENT' ||
+        fulfillmentStatus == 'PROCESSING' ||
+        fulfillmentStatus == 'NEW') {
+      return OrderStatus.sourceOrderPlaced;
+    }
+    return OrderStatus.pending;
   }
 
   @override

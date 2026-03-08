@@ -30,4 +30,7 @@ class TemuStubSource implements SourcePlatform {
 
   @override
   Future<SourceOrderResult?> getOrderStatus(String sourceOrderId) async => null;
+
+  @override
+  Future<bool> cancelOrder(String sourceOrderId) async => false;
 }

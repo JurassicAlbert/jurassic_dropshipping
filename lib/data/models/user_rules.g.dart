@@ -41,6 +41,9 @@ _$UserRulesImpl _$$UserRulesImplFromJson(Map<String, dynamic> json) =>
             (k, e) => MapEntry(k, (e as num).toDouble()),
           ) ??
           const {},
+      sellerReturnAddress: json['sellerReturnAddress'] as Map<String, dynamic>?,
+      marketplaceReturnPolicy:
+          json['marketplaceReturnPolicy'] as Map<String, dynamic>? ?? const {},
     );
 
 Map<String, dynamic> _$$UserRulesImplToJson(_$UserRulesImpl instance) =>
@@ -56,4 +59,6 @@ Map<String, dynamic> _$$UserRulesImplToJson(_$UserRulesImpl instance) =>
       'defaultMarkupPercent': instance.defaultMarkupPercent,
       'searchKeywords': instance.searchKeywords,
       'marketplaceFees': instance.marketplaceFees,
+      'sellerReturnAddress': instance.sellerReturnAddress,
+      'marketplaceReturnPolicy': instance.marketplaceReturnPolicy,
     };

@@ -72,6 +72,18 @@ class CjDropshippingClient {
     return null;
   }
 
+  /// True if credentials are set (access token or email+apiKey). When false, callers should skip API calls.
+  Future<bool> isConfigured() async {
+    final token = await secureStorage.read(SecureKeys.cjAccessToken);
+    if (token != null && token.isNotEmpty) return true;
+    final email = await secureStorage.read(SecureKeys.cjEmail);
+    final apiKey = await secureStorage.read(SecureKeys.cjApiKey);
+    return email != null &&
+        email.isNotEmpty &&
+        apiKey != null &&
+        apiKey.isNotEmpty;
+  }
+
   /// Ensure we have a valid token (e.g. after app start). Call with email + apiKey if token missing.
   Future<bool> ensureToken({String? email, String? apiKey}) async {
     var token = await secureStorage.read(SecureKeys.cjAccessToken);

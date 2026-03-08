@@ -4,8 +4,10 @@ import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/return_repository.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
+import 'package:jurassic_dropshipping/services/order_cancellation_service.dart';
 
 import '../fixtures/test_database.dart';
 import '../fixtures/test_fixtures.dart';
@@ -39,6 +41,7 @@ void main() {
   late OrderRepository orderRepo;
   late ListingRepository listingRepo;
   late ProductRepository productRepo;
+  late OrderCancellationService cancellationService;
 
   setUp(() {
     Fixtures.reset();
@@ -46,6 +49,14 @@ void main() {
     orderRepo = OrderRepository(db);
     listingRepo = ListingRepository(db);
     productRepo = ProductRepository(db);
+    cancellationService = OrderCancellationService(
+      orderRepository: orderRepo,
+      listingRepository: listingRepo,
+      productRepository: productRepo,
+      returnRepository: ReturnRepository(db),
+      targets: [],
+      sources: [],
+    );
   });
 
   tearDown(() async {
@@ -87,6 +98,7 @@ void main() {
         productRepository: productRepo,
         sources: [mockSource],
         targets: [mockTarget],
+        orderCancellationService: cancellationService,
       );
 
       await service.fulfillOrder(order);
@@ -132,6 +144,7 @@ void main() {
         productRepository: productRepo,
         sources: [trackingSource],
         targets: [mockTarget],
+        orderCancellationService: cancellationService,
       );
 
       await service.fulfillOrder(order);
@@ -159,6 +172,7 @@ void main() {
         productRepository: productRepo,
         sources: [MockSourcePlatform(mockId: 'mock_source')],
         targets: [MockTargetPlatform(mockId: 'mock_target')],
+        orderCancellationService: cancellationService,
       );
 
       await service.fulfillOrder(order);
@@ -190,6 +204,7 @@ void main() {
         productRepository: productRepo,
         sources: [MockSourcePlatform(mockId: 'mock_source')],
         targets: [MockTargetPlatform(mockId: 'mock_target')],
+        orderCancellationService: cancellationService,
       );
 
       await service.fulfillOrder(order);
@@ -230,6 +245,7 @@ void main() {
         productRepository: productRepo,
         sources: [throwingSource],
         targets: [mockTarget],
+        orderCancellationService: cancellationService,
       );
 
       await service.fulfillOrder(order);

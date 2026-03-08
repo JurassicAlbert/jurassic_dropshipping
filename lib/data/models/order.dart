@@ -27,6 +27,7 @@ enum OrderStatus {
   shipped,
   delivered,
   failed,
+  failedOutOfStock,
   cancelled,
 }
 
@@ -47,6 +48,7 @@ class Order with _$Order {
     String? marketplaceAccountId,
     DateTime? promisedDeliveryMin,
     DateTime? promisedDeliveryMax,
+    DateTime? deliveredAt,
     DateTime? approvedAt,
     DateTime? createdAt,
   }) = _Order;

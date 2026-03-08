@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:jurassic_dropshipping/core/logger.dart';
+import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/services/dio_rate_limit_interceptor.dart';
 import 'package:jurassic_dropshipping/services/dio_retry_interceptor.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
@@ -31,10 +32,12 @@ class TemuSellerClient {
     }
   }
 
-  Future<void> updateListing(String id, {double? price, int? stock}) async {
+  Future<void> updateListing(String id, {double? price, int? stock, String? title, String? description}) async {
     final updates = <String, dynamic>{};
     if (price != null) updates['price'] = price;
     if (stock != null) updates['stock'] = stock;
+    if (title != null) updates['title'] = title;
+    if (description != null) updates['description'] = description;
     if (updates.isEmpty) return;
     await _dio.patch('/listings/$id', data: updates);
   }
@@ -55,5 +58,26 @@ class TemuSellerClient {
 
   Future<void> updateTracking(String orderId, String trackingNumber) async {
     await _dio.post('/orders/$orderId/tracking', data: {'trackingNumber': trackingNumber});
+  }
+
+  Future<void> cancelOrder(String orderId) async {
+    try {
+      await _dio.post('/orders/$orderId/cancel', data: {});
+    } catch (e, st) {
+      appLogger.e('TemuSeller cancelOrder failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  Future<OrderStatus?> getOrderStatus(String orderId) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>('/orders/$orderId');
+      final status = res.data?['status'] as String?;
+      if (status == 'cancelled' || status == 'CANCELLED') return OrderStatus.cancelled;
+      if (status == 'shipped' || status == 'SENT') return OrderStatus.shipped;
+      return OrderStatus.pending;
+    } catch (_) {
+      return null;
+    }
   }
 }

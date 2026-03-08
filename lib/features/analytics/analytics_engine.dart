@@ -82,7 +82,9 @@ class AnalyticsEngine {
     }
 
     final failedCount =
-        orders.where((o) => o.status == OrderStatus.failed).length;
+        orders.where((o) =>
+            o.status == OrderStatus.failed ||
+            o.status == OrderStatus.failedOutOfStock).length;
     if (failedCount > 0) {
       result.add(AnalyticsIssue(
         severity: IssueSeverity.warning,
@@ -135,6 +137,63 @@ class AnalyticsEngine {
   double get totalReturnCost {
     return returns.fold(
         0.0, (s, r) => s + (r.refundAmount ?? 0) + (r.returnShippingCost ?? 0));
+  }
+
+  // ─── Margin strategy KPIs ─────────────────────────
+  /// Orders within [period] from now.
+  List<Order> _ordersInPeriod(Duration period) {
+    final since = DateTime.now().subtract(period);
+    return orders.where((o) => o.createdAt != null && o.createdAt!.isAfter(since)).toList();
+  }
+
+  /// Realized profit margin % for an order.
+  static double orderMarginPercent(Order o) {
+    if (o.sellingPrice <= 0) return 0;
+    return ((o.sellingPrice - o.sourceCost) / o.sellingPrice) * 100;
+  }
+
+  /// Recommended minimum margin % so we stay profitable: use the minimum realized margin among orders that had positive profit in [period], or 0 if none.
+  double recommendedMinMarginPercent({Duration period = const Duration(days: 30)}) {
+    final list = _ordersInPeriod(period)
+        .map((o) => orderMarginPercent(o))
+        .where((m) => m > 0)
+        .toList();
+    if (list.isEmpty) return 0;
+    list.sort();
+    return list.first;
+  }
+
+  /// For a given product/listing: recommended min margin % from its orders in [period].
+  double recommendedMinMarginForListing(String listingId, {Duration period = const Duration(days: 30)}) {
+    final list = _ordersInPeriod(period)
+        .where((o) => o.listingId == listingId)
+        .map((o) => orderMarginPercent(o))
+        .where((m) => m > 0)
+        .toList();
+    if (list.isEmpty) return 0;
+    list.sort();
+    return list.first;
+  }
+
+  /// Profit by margin band (e.g. "10-20%") for [period]. Keys are band labels, values are total profit in that band.
+  Map<String, double> profitByMarginBand({Duration period = const Duration(days: 30)}) {
+    const bands = [0.0, 10.0, 15.0, 20.0, 25.0, 50.0, 100.0];
+    final result = <String, double>{};
+    for (var i = 0; i < bands.length - 1; i++) {
+      result['${bands[i].toInt()}-${bands[i + 1].toInt()}%'] = 0;
+    }
+    for (final o in _ordersInPeriod(period)) {
+      final m = orderMarginPercent(o);
+      final profit = o.sellingPrice - o.sourceCost;
+      for (var i = 0; i < bands.length - 1; i++) {
+        if (m >= bands[i] && m < bands[i + 1]) {
+          result['${bands[i].toInt()}-${bands[i + 1].toInt()}%'] =
+              (result['${bands[i].toInt()}-${bands[i + 1].toInt()}%'] ?? 0) + profit;
+          break;
+        }
+      }
+    }
+    return result;
   }
 
   // ─── Daily profit for chart ───────────────────────

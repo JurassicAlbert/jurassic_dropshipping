@@ -15,7 +15,7 @@ class AmazonStubTarget implements TargetPlatform {
   }
 
   @override
-  Future<void> updateListing(String listingId, {double? price, int? stock}) async {}
+  Future<void> updateListing(String listingId, {double? price, int? stock, String? title, String? description}) async {}
 
   @override
   Future<List<Order>> getOrders(DateTime since) async => [];
@@ -25,4 +25,10 @@ class AmazonStubTarget implements TargetPlatform {
 
   @override
   Future<Map<String, dynamic>?> getListingDetails(String listingId) async => null;
+
+  @override
+  Future<void> cancelOrder(String targetOrderId) async {}
+
+  @override
+  Future<OrderStatus?> getOrderStatus(String targetOrderId) async => null;
 }

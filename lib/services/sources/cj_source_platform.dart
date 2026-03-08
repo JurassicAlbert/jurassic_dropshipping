@@ -14,6 +14,9 @@ class CjSourcePlatform implements SourcePlatform {
   @override
   String get displayName => 'CJ Dropshipping';
 
+  @override
+  Future<bool> isConfigured() => _client.isConfigured();
+
   static int? _parseDeliveryDays(String? deliveryCycle) {
     if (deliveryCycle == null || deliveryCycle.isEmpty) return null;
     final parts = deliveryCycle.split(RegExp(r'[^\d]'));
@@ -138,5 +141,10 @@ class CjSourcePlatform implements SourcePlatform {
   @override
   Future<SourceOrderResult?> getOrderStatus(String sourceOrderId) async {
     return SourceOrderResult(sourceOrderId: sourceOrderId);
+  }
+
+  @override
+  Future<bool> cancelOrder(String sourceOrderId) async {
+    return false;
   }
 }

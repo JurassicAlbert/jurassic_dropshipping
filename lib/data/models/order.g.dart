@@ -53,6 +53,9 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   promisedDeliveryMax: json['promisedDeliveryMax'] == null
       ? null
       : DateTime.parse(json['promisedDeliveryMax'] as String),
+  deliveredAt: json['deliveredAt'] == null
+      ? null
+      : DateTime.parse(json['deliveredAt'] as String),
   approvedAt: json['approvedAt'] == null
       ? null
       : DateTime.parse(json['approvedAt'] as String),
@@ -77,6 +80,7 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'marketplaceAccountId': instance.marketplaceAccountId,
       'promisedDeliveryMin': instance.promisedDeliveryMin?.toIso8601String(),
       'promisedDeliveryMax': instance.promisedDeliveryMax?.toIso8601String(),
+      'deliveredAt': instance.deliveredAt?.toIso8601String(),
       'approvedAt': instance.approvedAt?.toIso8601String(),
       'createdAt': instance.createdAt?.toIso8601String(),
     };
@@ -88,5 +92,6 @@ const _$OrderStatusEnumMap = {
   OrderStatus.shipped: 'shipped',
   OrderStatus.delivered: 'delivered',
   OrderStatus.failed: 'failed',
+  OrderStatus.failedOutOfStock: 'failedOutOfStock',
   OrderStatus.cancelled: 'cancelled',
 };

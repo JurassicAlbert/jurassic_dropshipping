@@ -1,8 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
+import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/return_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
+import 'package:jurassic_dropshipping/services/order_cancellation_service.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 
 import '../fixtures/test_database.dart';
@@ -30,12 +34,21 @@ void main() {
   late AppDatabase db;
   late OrderRepository orderRepo;
   late RulesRepository rulesRepo;
+  late OrderCancellationService cancellationService;
 
   setUp(() {
     Fixtures.reset();
     db = createTestDatabase();
     orderRepo = OrderRepository(db);
     rulesRepo = RulesRepository(db);
+    cancellationService = OrderCancellationService(
+      orderRepository: orderRepo,
+      listingRepository: ListingRepository(db),
+      productRepository: ProductRepository(db),
+      returnRepository: ReturnRepository(db),
+      targets: [],
+      sources: [],
+    );
   });
 
   tearDown(() async {
@@ -60,6 +73,7 @@ void main() {
         orderRepository: orderRepo,
         rulesRepository: rulesRepo,
         targets: [target],
+        orderCancellationService: cancellationService,
       );
 
       await service.syncOrders(DateTime.now().subtract(const Duration(days: 1)));
@@ -92,6 +106,7 @@ void main() {
         orderRepository: orderRepo,
         rulesRepository: rulesRepo,
         targets: [target],
+        orderCancellationService: cancellationService,
       );
 
       final added = await service.syncOrders(
@@ -119,6 +134,7 @@ void main() {
         orderRepository: orderRepo,
         rulesRepository: rulesRepo,
         targets: [target],
+        orderCancellationService: cancellationService,
       );
 
       await service.syncOrders(DateTime.now().subtract(const Duration(days: 1)));
@@ -144,6 +160,7 @@ void main() {
         orderRepository: orderRepo,
         rulesRepository: rulesRepo,
         targets: [target],
+        orderCancellationService: cancellationService,
       );
 
       await service.syncOrders(DateTime.now().subtract(const Duration(days: 1)));
@@ -171,6 +188,7 @@ void main() {
         orderRepository: orderRepo,
         rulesRepository: rulesRepo,
         targets: [target],
+        orderCancellationService: cancellationService,
       );
 
       final added = await service.syncOrders(
@@ -189,6 +207,7 @@ void main() {
         orderRepository: orderRepo,
         rulesRepository: rulesRepo,
         targets: [throwingTarget],
+        orderCancellationService: cancellationService,
       );
 
       final added = await service.syncOrders(

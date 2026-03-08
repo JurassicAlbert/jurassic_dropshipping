@@ -21,7 +21,7 @@ class PriceRefreshService {
 
     for (final offer in stale) {
       final source = sources.where((s) => s.id == offer.sourcePlatformId).firstOrNull;
-      if (source == null) continue;
+      if (source == null || !(await source.isConfigured())) continue;
 
       try {
         final product = await source.getProduct(offer.productId);

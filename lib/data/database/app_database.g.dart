@@ -1948,6 +1948,17 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _deliveredAtMeta = const VerificationMeta(
+    'deliveredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deliveredAt = GeneratedColumn<DateTime>(
+    'delivered_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _approvedAtMeta = const VerificationMeta(
     'approvedAt',
   );
@@ -1987,6 +1998,7 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
     marketplaceAccountId,
     promisedDeliveryMin,
     promisedDeliveryMax,
+    deliveredAt,
     approvedAt,
     createdAt,
   ];
@@ -2135,6 +2147,15 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         ),
       );
     }
+    if (data.containsKey('delivered_at')) {
+      context.handle(
+        _deliveredAtMeta,
+        deliveredAt.isAcceptableOrUnknown(
+          data['delivered_at']!,
+          _deliveredAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('approved_at')) {
       context.handle(
         _approvedAtMeta,
@@ -2218,6 +2239,10 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}promised_delivery_max'],
       ),
+      deliveredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}delivered_at'],
+      ),
       approvedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}approved_at'],
@@ -2251,6 +2276,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
   final String? marketplaceAccountId;
   final DateTime? promisedDeliveryMin;
   final DateTime? promisedDeliveryMax;
+  final DateTime? deliveredAt;
   final DateTime? approvedAt;
   final DateTime createdAt;
   const OrderRow({
@@ -2269,6 +2295,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     this.marketplaceAccountId,
     this.promisedDeliveryMin,
     this.promisedDeliveryMax,
+    this.deliveredAt,
     this.approvedAt,
     required this.createdAt,
   });
@@ -2301,6 +2328,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     }
     if (!nullToAbsent || promisedDeliveryMax != null) {
       map['promised_delivery_max'] = Variable<DateTime>(promisedDeliveryMax);
+    }
+    if (!nullToAbsent || deliveredAt != null) {
+      map['delivered_at'] = Variable<DateTime>(deliveredAt);
     }
     if (!nullToAbsent || approvedAt != null) {
       map['approved_at'] = Variable<DateTime>(approvedAt);
@@ -2338,6 +2368,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       promisedDeliveryMax: promisedDeliveryMax == null && nullToAbsent
           ? const Value.absent()
           : Value(promisedDeliveryMax),
+      deliveredAt: deliveredAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deliveredAt),
       approvedAt: approvedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(approvedAt),
@@ -2374,6 +2407,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       promisedDeliveryMax: serializer.fromJson<DateTime?>(
         json['promisedDeliveryMax'],
       ),
+      deliveredAt: serializer.fromJson<DateTime?>(json['deliveredAt']),
       approvedAt: serializer.fromJson<DateTime?>(json['approvedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -2397,6 +2431,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       'marketplaceAccountId': serializer.toJson<String?>(marketplaceAccountId),
       'promisedDeliveryMin': serializer.toJson<DateTime?>(promisedDeliveryMin),
       'promisedDeliveryMax': serializer.toJson<DateTime?>(promisedDeliveryMax),
+      'deliveredAt': serializer.toJson<DateTime?>(deliveredAt),
       'approvedAt': serializer.toJson<DateTime?>(approvedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -2418,6 +2453,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     Value<String?> marketplaceAccountId = const Value.absent(),
     Value<DateTime?> promisedDeliveryMin = const Value.absent(),
     Value<DateTime?> promisedDeliveryMax = const Value.absent(),
+    Value<DateTime?> deliveredAt = const Value.absent(),
     Value<DateTime?> approvedAt = const Value.absent(),
     DateTime? createdAt,
   }) => OrderRow(
@@ -2448,6 +2484,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     promisedDeliveryMax: promisedDeliveryMax.present
         ? promisedDeliveryMax.value
         : this.promisedDeliveryMax,
+    deliveredAt: deliveredAt.present ? deliveredAt.value : this.deliveredAt,
     approvedAt: approvedAt.present ? approvedAt.value : this.approvedAt,
     createdAt: createdAt ?? this.createdAt,
   );
@@ -2490,6 +2527,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       promisedDeliveryMax: data.promisedDeliveryMax.present
           ? data.promisedDeliveryMax.value
           : this.promisedDeliveryMax,
+      deliveredAt: data.deliveredAt.present
+          ? data.deliveredAt.value
+          : this.deliveredAt,
       approvedAt: data.approvedAt.present
           ? data.approvedAt.value
           : this.approvedAt,
@@ -2515,6 +2555,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
           ..write('marketplaceAccountId: $marketplaceAccountId, ')
           ..write('promisedDeliveryMin: $promisedDeliveryMin, ')
           ..write('promisedDeliveryMax: $promisedDeliveryMax, ')
+          ..write('deliveredAt: $deliveredAt, ')
           ..write('approvedAt: $approvedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -2538,6 +2579,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     marketplaceAccountId,
     promisedDeliveryMin,
     promisedDeliveryMax,
+    deliveredAt,
     approvedAt,
     createdAt,
   );
@@ -2560,6 +2602,7 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
           other.marketplaceAccountId == this.marketplaceAccountId &&
           other.promisedDeliveryMin == this.promisedDeliveryMin &&
           other.promisedDeliveryMax == this.promisedDeliveryMax &&
+          other.deliveredAt == this.deliveredAt &&
           other.approvedAt == this.approvedAt &&
           other.createdAt == this.createdAt);
 }
@@ -2580,6 +2623,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
   final Value<String?> marketplaceAccountId;
   final Value<DateTime?> promisedDeliveryMin;
   final Value<DateTime?> promisedDeliveryMax;
+  final Value<DateTime?> deliveredAt;
   final Value<DateTime?> approvedAt;
   final Value<DateTime> createdAt;
   const OrdersCompanion({
@@ -2598,6 +2642,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     this.marketplaceAccountId = const Value.absent(),
     this.promisedDeliveryMin = const Value.absent(),
     this.promisedDeliveryMax = const Value.absent(),
+    this.deliveredAt = const Value.absent(),
     this.approvedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
@@ -2617,6 +2662,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     this.marketplaceAccountId = const Value.absent(),
     this.promisedDeliveryMin = const Value.absent(),
     this.promisedDeliveryMax = const Value.absent(),
+    this.deliveredAt = const Value.absent(),
     this.approvedAt = const Value.absent(),
     required DateTime createdAt,
   }) : localId = Value(localId),
@@ -2644,6 +2690,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     Expression<String>? marketplaceAccountId,
     Expression<DateTime>? promisedDeliveryMin,
     Expression<DateTime>? promisedDeliveryMax,
+    Expression<DateTime>? deliveredAt,
     Expression<DateTime>? approvedAt,
     Expression<DateTime>? createdAt,
   }) {
@@ -2667,6 +2714,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
         'promised_delivery_min': promisedDeliveryMin,
       if (promisedDeliveryMax != null)
         'promised_delivery_max': promisedDeliveryMax,
+      if (deliveredAt != null) 'delivered_at': deliveredAt,
       if (approvedAt != null) 'approved_at': approvedAt,
       if (createdAt != null) 'created_at': createdAt,
     });
@@ -2688,6 +2736,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     Value<String?>? marketplaceAccountId,
     Value<DateTime?>? promisedDeliveryMin,
     Value<DateTime?>? promisedDeliveryMax,
+    Value<DateTime?>? deliveredAt,
     Value<DateTime?>? approvedAt,
     Value<DateTime>? createdAt,
   }) {
@@ -2707,6 +2756,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
       marketplaceAccountId: marketplaceAccountId ?? this.marketplaceAccountId,
       promisedDeliveryMin: promisedDeliveryMin ?? this.promisedDeliveryMin,
       promisedDeliveryMax: promisedDeliveryMax ?? this.promisedDeliveryMax,
+      deliveredAt: deliveredAt ?? this.deliveredAt,
       approvedAt: approvedAt ?? this.approvedAt,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -2768,6 +2818,9 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
         promisedDeliveryMax.value,
       );
     }
+    if (deliveredAt.present) {
+      map['delivered_at'] = Variable<DateTime>(deliveredAt.value);
+    }
     if (approvedAt.present) {
       map['approved_at'] = Variable<DateTime>(approvedAt.value);
     }
@@ -2795,6 +2848,7 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
           ..write('marketplaceAccountId: $marketplaceAccountId, ')
           ..write('promisedDeliveryMin: $promisedDeliveryMin, ')
           ..write('promisedDeliveryMax: $promisedDeliveryMax, ')
+          ..write('deliveredAt: $deliveredAt, ')
           ..write('approvedAt: $approvedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -3405,6 +3459,29 @@ class $UserRulesTableTable extends UserRulesTable
         requiredDuringInsert: false,
         defaultValue: const Constant('{}'),
       );
+  static const VerificationMeta _sellerReturnAddressJsonMeta =
+      const VerificationMeta('sellerReturnAddressJson');
+  @override
+  late final GeneratedColumn<String> sellerReturnAddressJson =
+      GeneratedColumn<String>(
+        'seller_return_address_json',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _marketplaceReturnPolicyJsonMeta =
+      const VerificationMeta('marketplaceReturnPolicyJson');
+  @override
+  late final GeneratedColumn<String> marketplaceReturnPolicyJson =
+      GeneratedColumn<String>(
+        'marketplace_return_policy_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('{}'),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3419,6 +3496,8 @@ class $UserRulesTableTable extends UserRulesTable
     defaultMarkupPercent,
     searchKeywords,
     marketplaceFeesJson,
+    sellerReturnAddressJson,
+    marketplaceReturnPolicyJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3552,6 +3631,24 @@ class $UserRulesTableTable extends UserRulesTable
         ),
       );
     }
+    if (data.containsKey('seller_return_address_json')) {
+      context.handle(
+        _sellerReturnAddressJsonMeta,
+        sellerReturnAddressJson.isAcceptableOrUnknown(
+          data['seller_return_address_json']!,
+          _sellerReturnAddressJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('marketplace_return_policy_json')) {
+      context.handle(
+        _marketplaceReturnPolicyJsonMeta,
+        marketplaceReturnPolicyJson.isAcceptableOrUnknown(
+          data['marketplace_return_policy_json']!,
+          _marketplaceReturnPolicyJsonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3609,6 +3706,14 @@ class $UserRulesTableTable extends UserRulesTable
         DriftSqlType.string,
         data['${effectivePrefix}marketplace_fees_json'],
       )!,
+      sellerReturnAddressJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seller_return_address_json'],
+      ),
+      marketplaceReturnPolicyJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}marketplace_return_policy_json'],
+      )!,
     );
   }
 
@@ -3631,6 +3736,8 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
   final double defaultMarkupPercent;
   final String searchKeywords;
   final String marketplaceFeesJson;
+  final String? sellerReturnAddressJson;
+  final String marketplaceReturnPolicyJson;
   const UserRulesRow({
     required this.id,
     required this.minProfitPercent,
@@ -3644,6 +3751,8 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     required this.defaultMarkupPercent,
     required this.searchKeywords,
     required this.marketplaceFeesJson,
+    this.sellerReturnAddressJson,
+    required this.marketplaceReturnPolicyJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3664,6 +3773,14 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     map['default_markup_percent'] = Variable<double>(defaultMarkupPercent);
     map['search_keywords'] = Variable<String>(searchKeywords);
     map['marketplace_fees_json'] = Variable<String>(marketplaceFeesJson);
+    if (!nullToAbsent || sellerReturnAddressJson != null) {
+      map['seller_return_address_json'] = Variable<String>(
+        sellerReturnAddressJson,
+      );
+    }
+    map['marketplace_return_policy_json'] = Variable<String>(
+      marketplaceReturnPolicyJson,
+    );
     return map;
   }
 
@@ -3683,6 +3800,10 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
       defaultMarkupPercent: Value(defaultMarkupPercent),
       searchKeywords: Value(searchKeywords),
       marketplaceFeesJson: Value(marketplaceFeesJson),
+      sellerReturnAddressJson: sellerReturnAddressJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sellerReturnAddressJson),
+      marketplaceReturnPolicyJson: Value(marketplaceReturnPolicyJson),
     );
   }
 
@@ -3720,6 +3841,12 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
       marketplaceFeesJson: serializer.fromJson<String>(
         json['marketplaceFeesJson'],
       ),
+      sellerReturnAddressJson: serializer.fromJson<String?>(
+        json['sellerReturnAddressJson'],
+      ),
+      marketplaceReturnPolicyJson: serializer.fromJson<String>(
+        json['marketplaceReturnPolicyJson'],
+      ),
     );
   }
   @override
@@ -3742,6 +3869,12 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
       'defaultMarkupPercent': serializer.toJson<double>(defaultMarkupPercent),
       'searchKeywords': serializer.toJson<String>(searchKeywords),
       'marketplaceFeesJson': serializer.toJson<String>(marketplaceFeesJson),
+      'sellerReturnAddressJson': serializer.toJson<String?>(
+        sellerReturnAddressJson,
+      ),
+      'marketplaceReturnPolicyJson': serializer.toJson<String>(
+        marketplaceReturnPolicyJson,
+      ),
     };
   }
 
@@ -3758,6 +3891,8 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     double? defaultMarkupPercent,
     String? searchKeywords,
     String? marketplaceFeesJson,
+    Value<String?> sellerReturnAddressJson = const Value.absent(),
+    String? marketplaceReturnPolicyJson,
   }) => UserRulesRow(
     id: id ?? this.id,
     minProfitPercent: minProfitPercent ?? this.minProfitPercent,
@@ -3776,6 +3911,11 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     defaultMarkupPercent: defaultMarkupPercent ?? this.defaultMarkupPercent,
     searchKeywords: searchKeywords ?? this.searchKeywords,
     marketplaceFeesJson: marketplaceFeesJson ?? this.marketplaceFeesJson,
+    sellerReturnAddressJson: sellerReturnAddressJson.present
+        ? sellerReturnAddressJson.value
+        : this.sellerReturnAddressJson,
+    marketplaceReturnPolicyJson:
+        marketplaceReturnPolicyJson ?? this.marketplaceReturnPolicyJson,
   );
   UserRulesRow copyWithCompanion(UserRulesTableCompanion data) {
     return UserRulesRow(
@@ -3813,6 +3953,12 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
       marketplaceFeesJson: data.marketplaceFeesJson.present
           ? data.marketplaceFeesJson.value
           : this.marketplaceFeesJson,
+      sellerReturnAddressJson: data.sellerReturnAddressJson.present
+          ? data.sellerReturnAddressJson.value
+          : this.sellerReturnAddressJson,
+      marketplaceReturnPolicyJson: data.marketplaceReturnPolicyJson.present
+          ? data.marketplaceReturnPolicyJson.value
+          : this.marketplaceReturnPolicyJson,
     );
   }
 
@@ -3830,7 +3976,9 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
           ..write('blacklistedSupplierIds: $blacklistedSupplierIds, ')
           ..write('defaultMarkupPercent: $defaultMarkupPercent, ')
           ..write('searchKeywords: $searchKeywords, ')
-          ..write('marketplaceFeesJson: $marketplaceFeesJson')
+          ..write('marketplaceFeesJson: $marketplaceFeesJson, ')
+          ..write('sellerReturnAddressJson: $sellerReturnAddressJson, ')
+          ..write('marketplaceReturnPolicyJson: $marketplaceReturnPolicyJson')
           ..write(')'))
         .toString();
   }
@@ -3849,6 +3997,8 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
     defaultMarkupPercent,
     searchKeywords,
     marketplaceFeesJson,
+    sellerReturnAddressJson,
+    marketplaceReturnPolicyJson,
   );
   @override
   bool operator ==(Object other) =>
@@ -3865,7 +4015,10 @@ class UserRulesRow extends DataClass implements Insertable<UserRulesRow> {
           other.blacklistedSupplierIds == this.blacklistedSupplierIds &&
           other.defaultMarkupPercent == this.defaultMarkupPercent &&
           other.searchKeywords == this.searchKeywords &&
-          other.marketplaceFeesJson == this.marketplaceFeesJson);
+          other.marketplaceFeesJson == this.marketplaceFeesJson &&
+          other.sellerReturnAddressJson == this.sellerReturnAddressJson &&
+          other.marketplaceReturnPolicyJson ==
+              this.marketplaceReturnPolicyJson);
 }
 
 class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
@@ -3881,6 +4034,8 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
   final Value<double> defaultMarkupPercent;
   final Value<String> searchKeywords;
   final Value<String> marketplaceFeesJson;
+  final Value<String?> sellerReturnAddressJson;
+  final Value<String> marketplaceReturnPolicyJson;
   const UserRulesTableCompanion({
     this.id = const Value.absent(),
     this.minProfitPercent = const Value.absent(),
@@ -3894,6 +4049,8 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     this.defaultMarkupPercent = const Value.absent(),
     this.searchKeywords = const Value.absent(),
     this.marketplaceFeesJson = const Value.absent(),
+    this.sellerReturnAddressJson = const Value.absent(),
+    this.marketplaceReturnPolicyJson = const Value.absent(),
   });
   UserRulesTableCompanion.insert({
     this.id = const Value.absent(),
@@ -3908,6 +4065,8 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     required double defaultMarkupPercent,
     required String searchKeywords,
     this.marketplaceFeesJson = const Value.absent(),
+    this.sellerReturnAddressJson = const Value.absent(),
+    this.marketplaceReturnPolicyJson = const Value.absent(),
   }) : minProfitPercent = Value(minProfitPercent),
        preferredSupplierCountries = Value(preferredSupplierCountries),
        manualApprovalListings = Value(manualApprovalListings),
@@ -3930,6 +4089,8 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     Expression<double>? defaultMarkupPercent,
     Expression<String>? searchKeywords,
     Expression<String>? marketplaceFeesJson,
+    Expression<String>? sellerReturnAddressJson,
+    Expression<String>? marketplaceReturnPolicyJson,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3952,6 +4113,10 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
       if (searchKeywords != null) 'search_keywords': searchKeywords,
       if (marketplaceFeesJson != null)
         'marketplace_fees_json': marketplaceFeesJson,
+      if (sellerReturnAddressJson != null)
+        'seller_return_address_json': sellerReturnAddressJson,
+      if (marketplaceReturnPolicyJson != null)
+        'marketplace_return_policy_json': marketplaceReturnPolicyJson,
     });
   }
 
@@ -3968,6 +4133,8 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
     Value<double>? defaultMarkupPercent,
     Value<String>? searchKeywords,
     Value<String>? marketplaceFeesJson,
+    Value<String?>? sellerReturnAddressJson,
+    Value<String>? marketplaceReturnPolicyJson,
   }) {
     return UserRulesTableCompanion(
       id: id ?? this.id,
@@ -3986,6 +4153,10 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
       defaultMarkupPercent: defaultMarkupPercent ?? this.defaultMarkupPercent,
       searchKeywords: searchKeywords ?? this.searchKeywords,
       marketplaceFeesJson: marketplaceFeesJson ?? this.marketplaceFeesJson,
+      sellerReturnAddressJson:
+          sellerReturnAddressJson ?? this.sellerReturnAddressJson,
+      marketplaceReturnPolicyJson:
+          marketplaceReturnPolicyJson ?? this.marketplaceReturnPolicyJson,
     );
   }
 
@@ -4042,6 +4213,16 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
         marketplaceFeesJson.value,
       );
     }
+    if (sellerReturnAddressJson.present) {
+      map['seller_return_address_json'] = Variable<String>(
+        sellerReturnAddressJson.value,
+      );
+    }
+    if (marketplaceReturnPolicyJson.present) {
+      map['marketplace_return_policy_json'] = Variable<String>(
+        marketplaceReturnPolicyJson.value,
+      );
+    }
     return map;
   }
 
@@ -4059,7 +4240,9 @@ class UserRulesTableCompanion extends UpdateCompanion<UserRulesRow> {
           ..write('blacklistedSupplierIds: $blacklistedSupplierIds, ')
           ..write('defaultMarkupPercent: $defaultMarkupPercent, ')
           ..write('searchKeywords: $searchKeywords, ')
-          ..write('marketplaceFeesJson: $marketplaceFeesJson')
+          ..write('marketplaceFeesJson: $marketplaceFeesJson, ')
+          ..write('sellerReturnAddressJson: $sellerReturnAddressJson, ')
+          ..write('marketplaceReturnPolicyJson: $marketplaceReturnPolicyJson')
           ..write(')'))
         .toString();
   }
@@ -6608,6 +6791,18 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _returnDestinationMeta = const VerificationMeta(
+    'returnDestination',
+  );
+  @override
+  late final GeneratedColumn<String> returnDestination =
+      GeneratedColumn<String>(
+        'return_destination',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6630,6 +6825,7 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
     productId,
     sourcePlatformId,
     targetPlatformId,
+    returnDestination,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6801,6 +6997,15 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
         ),
       );
     }
+    if (data.containsKey('return_destination')) {
+      context.handle(
+        _returnDestinationMeta,
+        returnDestination.isAcceptableOrUnknown(
+          data['return_destination']!,
+          _returnDestinationMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6890,6 +7095,10 @@ class $ReturnsTable extends Returns with TableInfo<$ReturnsTable, ReturnRow> {
         DriftSqlType.string,
         data['${effectivePrefix}target_platform_id'],
       ),
+      returnDestination: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_destination'],
+      ),
     );
   }
 
@@ -6920,6 +7129,7 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
   final String? productId;
   final String? sourcePlatformId;
   final String? targetPlatformId;
+  final String? returnDestination;
   const ReturnRow({
     required this.id,
     required this.returnId,
@@ -6941,6 +7151,7 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     this.productId,
     this.sourcePlatformId,
     this.targetPlatformId,
+    this.returnDestination,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6994,6 +7205,9 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     }
     if (!nullToAbsent || targetPlatformId != null) {
       map['target_platform_id'] = Variable<String>(targetPlatformId);
+    }
+    if (!nullToAbsent || returnDestination != null) {
+      map['return_destination'] = Variable<String>(returnDestination);
     }
     return map;
   }
@@ -7050,6 +7264,9 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
       targetPlatformId: targetPlatformId == null && nullToAbsent
           ? const Value.absent()
           : Value(targetPlatformId),
+      returnDestination: returnDestination == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnDestination),
     );
   }
 
@@ -7083,6 +7300,9 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
       productId: serializer.fromJson<String?>(json['productId']),
       sourcePlatformId: serializer.fromJson<String?>(json['sourcePlatformId']),
       targetPlatformId: serializer.fromJson<String?>(json['targetPlatformId']),
+      returnDestination: serializer.fromJson<String?>(
+        json['returnDestination'],
+      ),
     );
   }
   @override
@@ -7109,6 +7329,7 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
       'productId': serializer.toJson<String?>(productId),
       'sourcePlatformId': serializer.toJson<String?>(sourcePlatformId),
       'targetPlatformId': serializer.toJson<String?>(targetPlatformId),
+      'returnDestination': serializer.toJson<String?>(returnDestination),
     };
   }
 
@@ -7133,6 +7354,7 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     Value<String?> productId = const Value.absent(),
     Value<String?> sourcePlatformId = const Value.absent(),
     Value<String?> targetPlatformId = const Value.absent(),
+    Value<String?> returnDestination = const Value.absent(),
   }) => ReturnRow(
     id: id ?? this.id,
     returnId: returnId ?? this.returnId,
@@ -7170,6 +7392,9 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     targetPlatformId: targetPlatformId.present
         ? targetPlatformId.value
         : this.targetPlatformId,
+    returnDestination: returnDestination.present
+        ? returnDestination.value
+        : this.returnDestination,
   );
   ReturnRow copyWithCompanion(ReturnsCompanion data) {
     return ReturnRow(
@@ -7219,6 +7444,9 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
       targetPlatformId: data.targetPlatformId.present
           ? data.targetPlatformId.value
           : this.targetPlatformId,
+      returnDestination: data.returnDestination.present
+          ? data.returnDestination.value
+          : this.returnDestination,
     );
   }
 
@@ -7244,13 +7472,14 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
           ..write('supplierId: $supplierId, ')
           ..write('productId: $productId, ')
           ..write('sourcePlatformId: $sourcePlatformId, ')
-          ..write('targetPlatformId: $targetPlatformId')
+          ..write('targetPlatformId: $targetPlatformId, ')
+          ..write('returnDestination: $returnDestination')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     returnId,
     orderId,
@@ -7271,7 +7500,8 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
     productId,
     sourcePlatformId,
     targetPlatformId,
-  );
+    returnDestination,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7295,7 +7525,8 @@ class ReturnRow extends DataClass implements Insertable<ReturnRow> {
           other.supplierId == this.supplierId &&
           other.productId == this.productId &&
           other.sourcePlatformId == this.sourcePlatformId &&
-          other.targetPlatformId == this.targetPlatformId);
+          other.targetPlatformId == this.targetPlatformId &&
+          other.returnDestination == this.returnDestination);
 }
 
 class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
@@ -7319,6 +7550,7 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
   final Value<String?> productId;
   final Value<String?> sourcePlatformId;
   final Value<String?> targetPlatformId;
+  final Value<String?> returnDestination;
   const ReturnsCompanion({
     this.id = const Value.absent(),
     this.returnId = const Value.absent(),
@@ -7340,6 +7572,7 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     this.productId = const Value.absent(),
     this.sourcePlatformId = const Value.absent(),
     this.targetPlatformId = const Value.absent(),
+    this.returnDestination = const Value.absent(),
   });
   ReturnsCompanion.insert({
     this.id = const Value.absent(),
@@ -7362,6 +7595,7 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     this.productId = const Value.absent(),
     this.sourcePlatformId = const Value.absent(),
     this.targetPlatformId = const Value.absent(),
+    this.returnDestination = const Value.absent(),
   }) : returnId = Value(returnId),
        orderId = Value(orderId),
        reason = Value(reason),
@@ -7387,6 +7621,7 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     Expression<String>? productId,
     Expression<String>? sourcePlatformId,
     Expression<String>? targetPlatformId,
+    Expression<String>? returnDestination,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -7411,6 +7646,7 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
       if (productId != null) 'product_id': productId,
       if (sourcePlatformId != null) 'source_platform_id': sourcePlatformId,
       if (targetPlatformId != null) 'target_platform_id': targetPlatformId,
+      if (returnDestination != null) 'return_destination': returnDestination,
     });
   }
 
@@ -7435,6 +7671,7 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     Value<String?>? productId,
     Value<String?>? sourcePlatformId,
     Value<String?>? targetPlatformId,
+    Value<String?>? returnDestination,
   }) {
     return ReturnsCompanion(
       id: id ?? this.id,
@@ -7457,6 +7694,7 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
       productId: productId ?? this.productId,
       sourcePlatformId: sourcePlatformId ?? this.sourcePlatformId,
       targetPlatformId: targetPlatformId ?? this.targetPlatformId,
+      returnDestination: returnDestination ?? this.returnDestination,
     );
   }
 
@@ -7525,6 +7763,9 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
     if (targetPlatformId.present) {
       map['target_platform_id'] = Variable<String>(targetPlatformId.value);
     }
+    if (returnDestination.present) {
+      map['return_destination'] = Variable<String>(returnDestination.value);
+    }
     return map;
   }
 
@@ -7550,7 +7791,8 @@ class ReturnsCompanion extends UpdateCompanion<ReturnRow> {
           ..write('supplierId: $supplierId, ')
           ..write('productId: $productId, ')
           ..write('sourcePlatformId: $sourcePlatformId, ')
-          ..write('targetPlatformId: $targetPlatformId')
+          ..write('targetPlatformId: $targetPlatformId, ')
+          ..write('returnDestination: $returnDestination')
           ..write(')'))
         .toString();
   }
@@ -8397,6 +8639,7 @@ typedef $$OrdersTableCreateCompanionBuilder =
       Value<String?> marketplaceAccountId,
       Value<DateTime?> promisedDeliveryMin,
       Value<DateTime?> promisedDeliveryMax,
+      Value<DateTime?> deliveredAt,
       Value<DateTime?> approvedAt,
       required DateTime createdAt,
     });
@@ -8417,6 +8660,7 @@ typedef $$OrdersTableUpdateCompanionBuilder =
       Value<String?> marketplaceAccountId,
       Value<DateTime?> promisedDeliveryMin,
       Value<DateTime?> promisedDeliveryMax,
+      Value<DateTime?> deliveredAt,
       Value<DateTime?> approvedAt,
       Value<DateTime> createdAt,
     });
@@ -8502,6 +8746,11 @@ class $$OrdersTableFilterComposer
 
   ColumnFilters<DateTime> get promisedDeliveryMax => $composableBuilder(
     column: $table.promisedDeliveryMax,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deliveredAt => $composableBuilder(
+    column: $table.deliveredAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8600,6 +8849,11 @@ class $$OrdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get deliveredAt => $composableBuilder(
+    column: $table.deliveredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get approvedAt => $composableBuilder(
     column: $table.approvedAt,
     builder: (column) => ColumnOrderings(column),
@@ -8687,6 +8941,11 @@ class $$OrdersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get deliveredAt => $composableBuilder(
+    column: $table.deliveredAt,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get approvedAt => $composableBuilder(
     column: $table.approvedAt,
     builder: (column) => column,
@@ -8739,6 +8998,7 @@ class $$OrdersTableTableManager
                 Value<String?> marketplaceAccountId = const Value.absent(),
                 Value<DateTime?> promisedDeliveryMin = const Value.absent(),
                 Value<DateTime?> promisedDeliveryMax = const Value.absent(),
+                Value<DateTime?> deliveredAt = const Value.absent(),
                 Value<DateTime?> approvedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => OrdersCompanion(
@@ -8757,6 +9017,7 @@ class $$OrdersTableTableManager
                 marketplaceAccountId: marketplaceAccountId,
                 promisedDeliveryMin: promisedDeliveryMin,
                 promisedDeliveryMax: promisedDeliveryMax,
+                deliveredAt: deliveredAt,
                 approvedAt: approvedAt,
                 createdAt: createdAt,
               ),
@@ -8777,6 +9038,7 @@ class $$OrdersTableTableManager
                 Value<String?> marketplaceAccountId = const Value.absent(),
                 Value<DateTime?> promisedDeliveryMin = const Value.absent(),
                 Value<DateTime?> promisedDeliveryMax = const Value.absent(),
+                Value<DateTime?> deliveredAt = const Value.absent(),
                 Value<DateTime?> approvedAt = const Value.absent(),
                 required DateTime createdAt,
               }) => OrdersCompanion.insert(
@@ -8795,6 +9057,7 @@ class $$OrdersTableTableManager
                 marketplaceAccountId: marketplaceAccountId,
                 promisedDeliveryMin: promisedDeliveryMin,
                 promisedDeliveryMax: promisedDeliveryMax,
+                deliveredAt: deliveredAt,
                 approvedAt: approvedAt,
                 createdAt: createdAt,
               ),
@@ -9068,6 +9331,8 @@ typedef $$UserRulesTableTableCreateCompanionBuilder =
       required double defaultMarkupPercent,
       required String searchKeywords,
       Value<String> marketplaceFeesJson,
+      Value<String?> sellerReturnAddressJson,
+      Value<String> marketplaceReturnPolicyJson,
     });
 typedef $$UserRulesTableTableUpdateCompanionBuilder =
     UserRulesTableCompanion Function({
@@ -9083,6 +9348,8 @@ typedef $$UserRulesTableTableUpdateCompanionBuilder =
       Value<double> defaultMarkupPercent,
       Value<String> searchKeywords,
       Value<String> marketplaceFeesJson,
+      Value<String?> sellerReturnAddressJson,
+      Value<String> marketplaceReturnPolicyJson,
     });
 
 class $$UserRulesTableTableFilterComposer
@@ -9151,6 +9418,16 @@ class $$UserRulesTableTableFilterComposer
 
   ColumnFilters<String> get marketplaceFeesJson => $composableBuilder(
     column: $table.marketplaceFeesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sellerReturnAddressJson => $composableBuilder(
+    column: $table.sellerReturnAddressJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get marketplaceReturnPolicyJson => $composableBuilder(
+    column: $table.marketplaceReturnPolicyJson,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -9223,6 +9500,16 @@ class $$UserRulesTableTableOrderingComposer
     column: $table.marketplaceFeesJson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get sellerReturnAddressJson => $composableBuilder(
+    column: $table.sellerReturnAddressJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get marketplaceReturnPolicyJson => $composableBuilder(
+    column: $table.marketplaceReturnPolicyJson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserRulesTableTableAnnotationComposer
@@ -9291,6 +9578,16 @@ class $$UserRulesTableTableAnnotationComposer
     column: $table.marketplaceFeesJson,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get sellerReturnAddressJson => $composableBuilder(
+    column: $table.sellerReturnAddressJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get marketplaceReturnPolicyJson => $composableBuilder(
+    column: $table.marketplaceReturnPolicyJson,
+    builder: (column) => column,
+  );
 }
 
 class $$UserRulesTableTableTableManager
@@ -9338,6 +9635,9 @@ class $$UserRulesTableTableTableManager
                 Value<double> defaultMarkupPercent = const Value.absent(),
                 Value<String> searchKeywords = const Value.absent(),
                 Value<String> marketplaceFeesJson = const Value.absent(),
+                Value<String?> sellerReturnAddressJson = const Value.absent(),
+                Value<String> marketplaceReturnPolicyJson =
+                    const Value.absent(),
               }) => UserRulesTableCompanion(
                 id: id,
                 minProfitPercent: minProfitPercent,
@@ -9351,6 +9651,8 @@ class $$UserRulesTableTableTableManager
                 defaultMarkupPercent: defaultMarkupPercent,
                 searchKeywords: searchKeywords,
                 marketplaceFeesJson: marketplaceFeesJson,
+                sellerReturnAddressJson: sellerReturnAddressJson,
+                marketplaceReturnPolicyJson: marketplaceReturnPolicyJson,
               ),
           createCompanionCallback:
               ({
@@ -9366,6 +9668,9 @@ class $$UserRulesTableTableTableManager
                 required double defaultMarkupPercent,
                 required String searchKeywords,
                 Value<String> marketplaceFeesJson = const Value.absent(),
+                Value<String?> sellerReturnAddressJson = const Value.absent(),
+                Value<String> marketplaceReturnPolicyJson =
+                    const Value.absent(),
               }) => UserRulesTableCompanion.insert(
                 id: id,
                 minProfitPercent: minProfitPercent,
@@ -9379,6 +9684,8 @@ class $$UserRulesTableTableTableManager
                 defaultMarkupPercent: defaultMarkupPercent,
                 searchKeywords: searchKeywords,
                 marketplaceFeesJson: marketplaceFeesJson,
+                sellerReturnAddressJson: sellerReturnAddressJson,
+                marketplaceReturnPolicyJson: marketplaceReturnPolicyJson,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -10501,6 +10808,7 @@ typedef $$ReturnsTableCreateCompanionBuilder =
       Value<String?> productId,
       Value<String?> sourcePlatformId,
       Value<String?> targetPlatformId,
+      Value<String?> returnDestination,
     });
 typedef $$ReturnsTableUpdateCompanionBuilder =
     ReturnsCompanion Function({
@@ -10524,6 +10832,7 @@ typedef $$ReturnsTableUpdateCompanionBuilder =
       Value<String?> productId,
       Value<String?> sourcePlatformId,
       Value<String?> targetPlatformId,
+      Value<String?> returnDestination,
     });
 
 class $$ReturnsTableFilterComposer
@@ -10632,6 +10941,11 @@ class $$ReturnsTableFilterComposer
 
   ColumnFilters<String> get targetPlatformId => $composableBuilder(
     column: $table.targetPlatformId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnDestination => $composableBuilder(
+    column: $table.returnDestination,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10744,6 +11058,11 @@ class $$ReturnsTableOrderingComposer
     column: $table.targetPlatformId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get returnDestination => $composableBuilder(
+    column: $table.returnDestination,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ReturnsTableAnnotationComposer
@@ -10840,6 +11159,11 @@ class $$ReturnsTableAnnotationComposer
     column: $table.targetPlatformId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get returnDestination => $composableBuilder(
+    column: $table.returnDestination,
+    builder: (column) => column,
+  );
 }
 
 class $$ReturnsTableTableManager
@@ -10890,6 +11214,7 @@ class $$ReturnsTableTableManager
                 Value<String?> productId = const Value.absent(),
                 Value<String?> sourcePlatformId = const Value.absent(),
                 Value<String?> targetPlatformId = const Value.absent(),
+                Value<String?> returnDestination = const Value.absent(),
               }) => ReturnsCompanion(
                 id: id,
                 returnId: returnId,
@@ -10911,6 +11236,7 @@ class $$ReturnsTableTableManager
                 productId: productId,
                 sourcePlatformId: sourcePlatformId,
                 targetPlatformId: targetPlatformId,
+                returnDestination: returnDestination,
               ),
           createCompanionCallback:
               ({
@@ -10934,6 +11260,7 @@ class $$ReturnsTableTableManager
                 Value<String?> productId = const Value.absent(),
                 Value<String?> sourcePlatformId = const Value.absent(),
                 Value<String?> targetPlatformId = const Value.absent(),
+                Value<String?> returnDestination = const Value.absent(),
               }) => ReturnsCompanion.insert(
                 id: id,
                 returnId: returnId,
@@ -10955,6 +11282,7 @@ class $$ReturnsTableTableManager
                 productId: productId,
                 sourcePlatformId: sourcePlatformId,
                 targetPlatformId: targetPlatformId,
+                returnDestination: returnDestination,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

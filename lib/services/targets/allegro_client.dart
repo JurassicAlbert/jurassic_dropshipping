@@ -87,6 +87,18 @@ class AllegroClient {
     return false;
   }
 
+  /// True if credentials are set (access token or client id+secret for OAuth). When false, callers should skip API calls.
+  Future<bool> isConfigured() async {
+    final token = await secureStorage.read(SecureKeys.allegroAccessToken);
+    if (token != null && token.isNotEmpty) return true;
+    final clientId = await secureStorage.read(SecureKeys.allegroClientId);
+    final clientSecret = await secureStorage.read(SecureKeys.allegroClientSecret);
+    return clientId != null &&
+        clientId.isNotEmpty &&
+        clientSecret != null &&
+        clientSecret.isNotEmpty;
+  }
+
   /// Store tokens after OAuth flow (e.g. user pastes or we get from redirect).
   Future<void> setTokens({required String accessToken, String? refreshToken}) async {
     await secureStorage.write(SecureKeys.allegroAccessToken, accessToken);
@@ -127,11 +139,13 @@ class AllegroClient {
     }
   }
 
-  /// PATCH /sale/product-offers/{offerId} - update price/stock.
-  Future<void> updateOffer(String offerId, {double? price, int? stock}) async {
+  /// PATCH /sale/product-offers/{offerId} - update price/stock/name/description.
+  Future<void> updateOffer(String offerId, {double? price, int? stock, String? title, String? description}) async {
     final updates = <String, dynamic>{};
     if (price != null) updates['sellingMode'] = {'price': {'amount': price.toString()}};
     if (stock != null) updates['stock'] = {'available': stock};
+    if (title != null) updates['name'] = title;
+    if (description != null) updates['description'] = {'sections': [{'items': [{'type': 'TEXT', 'content': description}]}]};
     if (updates.isEmpty) return;
     await _dio.patch<Map<String, dynamic>>('/sale/product-offers/$offerId', data: updates);
   }
@@ -148,6 +162,19 @@ class AllegroClient {
       );
     } catch (e, st) {
       appLogger.e('Allegro setShipmentTracking failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  /// PUT /order/checkout-forms/{id}/fulfillment - set fulfillment status (e.g. CANCELLED).
+  Future<void> putFulfillmentStatus(String orderId, String status) async {
+    try {
+      await _dio.put<Map<String, dynamic>>(
+        '/order/checkout-forms/$orderId/fulfillment',
+        data: {'status': status},
+      );
+    } catch (e, st) {
+      appLogger.e('Allegro putFulfillmentStatus failed', error: e, stackTrace: st);
       rethrow;
     }
   }

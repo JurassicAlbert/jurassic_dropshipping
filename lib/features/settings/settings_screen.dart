@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
+import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -27,6 +28,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _allegroConnecting = false;
   bool? _allegroConnected;
   bool _showSaveBanner = false;
+  final _sellerReturnStreetController = TextEditingController();
+  final _sellerReturnCityController = TextEditingController();
+  final _sellerReturnZipController = TextEditingController();
+  final _sellerReturnCountryController = TextEditingController();
 
   @override
   void initState() {
@@ -55,6 +60,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _allegroClientSecretController.dispose();
     _api2cartApiKeyController.dispose();
     _api2cartStoreKeyController.dispose();
+    _sellerReturnStreetController.dispose();
+    _sellerReturnCityController.dispose();
+    _sellerReturnZipController.dispose();
+    _sellerReturnCountryController.dispose();
     super.dispose();
   }
 
@@ -78,6 +87,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _markupController.text = rules.defaultMarkupPercent.toString();
         _allegroFeeController.text = (rules.marketplaceFees['allegro'] ?? 10.0).toString();
         _temuFeeController.text = (rules.marketplaceFees['temu'] ?? 10.0).toString();
+        final seller = rules.sellerReturnAddressParsed;
+        if (seller != null) {
+          _sellerReturnStreetController.text = seller.street ?? '';
+          _sellerReturnCityController.text = seller.city ?? '';
+          _sellerReturnZipController.text = seller.zip ?? '';
+          _sellerReturnCountryController.text = seller.countryCode ?? '';
+        }
       }
     });
     return SingleChildScrollView(
@@ -153,6 +169,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       decoration: const InputDecoration(labelText: 'Temu fee %', border: OutlineInputBorder()),
                       keyboardType: TextInputType.number,
                     ),
+                    const SizedBox(height: 12),
+                    Text('Seller return address (when customer sends return to you)',
+                        style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: _sellerReturnStreetController,
+                      decoration: const InputDecoration(labelText: 'Street', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _sellerReturnCityController,
+                      decoration: const InputDecoration(labelText: 'City', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _sellerReturnZipController,
+                      decoration: const InputDecoration(labelText: 'ZIP', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _sellerReturnCountryController,
+                      decoration: const InputDecoration(labelText: 'Country code', border: OutlineInputBorder()),
+                    ),
                     const SizedBox(height: 16),
                     FilledButton(
                       onPressed: () async {
@@ -163,11 +202,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         final temuFee = double.tryParse(_temuFeeController.text);
                         if (allegroFee != null) fees['allegro'] = allegroFee;
                         if (temuFee != null) fees['temu'] = temuFee;
+                        final sellerStreet = _sellerReturnStreetController.text.trim();
+                        final sellerCity = _sellerReturnCityController.text.trim();
+                        final sellerZip = _sellerReturnZipController.text.trim();
+                        final sellerCountry = _sellerReturnCountryController.text.trim();
+                        Map<String, dynamic>? sellerReturnAddress;
+                        if (sellerStreet.isNotEmpty || sellerCity.isNotEmpty || sellerZip.isNotEmpty || sellerCountry.isNotEmpty) {
+                          sellerReturnAddress = {
+                            if (sellerStreet.isNotEmpty) 'street': sellerStreet,
+                            if (sellerCity.isNotEmpty) 'city': sellerCity,
+                            if (sellerZip.isNotEmpty) 'zip': sellerZip,
+                            if (sellerCountry.isNotEmpty) 'countryCode': sellerCountry,
+                          };
+                        }
                         final updated = rules.copyWith(
                           searchKeywords: _keywordsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
                           minProfitPercent: double.tryParse(_minProfitController.text) ?? rules.minProfitPercent,
                           defaultMarkupPercent: double.tryParse(_markupController.text) ?? rules.defaultMarkupPercent,
                           marketplaceFees: fees,
+                          sellerReturnAddress: sellerReturnAddress,
                         );
                         await ref.read(rulesRepositoryProvider).save(updated);
                         ref.invalidate(rulesProvider);

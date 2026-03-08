@@ -53,6 +53,10 @@ mixin _$ReturnRequest {
   /// Which marketplace the customer bought from
   String? get targetPlatformId => throw _privateConstructorUsedError;
 
+  /// Where customer sends the return (supplier warehouse vs seller address)
+  ReturnDestination? get returnDestination =>
+      throw _privateConstructorUsedError;
+
   /// Serializes this ReturnRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -90,6 +94,7 @@ abstract class $ReturnRequestCopyWith<$Res> {
     String? productId,
     String? sourcePlatformId,
     String? targetPlatformId,
+    ReturnDestination? returnDestination,
   });
 }
 
@@ -127,6 +132,7 @@ class _$ReturnRequestCopyWithImpl<$Res, $Val extends ReturnRequest>
     Object? productId = freezed,
     Object? sourcePlatformId = freezed,
     Object? targetPlatformId = freezed,
+    Object? returnDestination = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -206,6 +212,10 @@ class _$ReturnRequestCopyWithImpl<$Res, $Val extends ReturnRequest>
                 ? _value.targetPlatformId
                 : targetPlatformId // ignore: cast_nullable_to_non_nullable
                       as String?,
+            returnDestination: freezed == returnDestination
+                ? _value.returnDestination
+                : returnDestination // ignore: cast_nullable_to_non_nullable
+                      as ReturnDestination?,
           )
           as $Val,
     );
@@ -241,6 +251,7 @@ abstract class _$$ReturnRequestImplCopyWith<$Res>
     String? productId,
     String? sourcePlatformId,
     String? targetPlatformId,
+    ReturnDestination? returnDestination,
   });
 }
 
@@ -277,6 +288,7 @@ class __$$ReturnRequestImplCopyWithImpl<$Res>
     Object? productId = freezed,
     Object? sourcePlatformId = freezed,
     Object? targetPlatformId = freezed,
+    Object? returnDestination = freezed,
   }) {
     return _then(
       _$ReturnRequestImpl(
@@ -356,6 +368,10 @@ class __$$ReturnRequestImplCopyWithImpl<$Res>
             ? _value.targetPlatformId
             : targetPlatformId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        returnDestination: freezed == returnDestination
+            ? _value.returnDestination
+            : returnDestination // ignore: cast_nullable_to_non_nullable
+                  as ReturnDestination?,
       ),
     );
   }
@@ -384,6 +400,7 @@ class _$ReturnRequestImpl implements _ReturnRequest {
     this.productId,
     this.sourcePlatformId,
     this.targetPlatformId,
+    this.returnDestination,
   });
 
   factory _$ReturnRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -440,9 +457,13 @@ class _$ReturnRequestImpl implements _ReturnRequest {
   @override
   final String? targetPlatformId;
 
+  /// Where customer sends the return (supplier warehouse vs seller address)
+  @override
+  final ReturnDestination? returnDestination;
+
   @override
   String toString() {
-    return 'ReturnRequest(id: $id, orderId: $orderId, reason: $reason, status: $status, notes: $notes, refundAmount: $refundAmount, returnShippingCost: $returnShippingCost, restockingFee: $restockingFee, requestedAt: $requestedAt, resolvedAt: $resolvedAt, returnToAddress: $returnToAddress, returnToCity: $returnToCity, returnToCountry: $returnToCountry, returnTrackingNumber: $returnTrackingNumber, returnCarrier: $returnCarrier, supplierId: $supplierId, productId: $productId, sourcePlatformId: $sourcePlatformId, targetPlatformId: $targetPlatformId)';
+    return 'ReturnRequest(id: $id, orderId: $orderId, reason: $reason, status: $status, notes: $notes, refundAmount: $refundAmount, returnShippingCost: $returnShippingCost, restockingFee: $restockingFee, requestedAt: $requestedAt, resolvedAt: $resolvedAt, returnToAddress: $returnToAddress, returnToCity: $returnToCity, returnToCountry: $returnToCountry, returnTrackingNumber: $returnTrackingNumber, returnCarrier: $returnCarrier, supplierId: $supplierId, productId: $productId, sourcePlatformId: $sourcePlatformId, targetPlatformId: $targetPlatformId, returnDestination: $returnDestination)';
   }
 
   @override
@@ -482,7 +503,9 @@ class _$ReturnRequestImpl implements _ReturnRequest {
             (identical(other.sourcePlatformId, sourcePlatformId) ||
                 other.sourcePlatformId == sourcePlatformId) &&
             (identical(other.targetPlatformId, targetPlatformId) ||
-                other.targetPlatformId == targetPlatformId));
+                other.targetPlatformId == targetPlatformId) &&
+            (identical(other.returnDestination, returnDestination) ||
+                other.returnDestination == returnDestination));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -508,6 +531,7 @@ class _$ReturnRequestImpl implements _ReturnRequest {
     productId,
     sourcePlatformId,
     targetPlatformId,
+    returnDestination,
   ]);
 
   /// Create a copy of ReturnRequest
@@ -545,6 +569,7 @@ abstract class _ReturnRequest implements ReturnRequest {
     final String? productId,
     final String? sourcePlatformId,
     final String? targetPlatformId,
+    final ReturnDestination? returnDestination,
   }) = _$ReturnRequestImpl;
 
   factory _ReturnRequest.fromJson(Map<String, dynamic> json) =
@@ -600,6 +625,10 @@ abstract class _ReturnRequest implements ReturnRequest {
   /// Which marketplace the customer bought from
   @override
   String? get targetPlatformId;
+
+  /// Where customer sends the return (supplier warehouse vs seller address)
+  @override
+  ReturnDestination? get returnDestination;
 
   /// Create a copy of ReturnRequest
   /// with the given fields replaced by the non-null parameter values.

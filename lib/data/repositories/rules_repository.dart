@@ -21,6 +21,18 @@ class RulesRepository {
     return (map ?? {}).map((k, v) => MapEntry(k, (v as num).toDouble()));
   }
 
+  static Map<String, dynamic> _jsonMapDynamic(String? json) {
+    if (json == null || json.isEmpty) return {};
+    final map = jsonDecode(json) as Map<String, dynamic>?;
+    return map ?? {};
+  }
+
+  static Map<String, dynamic>? _jsonMapNullable(String? json) {
+    if (json == null || json.isEmpty) return null;
+    final map = jsonDecode(json) as Map<String, dynamic>?;
+    return map;
+  }
+
   static UserRules _rowToRules(UserRulesRow row) {
     return UserRules(
       minProfitPercent: row.minProfitPercent,
@@ -34,6 +46,8 @@ class RulesRepository {
       defaultMarkupPercent: row.defaultMarkupPercent,
       searchKeywords: _jsonList(row.searchKeywords),
       marketplaceFees: _jsonMap(row.marketplaceFeesJson),
+      sellerReturnAddress: _jsonMapNullable(row.sellerReturnAddressJson),
+      marketplaceReturnPolicy: _jsonMapDynamic(row.marketplaceReturnPolicyJson),
     );
   }
 
@@ -52,6 +66,10 @@ class RulesRepository {
     final blacklistedSuppliers = jsonEncode(rules.blacklistedSupplierIds);
     final keywords = jsonEncode(rules.searchKeywords);
     final feesJson = jsonEncode(rules.marketplaceFees);
+    final sellerReturnJson = rules.sellerReturnAddress != null
+        ? jsonEncode(rules.sellerReturnAddress)
+        : null;
+    final marketplaceReturnPolicyJson = jsonEncode(rules.marketplaceReturnPolicy);
     if (existing != null) {
       await (_db.update(_db.userRulesTable)..where((t) => t.id.equals(existing.id))).write(
         UserRulesTableCompanion(
@@ -66,6 +84,8 @@ class RulesRepository {
           defaultMarkupPercent: Value(rules.defaultMarkupPercent),
           searchKeywords: Value(keywords),
           marketplaceFeesJson: Value(feesJson),
+          sellerReturnAddressJson: Value(sellerReturnJson),
+          marketplaceReturnPolicyJson: Value(marketplaceReturnPolicyJson),
         ),
       );
     } else {
@@ -81,6 +101,9 @@ class RulesRepository {
           blacklistedSupplierIds: blacklistedSuppliers,
           defaultMarkupPercent: rules.defaultMarkupPercent,
           searchKeywords: keywords,
+          marketplaceFeesJson: Value(feesJson),
+          sellerReturnAddressJson: Value(sellerReturnJson),
+          marketplaceReturnPolicyJson: Value(marketplaceReturnPolicyJson),
         ),
       );
     }

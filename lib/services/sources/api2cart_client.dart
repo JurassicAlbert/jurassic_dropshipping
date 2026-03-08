@@ -29,6 +29,16 @@ class Api2CartClient {
   final SecureStorageService secureStorage;
   final Dio _dio;
 
+  /// True if api_key and store_key are set. When false, callers should skip API calls.
+  Future<bool> isConfigured() async {
+    final apiKey = await secureStorage.read(SecureKeys.api2cartApiKey);
+    final storeKey = await secureStorage.read(SecureKeys.api2cartStoreKey);
+    return apiKey != null &&
+        apiKey.isNotEmpty &&
+        storeKey != null &&
+        storeKey.isNotEmpty;
+  }
+
   Future<List<Map<String, dynamic>>> searchProducts(String keyword, {int count = 50}) async {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/product.list.json', queryParameters: {

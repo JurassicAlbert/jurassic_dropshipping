@@ -65,6 +65,8 @@ class AnalyticsScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 _SummaryKpiRow(engine: engine),
                 const SizedBox(height: 16),
+                _MarginStrategyKpi(engine: engine),
+                const SizedBox(height: 16),
                 _ProfitByPlatformChart(engine: engine),
                 const SizedBox(height: 16),
                 _ProfitByProductList(engine: engine),
@@ -123,6 +125,52 @@ class _SummaryKpiRow extends StatelessWidget {
           color: Colors.orange,
         ),
       ],
+    );
+  }
+}
+
+class _MarginStrategyKpi extends StatelessWidget {
+  const _MarginStrategyKpi({required this.engine});
+  final AnalyticsEngine engine;
+
+  @override
+  Widget build(BuildContext context) {
+    final rec1w = engine.recommendedMinMarginPercent(period: const Duration(days: 7));
+    final rec1m = engine.recommendedMinMarginPercent(period: const Duration(days: 30));
+    final rec1y = engine.recommendedMinMarginPercent(period: const Duration(days: 365));
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Margin strategy',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Recommended minimum profit margin so you stay profitable (based on your realized orders):',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                _KpiMetricCard(label: '1 week', value: '${rec1w.toStringAsFixed(1)}%', icon: Icons.show_chart, color: Colors.blue),
+                _KpiMetricCard(label: '1 month', value: '${rec1m.toStringAsFixed(1)}%', icon: Icons.show_chart, color: Colors.indigo),
+                _KpiMetricCard(label: '1 year', value: '${rec1y.toStringAsFixed(1)}%', icon: Icons.show_chart, color: Colors.purple),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Set "Min profit %" in Settings above the recommended value to avoid loss. You can set a specific margin per product or category later.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

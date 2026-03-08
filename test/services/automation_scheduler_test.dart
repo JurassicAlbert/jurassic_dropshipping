@@ -8,6 +8,7 @@ import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/return_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/listing_decider.dart';
@@ -16,6 +17,8 @@ import 'package:jurassic_dropshipping/domain/decision_engine/scanner.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/supplier_selector.dart';
 import 'package:jurassic_dropshipping/services/automation_scheduler.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
+import 'package:jurassic_dropshipping/services/order_cancellation_service.dart';
+import 'package:jurassic_dropshipping/services/marketplace_listing_sync_service.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/services/price_refresh_service.dart';
 
@@ -43,6 +46,7 @@ void main() {
     final orderRepo = OrderRepository(db);
     final decisionLogRepo = DecisionLogRepository(db);
     final offerRepo = SupplierOfferRepository(db);
+    final returnRepo = ReturnRepository(db);
 
     final pricingCalculator = PricingCalculator();
     final listingDecider = ListingDecider(pricingCalculator: pricingCalculator);
@@ -61,10 +65,19 @@ void main() {
       sources: [mockSource],
     );
 
+    final orderCancellationService = OrderCancellationService(
+      orderRepository: orderRepo,
+      listingRepository: listingRepo,
+      productRepository: productRepo,
+      returnRepository: returnRepo,
+      targets: [mockTarget],
+      sources: [mockSource],
+    );
     final orderSyncService = OrderSyncService(
       orderRepository: orderRepo,
       rulesRepository: rulesRepo,
       targets: [mockTarget],
+      orderCancellationService: orderCancellationService,
     );
 
     final fulfillmentService = FulfillmentService(
@@ -73,11 +86,19 @@ void main() {
       productRepository: productRepo,
       sources: [mockSource],
       targets: [mockTarget],
+      orderCancellationService: orderCancellationService,
     );
 
     final priceRefreshService = PriceRefreshService(
       supplierOfferRepository: offerRepo,
       sources: [mockSource],
+    );
+
+    final marketplaceListingSyncService = MarketplaceListingSyncService(
+      listingRepository: listingRepo,
+      productRepository: productRepo,
+      sources: [mockSource],
+      targets: [mockTarget],
     );
 
     scheduler = AutomationScheduler(
@@ -86,6 +107,7 @@ void main() {
       fulfillmentService: fulfillmentService,
       rulesRepository: rulesRepo,
       priceRefreshService: priceRefreshService,
+      marketplaceListingSyncService: marketplaceListingSyncService,
     );
   });
 
@@ -103,6 +125,9 @@ void main() {
       expect(scheduler.isScanRunning, isFalse);
       expect(scheduler.isSyncRunning, isFalse);
       expect(scheduler.isPriceRefreshRunning, isFalse);
+      expect(scheduler.isMarketplaceSyncRunning, isFalse);
+      expect(scheduler.isProductRefreshRunning, isFalse);
+      expect(scheduler.isLowStockRefreshRunning, isFalse);
     });
 
     test('startAll starts all timers', () async {

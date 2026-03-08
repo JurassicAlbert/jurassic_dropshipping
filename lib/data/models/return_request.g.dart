@@ -31,30 +31,36 @@ _$ReturnRequestImpl _$$ReturnRequestImplFromJson(Map<String, dynamic> json) =>
       productId: json['productId'] as String?,
       sourcePlatformId: json['sourcePlatformId'] as String?,
       targetPlatformId: json['targetPlatformId'] as String?,
+      returnDestination: $enumDecodeNullable(
+        _$ReturnDestinationEnumMap,
+        json['returnDestination'],
+      ),
     );
 
-Map<String, dynamic> _$$ReturnRequestImplToJson(_$ReturnRequestImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'orderId': instance.orderId,
-      'reason': _$ReturnReasonEnumMap[instance.reason]!,
-      'status': _$ReturnStatusEnumMap[instance.status]!,
-      'notes': instance.notes,
-      'refundAmount': instance.refundAmount,
-      'returnShippingCost': instance.returnShippingCost,
-      'restockingFee': instance.restockingFee,
-      'requestedAt': instance.requestedAt?.toIso8601String(),
-      'resolvedAt': instance.resolvedAt?.toIso8601String(),
-      'returnToAddress': instance.returnToAddress,
-      'returnToCity': instance.returnToCity,
-      'returnToCountry': instance.returnToCountry,
-      'returnTrackingNumber': instance.returnTrackingNumber,
-      'returnCarrier': instance.returnCarrier,
-      'supplierId': instance.supplierId,
-      'productId': instance.productId,
-      'sourcePlatformId': instance.sourcePlatformId,
-      'targetPlatformId': instance.targetPlatformId,
-    };
+Map<String, dynamic> _$$ReturnRequestImplToJson(
+  _$ReturnRequestImpl instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'orderId': instance.orderId,
+  'reason': _$ReturnReasonEnumMap[instance.reason]!,
+  'status': _$ReturnStatusEnumMap[instance.status]!,
+  'notes': instance.notes,
+  'refundAmount': instance.refundAmount,
+  'returnShippingCost': instance.returnShippingCost,
+  'restockingFee': instance.restockingFee,
+  'requestedAt': instance.requestedAt?.toIso8601String(),
+  'resolvedAt': instance.resolvedAt?.toIso8601String(),
+  'returnToAddress': instance.returnToAddress,
+  'returnToCity': instance.returnToCity,
+  'returnToCountry': instance.returnToCountry,
+  'returnTrackingNumber': instance.returnTrackingNumber,
+  'returnCarrier': instance.returnCarrier,
+  'supplierId': instance.supplierId,
+  'productId': instance.productId,
+  'sourcePlatformId': instance.sourcePlatformId,
+  'targetPlatformId': instance.targetPlatformId,
+  'returnDestination': _$ReturnDestinationEnumMap[instance.returnDestination],
+};
 
 const _$ReturnReasonEnumMap = {
   ReturnReason.noReason: 'noReason',
@@ -71,4 +77,9 @@ const _$ReturnStatusEnumMap = {
   ReturnStatus.received: 'received',
   ReturnStatus.refunded: 'refunded',
   ReturnStatus.rejected: 'rejected',
+};
+
+const _$ReturnDestinationEnumMap = {
+  ReturnDestination.toSupplier: 'toSupplier',
+  ReturnDestination.toSeller: 'toSeller',
 };

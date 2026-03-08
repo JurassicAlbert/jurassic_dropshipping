@@ -32,6 +32,7 @@ class OrderRepository {
       decisionLogId: row.decisionLogId,
       promisedDeliveryMin: row.promisedDeliveryMin,
       promisedDeliveryMax: row.promisedDeliveryMax,
+      deliveredAt: row.deliveredAt,
       approvedAt: row.approvedAt,
       createdAt: row.createdAt,
     );
@@ -73,6 +74,7 @@ class OrderRepository {
         marketplaceAccountId: Value(order.marketplaceAccountId),
         promisedDeliveryMin: Value(order.promisedDeliveryMin),
         promisedDeliveryMax: Value(order.promisedDeliveryMax),
+        deliveredAt: Value(order.deliveredAt),
         approvedAt: Value(order.approvedAt),
         createdAt: order.createdAt ?? DateTime.now(),
       ),
@@ -80,13 +82,14 @@ class OrderRepository {
   }
 
   Future<void> updateStatus(String localId, OrderStatus status,
-      {String? sourceOrderId, String? trackingNumber, DateTime? approvedAt}) async {
+      {String? sourceOrderId, String? trackingNumber, DateTime? approvedAt, DateTime? deliveredAt}) async {
     await (_db.update(_db.orders)..where((t) => t.localId.equals(localId))).write(
       OrdersCompanion(
         status: Value(status.name),
         sourceOrderId: sourceOrderId != null ? Value(sourceOrderId) : const Value.absent(),
         trackingNumber: trackingNumber != null ? Value(trackingNumber) : const Value.absent(),
         approvedAt: approvedAt != null ? Value(approvedAt) : const Value.absent(),
+        deliveredAt: deliveredAt != null ? Value(deliveredAt) : const Value.absent(),
       ),
     );
   }

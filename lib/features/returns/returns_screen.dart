@@ -158,6 +158,11 @@ class _ReturnCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text('Order: ${r.orderId}'),
             Text('Reason: ${_reasonLabel(r.reason)}'),
+            if (r.returnDestination != null)
+              Text(
+                'Return to: ${r.returnDestination == ReturnDestination.toSeller ? "Seller (you)" : "Supplier"}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             if (r.refundAmount != null)
               Text('Refund: \$${r.refundAmount!.toStringAsFixed(2)}'),
             if (r.returnShippingCost != null)

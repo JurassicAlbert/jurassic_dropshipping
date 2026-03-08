@@ -12,6 +12,9 @@ class Api2CartSourcePlatform implements SourcePlatform {
   String get displayName => 'API2Cart';
 
   @override
+  Future<bool> isConfigured() => _client.isConfigured();
+
+  @override
   Future<List<Product>> searchProducts(List<String> keywords, {SourceSearchFilters? filters}) async {
     final results = <Product>[];
     for (final keyword in keywords) {
@@ -46,6 +49,11 @@ class Api2CartSourcePlatform implements SourcePlatform {
   @override
   Future<SourceOrderResult?> getOrderStatus(String sourceOrderId) async {
     return null;
+  }
+
+  @override
+  Future<bool> cancelOrder(String sourceOrderId) async {
+    return false;
   }
 
   Product? _mapProduct(Map<String, dynamic> raw) {
