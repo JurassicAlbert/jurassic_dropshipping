@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
+import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
 
 class DecisionLogScreen extends ConsumerWidget {
   const DecisionLogScreen({super.key});
@@ -13,7 +15,11 @@ class DecisionLogScreen extends ConsumerWidget {
       onRefresh: () async => ref.invalidate(decisionLogsProvider),
       child: async.when(
         data: (logs) => logs.isEmpty
-            ? const Center(child: Text('No decision logs yet.'))
+            ? const EmptyState(
+                icon: Icons.list_alt,
+                title: 'No decisions logged',
+                subtitle: 'Decision logs are created when the scanner runs',
+              )
             : ListView.builder(
                 itemCount: logs.length,
                 itemBuilder: (_, i) {
@@ -28,7 +34,7 @@ class DecisionLogScreen extends ConsumerWidget {
                   );
                 },
               ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingSkeleton(),
         error: (e, _) => ErrorCard(
           message: 'Failed to load data. Please try again.',
           onRetry: () => ref.invalidate(decisionLogsProvider),

@@ -19,7 +19,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('No return requests match your filters.'), findsOneWidget);
+      expect(find.text('No returns'), findsOneWidget);
     });
 
     testWidgets('shows return cards when data present', (tester) async {

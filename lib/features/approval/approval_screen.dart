@@ -4,7 +4,9 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart';
+import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
 
 class ApprovalScreen extends ConsumerWidget {
   const ApprovalScreen({super.key});
@@ -29,11 +31,15 @@ class ApprovalScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             pendingListings.when(
               data: (listings) => listings.isEmpty
-                  ? const Card(child: Padding(padding: EdgeInsets.all(16), child: Text('No pending listings.')))
+                  ? const EmptyState(
+                      icon: Icons.pending_actions,
+                      title: 'Nothing pending',
+                      subtitle: 'Listings and orders awaiting approval will appear here',
+                    )
                   : Column(
                       children: listings.map((l) => _ListingApprovalTile(key: ValueKey(l.id), listing: l)).toList(),
                     ),
-              loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
+              loading: () => const SizedBox(height: 120, child: LoadingSkeleton(count: 2)),
               error: (e, _) => ErrorCard(
                 message: 'Failed to load data. Please try again.',
                 onRetry: () => ref.invalidate(pendingListingsProvider),
@@ -44,11 +50,15 @@ class ApprovalScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             pendingOrders.when(
               data: (orders) => orders.isEmpty
-                  ? const Card(child: Padding(padding: EdgeInsets.all(16), child: Text('No pending orders.')))
+                  ? const EmptyState(
+                      icon: Icons.pending_actions,
+                      title: 'Nothing pending',
+                      subtitle: 'Listings and orders awaiting approval will appear here',
+                    )
                   : Column(
                       children: orders.map((o) => _OrderApprovalTile(key: ValueKey(o.id), order: o)).toList(),
                     ),
-              loading: () => const Card(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
+              loading: () => const SizedBox(height: 120, child: LoadingSkeleton(count: 2)),
               error: (e, _) => ErrorCard(
                 message: 'Failed to load data. Please try again.',
                 onRetry: () => ref.invalidate(pendingOrdersProvider),

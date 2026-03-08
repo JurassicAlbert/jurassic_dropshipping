@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/supplier.dart';
+import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
 
 /// Suppliers overview: shows all registered suppliers with key details.
 class SuppliersScreen extends ConsumerWidget {
@@ -18,11 +20,10 @@ class SuppliersScreen extends ConsumerWidget {
       child: suppliersAsync.when(
         data: (suppliers) {
           if (suppliers.isEmpty) {
-            return ListView(
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No suppliers registered yet.')),
-              ],
+            return const EmptyState(
+              icon: Icons.store,
+              title: 'No suppliers',
+              subtitle: 'Load demo data from Settings to see suppliers',
             );
           }
           return ListView.builder(
@@ -30,7 +31,7 @@ class SuppliersScreen extends ConsumerWidget {
             itemBuilder: (_, i) => _SupplierTile(supplier: suppliers[i]),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingSkeleton(),
         error: (e, _) => ErrorCard(
           message: 'Failed to load data. Please try again.',
           onRetry: () => ref.invalidate(suppliersProvider),

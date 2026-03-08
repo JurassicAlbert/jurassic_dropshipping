@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
+import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
 import 'package:jurassic_dropshipping/features/shared/search_filter_bar.dart';
 
 class ProductsScreen extends ConsumerStatefulWidget {
@@ -76,11 +78,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               ),
               Expanded(
                 child: filtered.isEmpty
-                    ? ListView(
-                        children: const [
-                          SizedBox(height: 120),
-                          Center(child: Text('No listings match your filters.')),
-                        ],
+                    ? const EmptyState(
+                        icon: Icons.inventory_2,
+                        title: 'No listings yet',
+                        subtitle: 'Run a scan from Dashboard to find products',
                       )
                     : ListView.builder(
                         itemCount: filtered.length,
@@ -116,7 +117,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingSkeleton(),
         error: (e, _) => ErrorCard(
           message: 'Failed to load data. Please try again.',
           onRetry: () => ref.invalidate(listingsProvider),

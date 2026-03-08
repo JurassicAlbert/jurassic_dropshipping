@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
+import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
 
 /// Known marketplace display names.
 const _marketplaceNames = <String, String>{
@@ -49,11 +51,10 @@ class MarketplacesScreen extends ConsumerWidget {
           final sortedIds = allIds.toList()..sort();
 
           if (sortedIds.isEmpty) {
-            return ListView(
-              children: const [
-                SizedBox(height: 120),
-                Center(child: Text('No marketplace activity yet.')),
-              ],
+            return const EmptyState(
+              icon: Icons.public,
+              title: 'No marketplace activity',
+              subtitle: 'Connect a marketplace in Settings to start',
             );
           }
 
@@ -115,7 +116,7 @@ class MarketplacesScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingSkeleton(),
         error: (e, _) => ErrorCard(
           message: 'Failed to load data. Please try again.',
           onRetry: () => ref.invalidate(ordersProvider),

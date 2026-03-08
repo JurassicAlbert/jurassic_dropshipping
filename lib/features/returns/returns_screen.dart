@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
+import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
 import 'package:jurassic_dropshipping/features/shared/search_filter_bar.dart';
 
 class ReturnsScreen extends ConsumerStatefulWidget {
@@ -51,7 +53,7 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
     final returnsAsync = ref.watch(returnRequestsProvider);
 
     return returnsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const LoadingSkeleton(),
       error: (e, _) => ErrorCard(
         message: 'Failed to load data. Please try again.',
         onRetry: () => ref.invalidate(returnRequestsProvider),
@@ -78,27 +80,10 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
             ),
             Expanded(
               child: filtered.isEmpty
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.assignment_return, size: 64, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text(
-                              'No return requests match your filters.',
-                              style: TextStyle(fontSize: 18, color: Colors.grey),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Return requests from customers will appear here.',
-                              style: TextStyle(color: Colors.grey),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
+                  ? const EmptyState(
+                      icon: Icons.assignment_return,
+                      title: 'No returns',
+                      subtitle: 'Returns from customers will appear here',
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(16),
