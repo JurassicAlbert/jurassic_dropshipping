@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
+import 'package:jurassic_dropshipping/domain/post_order/return_routing.dart';
 
 class ReturnRepository {
-  ReturnRepository(this._db);
+  ReturnRepository(this._db, {this.tenantId = 1});
   final AppDatabase _db;
+  final int tenantId;
 
   static ReturnStatus _statusFromString(String s) {
     return ReturnStatus.values.firstWhere(
@@ -50,11 +52,14 @@ class ReturnRepository {
       sourcePlatformId: row.sourcePlatformId,
       targetPlatformId: row.targetPlatformId,
       returnDestination: _returnDestinationFromString(row.returnDestination),
+      returnRoutingDestination:
+          ReturnRoutingDestinationExtension.fromDbString(row.returnRoutingDestination),
     );
   }
 
   Future<List<ReturnRequest>> getAll() async {
     final rows = await (_db.select(_db.returns)
+          ..where((t) => t.tenantId.equals(tenantId))
           ..orderBy([(t) => OrderingTerm.desc(t.requestedAt)]))
         .get();
     return rows.map(_rowToReturnRequest).toList();
@@ -62,7 +67,7 @@ class ReturnRepository {
 
   Future<List<ReturnRequest>> getByOrderId(String orderId) async {
     final rows = await (_db.select(_db.returns)
-          ..where((t) => t.orderId.equals(orderId)))
+          ..where((t) => t.tenantId.equals(tenantId) & t.orderId.equals(orderId)))
         .get();
     return rows.map(_rowToReturnRequest).toList();
   }
@@ -70,6 +75,7 @@ class ReturnRepository {
   Future<void> insert(ReturnRequest returnRequest) async {
     await _db.into(_db.returns).insert(
       ReturnsCompanion.insert(
+        tenantId: Value(tenantId),
         returnId: returnRequest.id,
         orderId: returnRequest.orderId,
         reason: returnRequest.reason.name,
@@ -97,7 +103,7 @@ class ReturnRepository {
   Future<void> updateStatus(String returnId, ReturnStatus status,
       {double? refundAmount, DateTime? resolvedAt}) async {
     await (_db.update(_db.returns)
-          ..where((t) => t.returnId.equals(returnId)))
+          ..where((t) => t.tenantId.equals(tenantId) & t.returnId.equals(returnId)))
         .write(
       ReturnsCompanion(
         status: Value(status.name),
@@ -105,6 +111,33 @@ class ReturnRepository {
             refundAmount != null ? Value(refundAmount) : const Value.absent(),
         resolvedAt:
             resolvedAt != null ? Value(resolvedAt) : const Value.absent(),
+      ),
+    );
+  }
+
+  /// Update editable fields of an existing return request (status, amounts, notes, metadata).
+  Future<void> update(ReturnRequest r) async {
+    await (_db.update(_db.returns)
+          ..where((t) => t.tenantId.equals(tenantId) & t.returnId.equals(r.id)))
+        .write(
+      ReturnsCompanion(
+        status: Value(r.status.name),
+        notes: Value(r.notes),
+        refundAmount: Value(r.refundAmount),
+        returnShippingCost: Value(r.returnShippingCost),
+        restockingFee: Value(r.restockingFee),
+        resolvedAt: Value(r.resolvedAt),
+        returnToAddress: Value(r.returnToAddress),
+        returnToCity: Value(r.returnToCity),
+        returnToCountry: Value(r.returnToCountry),
+        returnTrackingNumber: Value(r.returnTrackingNumber),
+        returnCarrier: Value(r.returnCarrier),
+        supplierId: Value(r.supplierId),
+        productId: Value(r.productId),
+        sourcePlatformId: Value(r.sourcePlatformId),
+        targetPlatformId: Value(r.targetPlatformId),
+        returnDestination: Value(r.returnDestination?.name),
+        returnRoutingDestination: Value(r.returnRoutingDestination?.toDbString()),
       ),
     );
   }

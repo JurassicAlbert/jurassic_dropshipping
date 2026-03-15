@@ -5,6 +5,7 @@ import 'package:jurassic_dropshipping/core/app_error.dart';
 import 'package:jurassic_dropshipping/core/logger.dart';
 import 'package:jurassic_dropshipping/services/dio_rate_limit_interceptor.dart';
 import 'package:jurassic_dropshipping/services/dio_retry_interceptor.dart';
+import 'package:jurassic_dropshipping/services/rate_limiter.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 
 const _baseUrl = 'https://developers.cjdropshipping.com/api2.0/v1';
@@ -15,9 +16,10 @@ class CjDropshippingClient {
   CjDropshippingClient({
     required this.secureStorage,
     Dio? dio,
+    RateLimiter? rateLimiter,
   }) : _dio = dio ?? Dio(BaseOptions(baseUrl: _baseUrl, connectTimeout: const Duration(seconds: 15))) {
     _dio.interceptors.insert(0, RetryInterceptor());
-    _dio.interceptors.add(RateLimitInterceptor());
+    _dio.interceptors.add(RateLimitInterceptor(limiter: rateLimiter));
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await secureStorage.read(SecureKeys.cjAccessToken);

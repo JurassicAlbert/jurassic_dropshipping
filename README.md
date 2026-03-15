@@ -92,6 +92,10 @@ flutter test test/integration/ # integration (6)
 - [docs/DECISION_LOGIC.md](docs/DECISION_LOGIC.md) – Listing and supplier decision rules.
 - [docs/ADDING_A_MARKETPLACE.md](docs/ADDING_A_MARKETPLACE.md) – How to add a new source or target platform.
 - [docs/MONEY_SAFETY.md](docs/MONEY_SAFETY.md) – Financial safety guardrails, return risk, and monitoring checklist.
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) – Build, run, data, automation, and optional Docker.
+- [docs/OOS_DETECTION.md](docs/OOS_DETECTION.md) – How we detect out-of-stock (CJ codes, heuristics, strict mode).
+- [docs/WAREHOUSE_FEEDS.md](docs/WAREHOUSE_FEEDS.md) – Sourcing from warehouse/depot (CSV, XML, API) with flexible mapping; middleman optional.
+- [docs/POST_ORDER_INCIDENT_IMPLEMENTATION_PLAN.md](docs/POST_ORDER_INCIDENT_IMPLEMENTATION_PLAN.md) – Post-order lifecycle, incidents, returns, supplier policies, capital management, risk scoring, and pricing adaptation (18-phase plan).
 
 ## Integrations
 

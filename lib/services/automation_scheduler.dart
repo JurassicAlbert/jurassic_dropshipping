@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'package:hive/hive.dart';
 import 'package:jurassic_dropshipping/core/logger.dart';
+import 'package:jurassic_dropshipping/data/repositories/background_job_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
+import 'package:jurassic_dropshipping/data/models/listing.dart';
+import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/scanner.dart';
+import 'package:jurassic_dropshipping/domain/observability/observability_metrics.dart';
+import 'package:jurassic_dropshipping/services/background_job_processor_service.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
 import 'package:jurassic_dropshipping/services/marketplace_listing_sync_service.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/services/price_refresh_service.dart';
-import 'package:jurassic_dropshipping/data/models/order.dart';
 
 class AutomationScheduler {
   AutomationScheduler({
@@ -17,6 +21,9 @@ class AutomationScheduler {
     required this.rulesRepository,
     required this.priceRefreshService,
     required this.marketplaceListingSyncService,
+    this.jobRepository,
+    this.jobProcessor,
+    this.observabilityMetrics,
   });
 
   final Scanner scanner;
@@ -25,6 +32,11 @@ class AutomationScheduler {
   final RulesRepository rulesRepository;
   final PriceRefreshService priceRefreshService;
   final MarketplaceListingSyncService marketplaceListingSyncService;
+  /// When set, scan/fulfill/price_refresh are enqueued and processed asynchronously (Phase B).
+  final BackgroundJobRepository? jobRepository;
+  final BackgroundJobProcessorService? jobProcessor;
+  /// Phase 32: when set, records listing updates enqueued for observability.
+  final ObservabilityMetrics? observabilityMetrics;
 
   Timer? _scanTimer;
   Timer? _syncTimer;
@@ -32,6 +44,9 @@ class AutomationScheduler {
   Timer? _marketplaceSyncTimer;
   Timer? _productRefreshTimer;
   Timer? _lowStockRefreshTimer;
+  Timer? _jobProcessorTimer;
+  /// Phase 32: periodic observability log when [observabilityMetrics] is set.
+  Timer? _observabilityLogTimer;
 
   DateTime? lastScanTime;
   DateTime? lastSyncTime;
@@ -82,7 +97,15 @@ class AutomationScheduler {
     await loadState();
     final rules = await rulesRepository.get();
     final interval = Duration(minutes: rules.scanIntervalMinutes);
-    
+
+    if (jobRepository != null && jobProcessor != null) {
+      _jobProcessorTimer?.cancel();
+      _jobProcessorTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+        await jobProcessor!.processUntilEmpty(maxJobs: 5);
+      });
+      appLogger.i('AutomationScheduler: background job processor started');
+    }
+
     startScanner(interval: interval);
     startOrderSync(interval: interval);
     startPriceRefresh(interval: const Duration(hours: 6));
@@ -98,12 +121,16 @@ class AutomationScheduler {
     _marketplaceSyncTimer?.cancel();
     _productRefreshTimer?.cancel();
     _lowStockRefreshTimer?.cancel();
+    _jobProcessorTimer?.cancel();
+    _observabilityLogTimer?.cancel();
     _scanTimer = null;
     _syncTimer = null;
     _priceRefreshTimer = null;
     _marketplaceSyncTimer = null;
     _productRefreshTimer = null;
     _lowStockRefreshTimer = null;
+    _jobProcessorTimer = null;
+    _observabilityLogTimer = null;
     appLogger.i('AutomationScheduler: all timers stopped');
   }
 
@@ -135,13 +162,33 @@ class AutomationScheduler {
     appLogger.i('AutomationScheduler: marketplace listing sync started with interval $interval');
   }
 
+  /// Phase 23: Enqueue one update_listing job per active listing; worker processes at throttled rate.
   Future<void> _runMarketplaceListingSync() async {
     try {
-      final synced = await marketplaceListingSyncService.syncListingsStock();
-      lastMarketplaceSyncTime = DateTime.now();
-      await _saveState();
-      if (synced > 0) {
-        appLogger.i('AutomationScheduler: marketplace listing sync complete - $synced listings updated');
+      final rules = await rulesRepository.get();
+      if (rules.targetsReadOnly) {
+        appLogger.i('AutomationScheduler: marketplace listing sync skipped (targetsReadOnly=true)');
+        return;
+      }
+      if (jobRepository != null) {
+        final listings = await marketplaceListingSyncService.listingRepository.getByStatus(ListingStatus.active);
+        final withTargetId = listings.where((l) => l.targetListingId != null && l.targetListingId!.isNotEmpty).toList();
+        for (final listing in withTargetId) {
+          await jobRepository!.enqueue(BackgroundJobType.updateListing, {'listingId': listing.id});
+        }
+        lastMarketplaceSyncTime = DateTime.now();
+        await _saveState();
+        if (withTargetId.isNotEmpty) {
+          observabilityMetrics?.recordListingUpdatesEnqueued(withTargetId.length);
+          appLogger.i('AutomationScheduler: enqueued ${withTargetId.length} update_listing jobs (Phase 23 throttled)');
+        }
+      } else {
+        final synced = await marketplaceListingSyncService.syncListingsStock();
+        lastMarketplaceSyncTime = DateTime.now();
+        await _saveState();
+        if (synced > 0) {
+          appLogger.i('AutomationScheduler: marketplace listing sync complete - $synced listings updated');
+        }
       }
     } catch (e, st) {
       appLogger.e('AutomationScheduler: marketplace listing sync failed', error: e, stackTrace: st);
@@ -193,13 +240,21 @@ class AutomationScheduler {
       final refreshed = await priceRefreshService.refreshStaleOffers();
       lastPriceRefreshTime = DateTime.now();
       await _saveState();
-      appLogger.i('AutomationScheduler: price refresh complete - $refreshed offers refreshed');
+      appLogger.i('AutomationScheduler: price refresh complete - ${refreshed.length} products refreshed');
+      // Phase 31: PriceRefreshService enqueues catalog_event per product; handler enqueues update_listing (no duplicate here).
     } catch (e, st) {
       appLogger.e('AutomationScheduler: price refresh failed', error: e, stackTrace: st);
     }
   }
 
   Future<void> _runScan() async {
+    if (jobRepository != null) {
+      await jobRepository!.enqueue(BackgroundJobType.scan, {});
+      lastScanTime = DateTime.now();
+      await _saveState();
+      appLogger.i('AutomationScheduler: scan job enqueued');
+      return;
+    }
     if (_scanning) return;
     _scanning = true;
     try {
@@ -225,7 +280,15 @@ class AutomationScheduler {
       appLogger.i('AutomationScheduler: synced $added new orders');
 
       final rules = await rulesRepository.get();
-      if (!rules.manualApprovalOrders) {
+      if (!rules.manualApprovalOrders && !rules.targetsReadOnly && jobRepository != null) {
+        final pending = await orderSyncService.orderRepository.getByStatus(OrderStatus.pending);
+        for (final order in pending) {
+          await jobRepository!.enqueue(BackgroundJobType.fulfillOrder, {'orderId': order.id});
+        }
+        if (pending.isNotEmpty) {
+          appLogger.i('AutomationScheduler: enqueued ${pending.length} fulfill_order jobs');
+        }
+      } else if (!rules.manualApprovalOrders && !rules.targetsReadOnly) {
         final pending = await orderSyncService.orderRepository.getByStatus(OrderStatus.pending);
         for (final order in pending) {
           try {
@@ -234,6 +297,8 @@ class AutomationScheduler {
             appLogger.e('AutomationScheduler: auto-fulfill ${order.id} failed', error: e);
           }
         }
+      } else if (rules.targetsReadOnly) {
+        appLogger.i('AutomationScheduler: auto-fulfill skipped (targetsReadOnly=true)');
       }
     } catch (e, st) {
       appLogger.e('AutomationScheduler: sync failed', error: e, stackTrace: st);

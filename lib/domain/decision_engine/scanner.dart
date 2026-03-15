@@ -8,6 +8,8 @@ import 'package:jurassic_dropshipping/domain/decision_engine/listing_decider.dar
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/supplier_selector.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart';
+import 'package:jurassic_dropshipping/services/billing_service.dart';
+import 'package:jurassic_dropshipping/services/competitor_pricing_service.dart';
 
 /// Scans source platforms for products, applies rules, and creates draft/pending listings.
 class Scanner {
@@ -22,6 +24,8 @@ class Scanner {
     required this.sources,
     List<String> targetPlatformIds = const [],
     @Deprecated('Use targetPlatformIds instead') String targetPlatformId = '',
+    this.competitorPricingService,
+    this.billingService = null,
   }) : targetPlatformIds = targetPlatformIds.isNotEmpty
            ? targetPlatformIds
            : (targetPlatformId.isNotEmpty ? [targetPlatformId] : ['allegro']);
@@ -35,6 +39,8 @@ class Scanner {
   final SupplierSelector supplierSelector;
   final List<SourcePlatform> sources;
   final List<String> targetPlatformIds;
+  final CompetitorPricingService? competitorPricingService;
+  final BillingService? billingService;
 
   /// Run a scan: load rules, search each source, decide and persist listings.
   Future<ScanResult> run() async {
@@ -64,19 +70,43 @@ class Scanner {
           final selection = supplierSelector.select([product], rules);
           final chosen = selection.product;
           if (chosen == null) continue;
-          final decision = listingDecider.decide(chosen, rules);
-          if (decision is ListingDecisionReject) continue;
-          final accept = decision as ListingDecisionAccept;
-          final logId = 'log_${DateTime.now().millisecondsSinceEpoch}';
-          await decisionLogRepository.insert(DecisionLog(
-            id: logId,
-            type: DecisionLogType.listing,
-            entityId: accept.listing.id,
-            reason: accept.reason,
-            criteriaSnapshot: accept.criteriaSnapshot,
-            createdAt: DateTime.now(),
-          ));
+
+          // Evaluate listing decision per target platform so that:
+          // - platform-specific fees (including payment fees) are applied, and
+          // - pricing strategies (always_below_lowest, list_at_min_even_if_above_lowest, etc.)
+          //   can reason about platform/category data.
           for (final targetId in targetPlatformIds) {
+            CompetitivePricingInput? competitorInput;
+            if (competitorPricingService != null) {
+              competitorInput = await competitorPricingService!.getSnapshot(
+                chosen,
+                targetId,
+              );
+            }
+            final decision = listingDecider.decide(
+              chosen,
+              rules,
+              targetPlatformId: targetId,
+              competitorInput: competitorInput,
+            );
+            if (decision is ListingDecisionReject) continue;
+            final accept = decision as ListingDecisionAccept;
+            final logId = 'log_${DateTime.now().millisecondsSinceEpoch}_$targetId';
+            await decisionLogRepository.insert(DecisionLog(
+              id: logId,
+              type: DecisionLogType.listing,
+              entityId: accept.listing.id,
+              reason: accept.reason,
+              criteriaSnapshot: accept.criteriaSnapshot,
+              createdAt: DateTime.now(),
+            ));
+            if (billingService != null) {
+              final canCreate = await billingService!.canCreateListing();
+              if (!canCreate) {
+                appLogger.w('Scanner: billing limit reached (listings), skipping new listing');
+                continue;
+              }
+            }
             final listing = accept.listing.copyWith(
               targetPlatformId: targetId,
               decisionLogId: logId,

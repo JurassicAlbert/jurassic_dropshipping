@@ -347,6 +347,7 @@ mixin _$Order {
   String? get sourceOrderId => throw _privateConstructorUsedError;
   double get sourceCost => throw _privateConstructorUsedError;
   double get sellingPrice => throw _privateConstructorUsedError;
+  int get quantity => throw _privateConstructorUsedError;
   String? get trackingNumber => throw _privateConstructorUsedError;
   String? get decisionLogId => throw _privateConstructorUsedError;
   String? get marketplaceAccountId => throw _privateConstructorUsedError;
@@ -355,6 +356,21 @@ mixin _$Order {
   DateTime? get deliveredAt => throw _privateConstructorUsedError;
   DateTime? get approvedAt => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
+
+  /// Post-order lifecycle; null until backfilled or set by lifecycle engine.
+  String? get lifecycleState => throw _privateConstructorUsedError;
+
+  /// Phase 14: financial state (unpaid, supplier_paid, marketplace_released, refunded, loss). Nullable.
+  String? get financialState => throw _privateConstructorUsedError;
+
+  /// Phase 14: true when order is waiting for capital before fulfillment.
+  bool get queuedForCapital => throw _privateConstructorUsedError;
+
+  /// Phase 16: risk score 0–100; null until evaluated.
+  double? get riskScore => throw _privateConstructorUsedError;
+
+  /// Phase 16: JSON array of factor names.
+  String? get riskFactorsJson => throw _privateConstructorUsedError;
 
   /// Serializes this Order to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -380,6 +396,7 @@ abstract class $OrderCopyWith<$Res> {
     String? sourceOrderId,
     double sourceCost,
     double sellingPrice,
+    int quantity,
     String? trackingNumber,
     String? decisionLogId,
     String? marketplaceAccountId,
@@ -388,6 +405,11 @@ abstract class $OrderCopyWith<$Res> {
     DateTime? deliveredAt,
     DateTime? approvedAt,
     DateTime? createdAt,
+    String? lifecycleState,
+    String? financialState,
+    bool queuedForCapital,
+    double? riskScore,
+    String? riskFactorsJson,
   });
 
   $CustomerAddressCopyWith<$Res> get customerAddress;
@@ -417,6 +439,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? sourceOrderId = freezed,
     Object? sourceCost = null,
     Object? sellingPrice = null,
+    Object? quantity = null,
     Object? trackingNumber = freezed,
     Object? decisionLogId = freezed,
     Object? marketplaceAccountId = freezed,
@@ -425,6 +448,11 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? deliveredAt = freezed,
     Object? approvedAt = freezed,
     Object? createdAt = freezed,
+    Object? lifecycleState = freezed,
+    Object? financialState = freezed,
+    Object? queuedForCapital = null,
+    Object? riskScore = freezed,
+    Object? riskFactorsJson = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -464,6 +492,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.sellingPrice
                 : sellingPrice // ignore: cast_nullable_to_non_nullable
                       as double,
+            quantity: null == quantity
+                ? _value.quantity
+                : quantity // ignore: cast_nullable_to_non_nullable
+                      as int,
             trackingNumber: freezed == trackingNumber
                 ? _value.trackingNumber
                 : trackingNumber // ignore: cast_nullable_to_non_nullable
@@ -496,6 +528,26 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
+            lifecycleState: freezed == lifecycleState
+                ? _value.lifecycleState
+                : lifecycleState // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            financialState: freezed == financialState
+                ? _value.financialState
+                : financialState // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            queuedForCapital: null == queuedForCapital
+                ? _value.queuedForCapital
+                : queuedForCapital // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            riskScore: freezed == riskScore
+                ? _value.riskScore
+                : riskScore // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            riskFactorsJson: freezed == riskFactorsJson
+                ? _value.riskFactorsJson
+                : riskFactorsJson // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -530,6 +582,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     String? sourceOrderId,
     double sourceCost,
     double sellingPrice,
+    int quantity,
     String? trackingNumber,
     String? decisionLogId,
     String? marketplaceAccountId,
@@ -538,6 +591,11 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     DateTime? deliveredAt,
     DateTime? approvedAt,
     DateTime? createdAt,
+    String? lifecycleState,
+    String? financialState,
+    bool queuedForCapital,
+    double? riskScore,
+    String? riskFactorsJson,
   });
 
   @override
@@ -567,6 +625,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? sourceOrderId = freezed,
     Object? sourceCost = null,
     Object? sellingPrice = null,
+    Object? quantity = null,
     Object? trackingNumber = freezed,
     Object? decisionLogId = freezed,
     Object? marketplaceAccountId = freezed,
@@ -575,6 +634,11 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? deliveredAt = freezed,
     Object? approvedAt = freezed,
     Object? createdAt = freezed,
+    Object? lifecycleState = freezed,
+    Object? financialState = freezed,
+    Object? queuedForCapital = null,
+    Object? riskScore = freezed,
+    Object? riskFactorsJson = freezed,
   }) {
     return _then(
       _$OrderImpl(
@@ -614,6 +678,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.sellingPrice
             : sellingPrice // ignore: cast_nullable_to_non_nullable
                   as double,
+        quantity: null == quantity
+            ? _value.quantity
+            : quantity // ignore: cast_nullable_to_non_nullable
+                  as int,
         trackingNumber: freezed == trackingNumber
             ? _value.trackingNumber
             : trackingNumber // ignore: cast_nullable_to_non_nullable
@@ -646,6 +714,26 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        lifecycleState: freezed == lifecycleState
+            ? _value.lifecycleState
+            : lifecycleState // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        financialState: freezed == financialState
+            ? _value.financialState
+            : financialState // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        queuedForCapital: null == queuedForCapital
+            ? _value.queuedForCapital
+            : queuedForCapital // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        riskScore: freezed == riskScore
+            ? _value.riskScore
+            : riskScore // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        riskFactorsJson: freezed == riskFactorsJson
+            ? _value.riskFactorsJson
+            : riskFactorsJson // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -664,6 +752,7 @@ class _$OrderImpl implements _Order {
     this.sourceOrderId,
     required this.sourceCost,
     required this.sellingPrice,
+    this.quantity = 1,
     this.trackingNumber,
     this.decisionLogId,
     this.marketplaceAccountId,
@@ -672,6 +761,11 @@ class _$OrderImpl implements _Order {
     this.deliveredAt,
     this.approvedAt,
     this.createdAt,
+    this.lifecycleState,
+    this.financialState,
+    this.queuedForCapital = false,
+    this.riskScore,
+    this.riskFactorsJson,
   });
 
   factory _$OrderImpl.fromJson(Map<String, dynamic> json) =>
@@ -696,6 +790,9 @@ class _$OrderImpl implements _Order {
   @override
   final double sellingPrice;
   @override
+  @JsonKey()
+  final int quantity;
+  @override
   final String? trackingNumber;
   @override
   final String? decisionLogId;
@@ -712,9 +809,30 @@ class _$OrderImpl implements _Order {
   @override
   final DateTime? createdAt;
 
+  /// Post-order lifecycle; null until backfilled or set by lifecycle engine.
+  @override
+  final String? lifecycleState;
+
+  /// Phase 14: financial state (unpaid, supplier_paid, marketplace_released, refunded, loss). Nullable.
+  @override
+  final String? financialState;
+
+  /// Phase 14: true when order is waiting for capital before fulfillment.
+  @override
+  @JsonKey()
+  final bool queuedForCapital;
+
+  /// Phase 16: risk score 0–100; null until evaluated.
+  @override
+  final double? riskScore;
+
+  /// Phase 16: JSON array of factor names.
+  @override
+  final String? riskFactorsJson;
+
   @override
   String toString() {
-    return 'Order(id: $id, listingId: $listingId, targetOrderId: $targetOrderId, targetPlatformId: $targetPlatformId, customerAddress: $customerAddress, status: $status, sourceOrderId: $sourceOrderId, sourceCost: $sourceCost, sellingPrice: $sellingPrice, trackingNumber: $trackingNumber, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedDeliveryMin: $promisedDeliveryMin, promisedDeliveryMax: $promisedDeliveryMax, deliveredAt: $deliveredAt, approvedAt: $approvedAt, createdAt: $createdAt)';
+    return 'Order(id: $id, listingId: $listingId, targetOrderId: $targetOrderId, targetPlatformId: $targetPlatformId, customerAddress: $customerAddress, status: $status, sourceOrderId: $sourceOrderId, sourceCost: $sourceCost, sellingPrice: $sellingPrice, quantity: $quantity, trackingNumber: $trackingNumber, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedDeliveryMin: $promisedDeliveryMin, promisedDeliveryMax: $promisedDeliveryMax, deliveredAt: $deliveredAt, approvedAt: $approvedAt, createdAt: $createdAt, lifecycleState: $lifecycleState, financialState: $financialState, queuedForCapital: $queuedForCapital, riskScore: $riskScore, riskFactorsJson: $riskFactorsJson)';
   }
 
   @override
@@ -738,6 +856,8 @@ class _$OrderImpl implements _Order {
                 other.sourceCost == sourceCost) &&
             (identical(other.sellingPrice, sellingPrice) ||
                 other.sellingPrice == sellingPrice) &&
+            (identical(other.quantity, quantity) ||
+                other.quantity == quantity) &&
             (identical(other.trackingNumber, trackingNumber) ||
                 other.trackingNumber == trackingNumber) &&
             (identical(other.decisionLogId, decisionLogId) ||
@@ -753,12 +873,22 @@ class _$OrderImpl implements _Order {
             (identical(other.approvedAt, approvedAt) ||
                 other.approvedAt == approvedAt) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.lifecycleState, lifecycleState) ||
+                other.lifecycleState == lifecycleState) &&
+            (identical(other.financialState, financialState) ||
+                other.financialState == financialState) &&
+            (identical(other.queuedForCapital, queuedForCapital) ||
+                other.queuedForCapital == queuedForCapital) &&
+            (identical(other.riskScore, riskScore) ||
+                other.riskScore == riskScore) &&
+            (identical(other.riskFactorsJson, riskFactorsJson) ||
+                other.riskFactorsJson == riskFactorsJson));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     listingId,
@@ -769,6 +899,7 @@ class _$OrderImpl implements _Order {
     sourceOrderId,
     sourceCost,
     sellingPrice,
+    quantity,
     trackingNumber,
     decisionLogId,
     marketplaceAccountId,
@@ -777,7 +908,12 @@ class _$OrderImpl implements _Order {
     deliveredAt,
     approvedAt,
     createdAt,
-  );
+    lifecycleState,
+    financialState,
+    queuedForCapital,
+    riskScore,
+    riskFactorsJson,
+  ]);
 
   /// Create a copy of Order
   /// with the given fields replaced by the non-null parameter values.
@@ -804,6 +940,7 @@ abstract class _Order implements Order {
     final String? sourceOrderId,
     required final double sourceCost,
     required final double sellingPrice,
+    final int quantity,
     final String? trackingNumber,
     final String? decisionLogId,
     final String? marketplaceAccountId,
@@ -812,6 +949,11 @@ abstract class _Order implements Order {
     final DateTime? deliveredAt,
     final DateTime? approvedAt,
     final DateTime? createdAt,
+    final String? lifecycleState,
+    final String? financialState,
+    final bool queuedForCapital,
+    final double? riskScore,
+    final String? riskFactorsJson,
   }) = _$OrderImpl;
 
   factory _Order.fromJson(Map<String, dynamic> json) = _$OrderImpl.fromJson;
@@ -835,6 +977,8 @@ abstract class _Order implements Order {
   @override
   double get sellingPrice;
   @override
+  int get quantity;
+  @override
   String? get trackingNumber;
   @override
   String? get decisionLogId;
@@ -850,6 +994,26 @@ abstract class _Order implements Order {
   DateTime? get approvedAt;
   @override
   DateTime? get createdAt;
+
+  /// Post-order lifecycle; null until backfilled or set by lifecycle engine.
+  @override
+  String? get lifecycleState;
+
+  /// Phase 14: financial state (unpaid, supplier_paid, marketplace_released, refunded, loss). Nullable.
+  @override
+  String? get financialState;
+
+  /// Phase 14: true when order is waiting for capital before fulfillment.
+  @override
+  bool get queuedForCapital;
+
+  /// Phase 16: risk score 0–100; null until evaluated.
+  @override
+  double? get riskScore;
+
+  /// Phase 16: JSON array of factor names.
+  @override
+  String? get riskFactorsJson;
 
   /// Create a copy of Order
   /// with the given fields replaced by the non-null parameter values.

@@ -13,6 +13,10 @@ class TemuTargetPlatform implements TargetPlatform {
   @override
   String get displayName => 'Temu';
 
+  // For now, Temu listings are always in PLN. Centralized here to make it
+  // easier to support multiple currencies in the future.
+  String get _currency => 'PLN';
+
   @override
   Future<bool> isConfigured() async => false;
 
@@ -22,7 +26,7 @@ class TemuTargetPlatform implements TargetPlatform {
       'title': draft.title,
       'description': draft.description,
       'price': draft.sellingPrice,
-      'currency': 'PLN',
+      'currency': _currency,
       'stock': draft.stock ?? 99,
       'images': draft.imageUrls,
       if (draft.categoryId != null) 'categoryId': draft.categoryId,
@@ -37,6 +41,9 @@ class TemuTargetPlatform implements TargetPlatform {
     await _client.updateListing(listingId, price: price, stock: stock, title: title, description: description);
   }
 
+  /// Fetches orders from Temu. Assumes one line item per raw order (form).
+  /// If the API later returns multiple line items per order (e.g. form['lineItems']),
+  /// expand to one [Order] per line with stable ids (see AllegroTargetPlatform.getOrders).
   @override
   Future<List<Order>> getOrders(DateTime since) async {
     final raw = await _client.getOrders(since: since);
@@ -44,6 +51,7 @@ class TemuTargetPlatform implements TargetPlatform {
       final id = form['id'] as String? ?? '';
       final amount = (form['totalPrice'] as num?)?.toDouble() ?? 0.0;
       final addr = form['shippingAddress'] as Map<String, dynamic>? ?? {};
+      final quantity = form['quantity'] is num ? (form['quantity'] as num).toInt() : 1;
       return Order(
         id: '${id}_$temuPlatformId',
         listingId: form['listingId'] as String? ?? '',
@@ -61,6 +69,7 @@ class TemuTargetPlatform implements TargetPlatform {
         status: OrderStatus.pending,
         sourceCost: 0,
         sellingPrice: amount,
+        quantity: quantity,
         createdAt: form['createdAt'] != null ? DateTime.tryParse(form['createdAt'] as String) : DateTime.now(),
       );
     }).toList();

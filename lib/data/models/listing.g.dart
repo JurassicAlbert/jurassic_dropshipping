@@ -25,6 +25,7 @@ _$ListingImpl _$$ListingImplFromJson(Map<String, dynamic> json) =>
       publishedAt: json['publishedAt'] == null
           ? null
           : DateTime.parse(json['publishedAt'] as String),
+      variantId: json['variantId'] as String?,
     );
 
 Map<String, dynamic> _$$ListingImplToJson(_$ListingImpl instance) =>
@@ -42,11 +43,13 @@ Map<String, dynamic> _$$ListingImplToJson(_$ListingImpl instance) =>
       'promisedMaxDays': instance.promisedMaxDays,
       'createdAt': instance.createdAt?.toIso8601String(),
       'publishedAt': instance.publishedAt?.toIso8601String(),
+      'variantId': instance.variantId,
     };
 
 const _$ListingStatusEnumMap = {
   ListingStatus.draft: 'draft',
   ListingStatus.pendingApproval: 'pendingApproval',
   ListingStatus.active: 'active',
+  ListingStatus.paused: 'paused',
   ListingStatus.soldOut: 'soldOut',
 };

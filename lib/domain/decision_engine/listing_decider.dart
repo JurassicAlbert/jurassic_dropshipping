@@ -14,7 +14,15 @@ class ListingDecider {
 
   /// Returns a listing decision: if profitable and within rules, returns [ListingDecision.accept] with
   /// draft listing and reason; otherwise [ListingDecision.reject] with reason.
-  ListingDecision decide(Product product, UserRules rules) {
+  /// When [targetPlatformId] and [competitorInput] are provided, uses competitive pricing strategy
+  /// (e.g. 0.01 below lowest or premium when better reviews) and P_min including payment fees.
+  ListingDecision decide(
+    Product product,
+    UserRules rules, {
+    String? targetPlatformId,
+    String? categoryId,
+    CompetitivePricingInput? competitorInput,
+  }) {
     final sourceCost = product.basePrice + (product.shippingCost ?? 0);
 
     if (rules.maxSourcePrice != null && sourceCost > rules.maxSourcePrice!) {
@@ -29,16 +37,67 @@ class ListingDecider {
       return ListingDecisionReject(reason: 'Product blacklisted');
     }
 
-    final sellingPrice = pricingCalculator.calculateSellingPrice(sourceCost, rules);
-    final margin = pricingCalculator.profitMarginPercent(sellingPrice, sourceCost);
-
-    if (!pricingCalculator.meetsMinProfit(sellingPrice, sourceCost, rules)) {
-      return ListingDecisionReject(
-        reason: 'Profit margin ${margin.toStringAsFixed(1)}% < ${rules.minProfitPercent}%',
-      );
+    // Phase 21: shipping validation — reject if expected delivery exceeds marketplace max.
+    if (rules.marketplaceMaxDeliveryDays != null) {
+      final processingDays = rules.defaultSupplierProcessingDays;
+      final shippingDays = product.estimatedDays ?? rules.defaultSupplierShippingDays;
+      final expectedMaxDays = processingDays + shippingDays;
+      if (expectedMaxDays > rules.marketplaceMaxDeliveryDays!) {
+        return ListingDecisionReject(
+          reason: 'Expected delivery $expectedMaxDays days (processing $processingDays + shipping $shippingDays) '
+              'exceeds marketplace max ${rules.marketplaceMaxDeliveryDays} days',
+        );
+      }
     }
 
-    final absoluteProfit = pricingCalculator.profitAfterFee(sellingPrice, sourceCost);
+    double sellingPrice;
+    String reason;
+    double margin;
+
+    if (targetPlatformId != null &&
+        (competitorInput != null || rules.pricingStrategy == PricingStrategyId.fixedMarkup)) {
+      final decision = pricingCalculator.decideCompetitivePrice(
+        sourceCost: sourceCost,
+        rules: rules,
+        platformId: targetPlatformId,
+        categoryId: categoryId,
+        competitorInput: competitorInput,
+      );
+      if (!decision.shouldCreate || decision.createAtPrice == null) {
+        return ListingDecisionReject(
+          reason: decision.rejectReason ?? 'Pricing decision: do not create',
+        );
+      }
+      sellingPrice = decision.createAtPrice!;
+      reason = 'Competitive price ${sellingPrice.toStringAsFixed(2)} (strategy: ${rules.pricingStrategy})';
+      margin = pricingCalculator.profitMarginPercent(
+        sellingPrice,
+        sourceCost,
+        targetPlatformId,
+        rules,
+      );
+    } else {
+      sellingPrice = targetPlatformId != null
+          ? pricingCalculator.calculateSellingPriceForPlatform(sourceCost, rules, targetPlatformId)
+          : pricingCalculator.calculateSellingPrice(sourceCost, rules);
+      margin = targetPlatformId != null
+          ? pricingCalculator.profitMarginPercent(sellingPrice, sourceCost, targetPlatformId, rules)
+          : pricingCalculator.profitMarginPercent(sellingPrice, sourceCost);
+
+      if (!pricingCalculator.meetsMinProfit(sellingPrice, sourceCost, rules, targetPlatformId, categoryId)) {
+        final minMargin = categoryId != null
+            ? (rules.categoryMinProfitPercent[categoryId] ?? rules.minProfitPercent)
+            : rules.minProfitPercent;
+        return ListingDecisionReject(
+          reason: 'Profit margin ${margin.toStringAsFixed(1)}% < $minMargin%',
+        );
+      }
+      reason = 'Profit margin ${margin.toStringAsFixed(1)}% >= ${rules.minProfitPercent}%';
+    }
+
+    final absoluteProfit = targetPlatformId != null
+        ? pricingCalculator.profitAfterFee(sellingPrice, sourceCost, targetPlatformId, rules)
+        : pricingCalculator.profitAfterFee(sellingPrice, sourceCost);
     if (absoluteProfit < 5.0) {
       return ListingDecisionReject(
         reason: 'Absolute profit ${absoluteProfit.toStringAsFixed(2)} PLN < 5 PLN minimum',
@@ -51,24 +110,29 @@ class ListingDecider {
       );
     }
 
-    if (margin >= rules.minProfitPercent && margin < rules.minProfitPercent + 5) {
+    final minMargin = categoryId != null
+        ? (rules.categoryMinProfitPercent[categoryId] ?? rules.minProfitPercent)
+        : rules.minProfitPercent;
+    if (margin >= minMargin && margin < minMargin + 5) {
       appLogger.w(
         'ListingDecider: borderline margin ${margin.toStringAsFixed(1)}% for product ${product.id} '
-        '(min ${rules.minProfitPercent}%, threshold ${(rules.minProfitPercent + 5).toStringAsFixed(1)}%)',
+        '(min $minMargin%, threshold ${(minMargin + 5).toStringAsFixed(1)}%)',
       );
     }
 
     final listingId = 'listing_${product.sourcePlatformId}_${product.sourceId}_${DateTime.now().millisecondsSinceEpoch}';
+    final String? variantId =
+        product.variants.isNotEmpty ? product.variants.first.id : null;
     final listing = Listing(
       id: listingId,
       productId: product.id,
-      targetPlatformId: '', // filled by caller when target is chosen
+      targetPlatformId: targetPlatformId ?? '',
       status: rules.manualApprovalListings ? ListingStatus.pendingApproval : ListingStatus.draft,
       sellingPrice: sellingPrice,
       sourceCost: sourceCost,
       createdAt: DateTime.now(),
+      variantId: variantId,
     );
-    final reason = 'Profit margin ${margin.toStringAsFixed(1)}% >= ${rules.minProfitPercent}%';
     return ListingDecisionAccept(
       listing: listing,
       reason: reason,
@@ -76,7 +140,9 @@ class ListingDecider {
         'sourceCost': sourceCost,
         'sellingPrice': sellingPrice,
         'marginPercent': margin,
-        'minProfitPercent': rules.minProfitPercent,
+        'minProfitPercent': minMargin,
+        ...? (targetPlatformId != null ? {'platformId': targetPlatformId} : null),
+        ...? (rules.pricingStrategy.isNotEmpty ? {'pricingStrategy': rules.pricingStrategy} : null),
       },
     );
   }

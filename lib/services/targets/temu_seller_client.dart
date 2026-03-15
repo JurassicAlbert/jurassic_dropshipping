@@ -3,6 +3,7 @@ import 'package:jurassic_dropshipping/core/logger.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/services/dio_rate_limit_interceptor.dart';
 import 'package:jurassic_dropshipping/services/dio_retry_interceptor.dart';
+import 'package:jurassic_dropshipping/services/rate_limiter.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 
 /// Temu Seller API client. 
@@ -10,13 +11,13 @@ import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 /// implementation that will be connected when the API becomes available.
 /// For now it uses placeholder endpoints.
 class TemuSellerClient {
-  TemuSellerClient({required this.secureStorage, Dio? dio})
+  TemuSellerClient({required this.secureStorage, Dio? dio, RateLimiter? rateLimiter})
       : _dio = dio ?? Dio(BaseOptions(
           baseUrl: 'https://seller.temu.com/api',
           connectTimeout: const Duration(seconds: 15),
         )) {
     _dio.interceptors.insert(0, RetryInterceptor());
-    _dio.interceptors.add(RateLimitInterceptor());
+    _dio.interceptors.add(RateLimitInterceptor(limiter: rateLimiter));
   }
 
   final SecureStorageService secureStorage;

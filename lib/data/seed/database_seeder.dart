@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
@@ -74,7 +75,35 @@ class DatabaseSeeder {
       count++;
     }
 
+    count += await _seedBillingIfEmpty();
+
     return SeedResult(entitiesCreated: count);
+  }
+
+  /// Phase B5: ensure default billing plans and tenant 1 on free plan. Returns number of entities created.
+  Future<int> _seedBillingIfEmpty() async {
+    final existing = await db.select(db.billingPlans).get();
+    if (existing.isNotEmpty) return 0;
+    await db.into(db.billingPlans).insert(BillingPlansCompanion.insert(
+      name: 'free',
+      maxListings: 10,
+      maxOrdersPerMonth: 50,
+    ));
+    await db.into(db.billingPlans).insert(BillingPlansCompanion.insert(
+      name: 'pro',
+      maxListings: -1,
+      maxOrdersPerMonth: -1,
+    ));
+    final freePlan = await (db.select(db.billingPlans)..where((t) => t.name.equals('free'))).getSingle();
+    final tenantPlan = await (db.select(db.tenantPlans)..where((t) => t.tenantId.equals(1))).getSingleOrNull();
+    if (tenantPlan == null) {
+      await db.into(db.tenantPlans).insert(TenantPlansCompanion.insert(
+        tenantId: Value(1),
+        planId: freePlan.id,
+      ));
+      return 3; // 2 plans + 1 tenant_plan
+    }
+    return 2; // 2 plans only
   }
 
   Future<void> dropAll() async {

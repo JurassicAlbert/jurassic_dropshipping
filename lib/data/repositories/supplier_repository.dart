@@ -3,8 +3,9 @@ import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/supplier.dart';
 
 class SupplierRepository {
-  SupplierRepository(this._db);
+  SupplierRepository(this._db, {this.tenantId = 1});
   final AppDatabase _db;
+  final int tenantId;
 
   static Supplier _rowToSupplier(SupplierRow row) {
     return Supplier(
@@ -29,24 +30,24 @@ class SupplierRepository {
   }
 
   Future<List<Supplier>> getAll() async {
-    final rows = await _db.select(_db.suppliers).get();
+    final rows = await (_db.select(_db.suppliers)..where((t) => t.tenantId.equals(tenantId))).get();
     return rows.map(_rowToSupplier).toList();
   }
 
   Future<Supplier?> getById(String supplierId) async {
     final row = await (_db.select(_db.suppliers)
-          ..where((t) => t.supplierId.equals(supplierId)))
+          ..where((t) => t.tenantId.equals(tenantId) & t.supplierId.equals(supplierId)))
         .getSingleOrNull();
     return row != null ? _rowToSupplier(row) : null;
   }
 
   Future<void> upsert(Supplier supplier) async {
     final existing = await (_db.select(_db.suppliers)
-          ..where((t) => t.supplierId.equals(supplier.id)))
+          ..where((t) => t.tenantId.equals(tenantId) & t.supplierId.equals(supplier.id)))
         .getSingleOrNull();
     if (existing != null) {
       await (_db.update(_db.suppliers)
-            ..where((t) => t.supplierId.equals(supplier.id)))
+            ..where((t) => t.tenantId.equals(tenantId) & t.supplierId.equals(supplier.id)))
           .write(SuppliersCompanion(
         name: Value(supplier.name),
         platformType: Value(supplier.platformType),
@@ -67,6 +68,7 @@ class SupplierRepository {
       ));
     } else {
       await _db.into(_db.suppliers).insert(SuppliersCompanion.insert(
+        tenantId: Value(tenantId),
         supplierId: supplier.id,
         name: supplier.name,
         platformType: supplier.platformType,
@@ -90,7 +92,7 @@ class SupplierRepository {
 
   Future<void> delete(String supplierId) async {
     await (_db.delete(_db.suppliers)
-          ..where((t) => t.supplierId.equals(supplierId)))
+          ..where((t) => t.tenantId.equals(tenantId) & t.supplierId.equals(supplierId)))
         .go();
   }
 }

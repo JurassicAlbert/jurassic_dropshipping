@@ -18,8 +18,12 @@ class ShellScreen extends ConsumerWidget {
     '/suppliers',
     '/marketplaces',
     '/returns',
+    '/incidents',
+    '/returned-stock',
+    '/capital',
     '/approval',
     '/decision-log',
+    '/return-policies',
     '/settings',
   ];
 
@@ -31,8 +35,12 @@ class ShellScreen extends ConsumerWidget {
     'Suppliers',
     'Marketplaces',
     'Returns',
+    'Incidents',
+    'Returned stock',
+    'Capital',
     'Approval Queue',
     'Decision Log',
+    'Return policies',
     'Settings',
   ];
 
@@ -44,8 +52,12 @@ class ShellScreen extends ConsumerWidget {
     Icons.store,
     Icons.public,
     Icons.assignment_return,
+    Icons.warning_amber,
+    Icons.inventory,
+    Icons.account_balance,
     Icons.pending_actions,
     Icons.list_alt,
+    Icons.policy,
     Icons.settings,
   ];
 
@@ -92,10 +104,10 @@ class ShellScreen extends ConsumerWidget {
         for (var i = 0; i < 4; i++) navTile(i),
         const Divider(indent: 16, endIndent: 16),
         sectionHeader('OPERATIONS'),
-        for (var i = 4; i < 7; i++) navTile(i),
+        for (var i = 4; i < 10; i++) navTile(i),
         const Divider(indent: 16, endIndent: 16),
         sectionHeader('ADMIN'),
-        for (var i = 7; i < 10; i++) navTile(i),
+        for (var i = 10; i < 14; i++) navTile(i),
       ],
     );
   }
@@ -115,6 +127,7 @@ class ShellScreen extends ConsumerWidget {
     final useRail = width >= _railBreakpoint;
     final currentPath = GoRouterState.of(context).uri.path;
     final theme = Theme.of(context);
+    final rulesAsync = ref.watch(rulesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -128,6 +141,41 @@ class ShellScreen extends ConsumerWidget {
                 ),
               ),
         actions: [
+          rulesAsync.when(
+            data: (rules) {
+              final readOnly = rules.targetsReadOnly;
+              final bg = readOnly ? Colors.orange.shade100 : Colors.green.shade100;
+              final fg = readOnly ? Colors.orange.shade800 : Colors.green.shade800;
+              final label = readOnly ? 'Read-only (no writes to marketplaces)' : 'Live writes enabled';
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: bg,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        readOnly ? Icons.visibility_off : Icons.play_circle_outline,
+                        size: 16,
+                        color: fg,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        label,
+                        style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
+          ),
           IconButton(
             icon: const Icon(Icons.lock_outline),
             tooltip: 'Lock app',

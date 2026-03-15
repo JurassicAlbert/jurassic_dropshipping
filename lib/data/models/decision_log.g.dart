@@ -14,6 +14,8 @@ _$DecisionLogImpl _$$DecisionLogImplFromJson(Map<String, dynamic> json) =>
       reason: json['reason'] as String,
       criteriaSnapshot: json['criteriaSnapshot'] as Map<String, dynamic>?,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      incidentType: json['incidentType'] as String?,
+      financialImpact: (json['financialImpact'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$$DecisionLogImplToJson(_$DecisionLogImpl instance) =>
@@ -24,10 +26,14 @@ Map<String, dynamic> _$$DecisionLogImplToJson(_$DecisionLogImpl instance) =>
       'reason': instance.reason,
       'criteriaSnapshot': instance.criteriaSnapshot,
       'createdAt': instance.createdAt.toIso8601String(),
+      'incidentType': instance.incidentType,
+      'financialImpact': instance.financialImpact,
     };
 
 const _$DecisionLogTypeEnumMap = {
   DecisionLogType.listing: 'listing',
   DecisionLogType.order: 'order',
   DecisionLogType.supplier: 'supplier',
+  DecisionLogType.profitAlert: 'profitAlert',
+  DecisionLogType.incident: 'incident',
 };

@@ -1,3 +1,4 @@
+import 'package:jurassic_dropshipping/core/logger.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart';
 import 'package:jurassic_dropshipping/services/targets/allegro_client.dart';
@@ -13,6 +14,11 @@ class AllegroTargetPlatform implements TargetPlatform {
   String get id => allegroPlatformId;
   @override
   String get displayName => 'Allegro';
+
+   // For now, Allegro listings are always in PLN and located in PL.
+   // Keeping this centralized makes it easier to support other currencies/countries later.
+   String get _currency => 'PLN';
+   String get _sellerCountryCode => 'PL';
 
   @override
   Future<bool> isConfigured() => _client.isConfigured();
@@ -43,7 +49,7 @@ class AllegroTargetPlatform implements TargetPlatform {
         'format': 'BUY_NOW',
         'price': {
           'amount': draft.sellingPrice.toStringAsFixed(2),
-          'currency': 'PLN',
+          'currency': _currency,
         },
       },
       'stock': {'available': draft.stock ?? 99, 'unit': 'UNIT'},
@@ -51,7 +57,7 @@ class AllegroTargetPlatform implements TargetPlatform {
           .take(16)
           .map((url) => {'url': url})
           .toList(),
-      'location': {'countryCode': 'PL'},
+      'location': {'countryCode': _sellerCountryCode},
       'delivery': {
         'shippingRates': null,
         'handlingTime': 'PT72H',
@@ -76,32 +82,49 @@ class AllegroTargetPlatform implements TargetPlatform {
       final id = form['id'] as String?;
       if (id == null) continue;
       final lineItems = form['lineItems'] as List<dynamic>? ?? [];
-      final first = lineItems.isNotEmpty ? lineItems.first as Map<String, dynamic>? : null;
+      if (lineItems.isEmpty) continue;
       final buyer = form['buyer'] as Map<String, dynamic>? ?? {};
       final delivery = form['delivery'] as Map<String, dynamic>? ?? {};
       final address = delivery['address'] as Map<String, dynamic>? ?? {};
       final total = form['summary']?['totalToPay'] as Map<String, dynamic>?;
-      final amount = total?['amount'] != null ? double.tryParse(total!['amount'].toString()) ?? 0.0 : 0.0;
+      final totalAmount = total?['amount'] != null ? double.tryParse(total!['amount'].toString()) ?? 0.0 : 0.0;
       final createdAt = form['createdAt'] as String?;
-      orders.add(Order(
-        id: '${id}_$allegroPlatformId',
-        listingId: first?['offer']?['id']?.toString() ?? '',
-        targetOrderId: id,
-        targetPlatformId: allegroPlatformId,
-        customerAddress: CustomerAddress(
-          name: buyer['login'] as String? ?? address['fullName'] as String? ?? 'Customer',
-          street: address['street'] as String? ?? '',
-          city: address['city'] as String?,
-          zip: address['zipCode'] as String? ?? '',
-          countryCode: address['countryCode'] as String? ?? 'PL',
-          phone: address['phoneNumber'] as String? ?? '',
-          email: buyer['email'] as String?,
-        ),
-        status: OrderStatus.pending,
-        sourceCost: 0,
-        sellingPrice: amount,
-        createdAt: createdAt != null ? DateTime.tryParse(createdAt) : DateTime.now(),
-      ));
+      final created = createdAt != null ? DateTime.tryParse(createdAt) : null;
+      final customerAddress = CustomerAddress(
+        name: buyer['login'] as String? ?? address['fullName'] as String? ?? 'Customer',
+        street: address['street'] as String? ?? '',
+        city: address['city'] as String?,
+        zip: address['zipCode'] as String? ?? '',
+        countryCode: address['countryCode'] as String? ?? 'PL',
+        phone: address['phoneNumber'] as String? ?? '',
+        email: buyer['email'] as String?,
+      );
+      if (lineItems.length > 1) {
+        appLogger.i('Allegro order $id has ${lineItems.length} line items, creating ${lineItems.length} local orders');
+      }
+      for (var idx = 0; idx < lineItems.length; idx++) {
+        final line = lineItems[idx] as Map<String, dynamic>? ?? {};
+        final offerId = line['offer']?['id']?.toString() ?? '';
+        final quantity = line['quantity'] is num ? (line['quantity'] as num).toInt() : 1;
+        final lineAmount = line['price']?['amount'];
+        final linePrice = lineAmount != null ? double.tryParse(lineAmount.toString()) : null;
+        final sellingPrice = linePrice ?? (lineItems.length > 1 ? totalAmount / lineItems.length : totalAmount);
+        final orderId = lineItems.length == 1
+            ? '${id}_$allegroPlatformId'
+            : '${id}_${allegroPlatformId}_$idx';
+        orders.add(Order(
+          id: orderId,
+          listingId: offerId,
+          targetOrderId: id,
+          targetPlatformId: allegroPlatformId,
+          customerAddress: customerAddress,
+          status: OrderStatus.pending,
+          sourceCost: 0,
+          sellingPrice: sellingPrice,
+          quantity: quantity,
+          createdAt: created ?? DateTime.now(),
+        ));
+      }
     }
     return orders;
   }
@@ -132,6 +155,51 @@ class AllegroTargetPlatform implements TargetPlatform {
       return OrderStatus.sourceOrderPlaced;
     }
     return OrderStatus.pending;
+  }
+
+  // --- Phase 12: Returns & refunds ---
+
+  @override
+  Future<List<CustomerReturnSummary>> getCustomerReturns({DateTime? since}) async {
+    return _client.getCustomerReturns(
+      createdAtGte: since,
+      limit: 100,
+    );
+  }
+
+  @override
+  Future<CustomerReturnDetails?> getCustomerReturn(String returnId) async {
+    return _client.getCustomerReturn(returnId);
+  }
+
+  @override
+  Future<void> rejectReturn(String returnId, String reason) async {
+    await _client.rejectCustomerReturn(returnId, reason);
+  }
+
+  @override
+  Future<void> issueRefund(String targetOrderId, double amount, String reason) async {
+    final form = await _client.getCheckoutForm(targetOrderId);
+    if (form == null) throw StateError('Allegro checkout form not found: $targetOrderId');
+    final payment = form['payment'] as Map<String, dynamic>?;
+    final paymentId = payment?['id'] as String?;
+    if (paymentId == null || paymentId.isEmpty) {
+      throw StateError('Allegro checkout form has no payment id; cannot issue refund');
+    }
+    final lineItemsRaw = form['lineItems'] as List<dynamic>? ?? [];
+    final lineItems = lineItemsRaw.map((e) {
+      final m = e as Map<String, dynamic>;
+      final id = m['id'] as String? ?? '';
+      final qty = (m['quantity'] as num?)?.toInt() ?? 1;
+      return {'id': id, 'type': 'QUANTITY', 'quantity': qty, 'value': null};
+    }).toList();
+    await _client.createRefund(
+      paymentId: paymentId,
+      orderId: targetOrderId,
+      reason: 'REFUND',
+      lineItems: lineItems.isEmpty ? null : lineItems,
+      sellerComment: reason,
+    );
   }
 
   @override

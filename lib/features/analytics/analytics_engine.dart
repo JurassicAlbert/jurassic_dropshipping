@@ -17,8 +17,8 @@ class AnalyticsEngine {
   final List<Supplier> suppliers;
 
   // ─── Summary KPIs ──────────────────────────────────
-  double get totalRevenue => orders.fold(0, (s, o) => s + o.sellingPrice);
-  double get totalCost => orders.fold(0, (s, o) => s + o.sourceCost);
+  double get totalRevenue => orders.fold(0, (s, o) => s + (o.sellingPrice * o.quantity));
+  double get totalCost => orders.fold(0, (s, o) => s + (o.sourceCost * o.quantity));
   double get totalProfit => totalRevenue - totalCost;
   double get profitMarginPercent =>
       totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
@@ -37,9 +37,9 @@ class AnalyticsEngine {
     for (final o in orders) {
       map.update(
         o.targetPlatformId,
-        (s) => s.addOrder(o.sellingPrice, o.sourceCost),
+        (s) => s.addOrder(o.sellingPrice * o.quantity, o.sourceCost * o.quantity),
         ifAbsent: () => PlatformStats(o.targetPlatformId)
-          ..addOrder(o.sellingPrice, o.sourceCost),
+          ..addOrder(o.sellingPrice * o.quantity, o.sourceCost * o.quantity),
       );
     }
     return map;
@@ -51,9 +51,9 @@ class AnalyticsEngine {
     for (final o in orders) {
       map.update(
         o.listingId,
-        (s) => s..addOrder(o.sellingPrice, o.sourceCost),
+        (s) => s..addOrder(o.sellingPrice * o.quantity, o.sourceCost * o.quantity),
         ifAbsent: () =>
-            ProductStats(o.listingId)..addOrder(o.sellingPrice, o.sourceCost),
+            ProductStats(o.listingId)..addOrder(o.sellingPrice * o.quantity, o.sourceCost * o.quantity),
       );
     }
     final sorted = map.values.toList()
@@ -67,8 +67,11 @@ class AnalyticsEngine {
 
     final byProduct = <String, double>{};
     for (final o in orders) {
-      byProduct.update(o.listingId, (v) => v + (o.sellingPrice - o.sourceCost),
-          ifAbsent: () => o.sellingPrice - o.sourceCost);
+      byProduct.update(
+        o.listingId,
+        (v) => v + ((o.sellingPrice - o.sourceCost) * o.quantity),
+        ifAbsent: () => (o.sellingPrice - o.sourceCost) * o.quantity,
+      );
     }
     for (final entry in byProduct.entries) {
       if (entry.value < 0) {
@@ -184,7 +187,7 @@ class AnalyticsEngine {
     }
     for (final o in _ordersInPeriod(period)) {
       final m = orderMarginPercent(o);
-      final profit = o.sellingPrice - o.sourceCost;
+      final profit = (o.sellingPrice - o.sourceCost) * o.quantity;
       for (var i = 0; i < bands.length - 1; i++) {
         if (m >= bands[i] && m < bands[i + 1]) {
           result['${bands[i].toInt()}-${bands[i + 1].toInt()}%'] =

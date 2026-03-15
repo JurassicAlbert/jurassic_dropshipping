@@ -1,0 +1,26 @@
+# Build and tooling
+build/
+.dart_tool/
+*.iml
+.idea/
+.vscode/
+
+# Git and env
+.git
+.gitignore
+.env
+.env.*
+
+# Docs and plans (optional; remove if you want them in image)
+# docs/
+# *.md
+# *.plan.md
+
+# Test and coverage
+coverage/
+.test_coverage.dart
+test/
+
+# Misc
+*.log
+.DS_Store

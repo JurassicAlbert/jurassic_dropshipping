@@ -29,6 +29,12 @@ mixin _$DecisionLog {
       throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
+  /// For incident decisions: incident type (e.g. damage_claim, parcel_not_collected).
+  String? get incidentType => throw _privateConstructorUsedError;
+
+  /// For incident decisions: total cost impact (refund + shipping + fees).
+  double? get financialImpact => throw _privateConstructorUsedError;
+
   /// Serializes this DecisionLog to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -53,6 +59,8 @@ abstract class $DecisionLogCopyWith<$Res> {
     String reason,
     Map<String, dynamic>? criteriaSnapshot,
     DateTime createdAt,
+    String? incidentType,
+    double? financialImpact,
   });
 }
 
@@ -77,6 +85,8 @@ class _$DecisionLogCopyWithImpl<$Res, $Val extends DecisionLog>
     Object? reason = null,
     Object? criteriaSnapshot = freezed,
     Object? createdAt = null,
+    Object? incidentType = freezed,
+    Object? financialImpact = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -104,6 +114,14 @@ class _$DecisionLogCopyWithImpl<$Res, $Val extends DecisionLog>
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as DateTime,
+            incidentType: freezed == incidentType
+                ? _value.incidentType
+                : incidentType // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            financialImpact: freezed == financialImpact
+                ? _value.financialImpact
+                : financialImpact // ignore: cast_nullable_to_non_nullable
+                      as double?,
           )
           as $Val,
     );
@@ -126,6 +144,8 @@ abstract class _$$DecisionLogImplCopyWith<$Res>
     String reason,
     Map<String, dynamic>? criteriaSnapshot,
     DateTime createdAt,
+    String? incidentType,
+    double? financialImpact,
   });
 }
 
@@ -149,6 +169,8 @@ class __$$DecisionLogImplCopyWithImpl<$Res>
     Object? reason = null,
     Object? criteriaSnapshot = freezed,
     Object? createdAt = null,
+    Object? incidentType = freezed,
+    Object? financialImpact = freezed,
   }) {
     return _then(
       _$DecisionLogImpl(
@@ -176,6 +198,14 @@ class __$$DecisionLogImplCopyWithImpl<$Res>
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        incidentType: freezed == incidentType
+            ? _value.incidentType
+            : incidentType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        financialImpact: freezed == financialImpact
+            ? _value.financialImpact
+            : financialImpact // ignore: cast_nullable_to_non_nullable
+                  as double?,
       ),
     );
   }
@@ -191,6 +221,8 @@ class _$DecisionLogImpl implements _DecisionLog {
     required this.reason,
     final Map<String, dynamic>? criteriaSnapshot,
     required this.createdAt,
+    this.incidentType,
+    this.financialImpact,
   }) : _criteriaSnapshot = criteriaSnapshot;
 
   factory _$DecisionLogImpl.fromJson(Map<String, dynamic> json) =>
@@ -217,9 +249,17 @@ class _$DecisionLogImpl implements _DecisionLog {
   @override
   final DateTime createdAt;
 
+  /// For incident decisions: incident type (e.g. damage_claim, parcel_not_collected).
+  @override
+  final String? incidentType;
+
+  /// For incident decisions: total cost impact (refund + shipping + fees).
+  @override
+  final double? financialImpact;
+
   @override
   String toString() {
-    return 'DecisionLog(id: $id, type: $type, entityId: $entityId, reason: $reason, criteriaSnapshot: $criteriaSnapshot, createdAt: $createdAt)';
+    return 'DecisionLog(id: $id, type: $type, entityId: $entityId, reason: $reason, criteriaSnapshot: $criteriaSnapshot, createdAt: $createdAt, incidentType: $incidentType, financialImpact: $financialImpact)';
   }
 
   @override
@@ -237,7 +277,11 @@ class _$DecisionLogImpl implements _DecisionLog {
               _criteriaSnapshot,
             ) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.incidentType, incidentType) ||
+                other.incidentType == incidentType) &&
+            (identical(other.financialImpact, financialImpact) ||
+                other.financialImpact == financialImpact));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -250,6 +294,8 @@ class _$DecisionLogImpl implements _DecisionLog {
     reason,
     const DeepCollectionEquality().hash(_criteriaSnapshot),
     createdAt,
+    incidentType,
+    financialImpact,
   );
 
   /// Create a copy of DecisionLog
@@ -274,6 +320,8 @@ abstract class _DecisionLog implements DecisionLog {
     required final String reason,
     final Map<String, dynamic>? criteriaSnapshot,
     required final DateTime createdAt,
+    final String? incidentType,
+    final double? financialImpact,
   }) = _$DecisionLogImpl;
 
   factory _DecisionLog.fromJson(Map<String, dynamic> json) =
@@ -291,6 +339,14 @@ abstract class _DecisionLog implements DecisionLog {
   Map<String, dynamic>? get criteriaSnapshot;
   @override
   DateTime get createdAt;
+
+  /// For incident decisions: incident type (e.g. damage_claim, parcel_not_collected).
+  @override
+  String? get incidentType;
+
+  /// For incident decisions: total cost impact (refund + shipping + fees).
+  @override
+  double? get financialImpact;
 
   /// Create a copy of DecisionLog
   /// with the given fields replaced by the non-null parameter values.

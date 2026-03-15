@@ -57,6 +57,12 @@ mixin _$ReturnRequest {
   ReturnDestination? get returnDestination =>
       throw _privateConstructorUsedError;
 
+  /// Routing target: seller address, supplier warehouse, return center, disposal (Phase 4).
+  // ignore: invalid_annotation_target
+  @JsonKey(fromJson: _returnRoutingFromJson, toJson: _returnRoutingToJson)
+  ReturnRoutingDestination? get returnRoutingDestination =>
+      throw _privateConstructorUsedError;
+
   /// Serializes this ReturnRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -95,6 +101,8 @@ abstract class $ReturnRequestCopyWith<$Res> {
     String? sourcePlatformId,
     String? targetPlatformId,
     ReturnDestination? returnDestination,
+    @JsonKey(fromJson: _returnRoutingFromJson, toJson: _returnRoutingToJson)
+    ReturnRoutingDestination? returnRoutingDestination,
   });
 }
 
@@ -133,6 +141,7 @@ class _$ReturnRequestCopyWithImpl<$Res, $Val extends ReturnRequest>
     Object? sourcePlatformId = freezed,
     Object? targetPlatformId = freezed,
     Object? returnDestination = freezed,
+    Object? returnRoutingDestination = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -216,6 +225,10 @@ class _$ReturnRequestCopyWithImpl<$Res, $Val extends ReturnRequest>
                 ? _value.returnDestination
                 : returnDestination // ignore: cast_nullable_to_non_nullable
                       as ReturnDestination?,
+            returnRoutingDestination: freezed == returnRoutingDestination
+                ? _value.returnRoutingDestination
+                : returnRoutingDestination // ignore: cast_nullable_to_non_nullable
+                      as ReturnRoutingDestination?,
           )
           as $Val,
     );
@@ -252,6 +265,8 @@ abstract class _$$ReturnRequestImplCopyWith<$Res>
     String? sourcePlatformId,
     String? targetPlatformId,
     ReturnDestination? returnDestination,
+    @JsonKey(fromJson: _returnRoutingFromJson, toJson: _returnRoutingToJson)
+    ReturnRoutingDestination? returnRoutingDestination,
   });
 }
 
@@ -289,6 +304,7 @@ class __$$ReturnRequestImplCopyWithImpl<$Res>
     Object? sourcePlatformId = freezed,
     Object? targetPlatformId = freezed,
     Object? returnDestination = freezed,
+    Object? returnRoutingDestination = freezed,
   }) {
     return _then(
       _$ReturnRequestImpl(
@@ -372,6 +388,10 @@ class __$$ReturnRequestImplCopyWithImpl<$Res>
             ? _value.returnDestination
             : returnDestination // ignore: cast_nullable_to_non_nullable
                   as ReturnDestination?,
+        returnRoutingDestination: freezed == returnRoutingDestination
+            ? _value.returnRoutingDestination
+            : returnRoutingDestination // ignore: cast_nullable_to_non_nullable
+                  as ReturnRoutingDestination?,
       ),
     );
   }
@@ -401,6 +421,8 @@ class _$ReturnRequestImpl implements _ReturnRequest {
     this.sourcePlatformId,
     this.targetPlatformId,
     this.returnDestination,
+    @JsonKey(fromJson: _returnRoutingFromJson, toJson: _returnRoutingToJson)
+    this.returnRoutingDestination,
   });
 
   factory _$ReturnRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -461,9 +483,15 @@ class _$ReturnRequestImpl implements _ReturnRequest {
   @override
   final ReturnDestination? returnDestination;
 
+  /// Routing target: seller address, supplier warehouse, return center, disposal (Phase 4).
+  // ignore: invalid_annotation_target
+  @override
+  @JsonKey(fromJson: _returnRoutingFromJson, toJson: _returnRoutingToJson)
+  final ReturnRoutingDestination? returnRoutingDestination;
+
   @override
   String toString() {
-    return 'ReturnRequest(id: $id, orderId: $orderId, reason: $reason, status: $status, notes: $notes, refundAmount: $refundAmount, returnShippingCost: $returnShippingCost, restockingFee: $restockingFee, requestedAt: $requestedAt, resolvedAt: $resolvedAt, returnToAddress: $returnToAddress, returnToCity: $returnToCity, returnToCountry: $returnToCountry, returnTrackingNumber: $returnTrackingNumber, returnCarrier: $returnCarrier, supplierId: $supplierId, productId: $productId, sourcePlatformId: $sourcePlatformId, targetPlatformId: $targetPlatformId, returnDestination: $returnDestination)';
+    return 'ReturnRequest(id: $id, orderId: $orderId, reason: $reason, status: $status, notes: $notes, refundAmount: $refundAmount, returnShippingCost: $returnShippingCost, restockingFee: $restockingFee, requestedAt: $requestedAt, resolvedAt: $resolvedAt, returnToAddress: $returnToAddress, returnToCity: $returnToCity, returnToCountry: $returnToCountry, returnTrackingNumber: $returnTrackingNumber, returnCarrier: $returnCarrier, supplierId: $supplierId, productId: $productId, sourcePlatformId: $sourcePlatformId, targetPlatformId: $targetPlatformId, returnDestination: $returnDestination, returnRoutingDestination: $returnRoutingDestination)';
   }
 
   @override
@@ -505,7 +533,12 @@ class _$ReturnRequestImpl implements _ReturnRequest {
             (identical(other.targetPlatformId, targetPlatformId) ||
                 other.targetPlatformId == targetPlatformId) &&
             (identical(other.returnDestination, returnDestination) ||
-                other.returnDestination == returnDestination));
+                other.returnDestination == returnDestination) &&
+            (identical(
+                  other.returnRoutingDestination,
+                  returnRoutingDestination,
+                ) ||
+                other.returnRoutingDestination == returnRoutingDestination));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -532,6 +565,7 @@ class _$ReturnRequestImpl implements _ReturnRequest {
     sourcePlatformId,
     targetPlatformId,
     returnDestination,
+    returnRoutingDestination,
   ]);
 
   /// Create a copy of ReturnRequest
@@ -570,6 +604,8 @@ abstract class _ReturnRequest implements ReturnRequest {
     final String? sourcePlatformId,
     final String? targetPlatformId,
     final ReturnDestination? returnDestination,
+    @JsonKey(fromJson: _returnRoutingFromJson, toJson: _returnRoutingToJson)
+    final ReturnRoutingDestination? returnRoutingDestination,
   }) = _$ReturnRequestImpl;
 
   factory _ReturnRequest.fromJson(Map<String, dynamic> json) =
@@ -629,6 +665,12 @@ abstract class _ReturnRequest implements ReturnRequest {
   /// Where customer sends the return (supplier warehouse vs seller address)
   @override
   ReturnDestination? get returnDestination;
+
+  /// Routing target: seller address, supplier warehouse, return center, disposal (Phase 4).
+  // ignore: invalid_annotation_target
+  @override
+  @JsonKey(fromJson: _returnRoutingFromJson, toJson: _returnRoutingToJson)
+  ReturnRoutingDestination? get returnRoutingDestination;
 
   /// Create a copy of ReturnRequest
   /// with the given fields replaced by the non-null parameter values.

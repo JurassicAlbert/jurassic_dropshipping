@@ -7,6 +7,7 @@ part 'app_database.g.dart';
 @DataClassName('ProductRow')
 class Products extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   TextColumn get localId => text()();
   TextColumn get sourceId => text()();
   TextColumn get sourcePlatformId => text()();
@@ -27,6 +28,7 @@ class Products extends Table {
 @DataClassName('ListingRow')
 class Listings extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   TextColumn get localId => text()();
   TextColumn get productId => text()();
   TextColumn get targetPlatformId => text()();
@@ -40,11 +42,14 @@ class Listings extends Table {
   IntColumn get promisedMaxDays => integer().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get publishedAt => dateTime().nullable()();
+  // Optional variant this listing sells; when null, listing is product-level.
+  TextColumn get variantId => text().nullable()();
 }
 
 @DataClassName('OrderRow')
 class Orders extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   TextColumn get localId => text()();
   TextColumn get listingId => text()();
   TextColumn get targetOrderId => text()();
@@ -54,6 +59,8 @@ class Orders extends Table {
   TextColumn get sourceOrderId => text().nullable()();
   RealColumn get sourceCost => real()();
   RealColumn get sellingPrice => real()();
+  IntColumn get quantity =>
+      integer().withDefault(const Constant(1))(); // units in this order
   TextColumn get trackingNumber => text().nullable()();
   TextColumn get decisionLogId => text().nullable()();
   TextColumn get marketplaceAccountId => text().nullable()();
@@ -62,22 +69,38 @@ class Orders extends Table {
   DateTimeColumn get deliveredAt => dateTime().nullable()();
   DateTimeColumn get approvedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+  /// Post-order lifecycle state (created, approved, shipped, returnRequested, refunded, etc.). Nullable for backfill.
+  TextColumn get lifecycleState => text().nullable()();
+  /// Phase 14: financial state (unpaid, supplier_paid, marketplace_held, marketplace_released, refunded, loss). Nullable.
+  TextColumn get financialState => text().nullable()();
+  /// Phase 14: when true, order is waiting for capital before fulfillment.
+  BoolColumn get queuedForCapital => boolean().withDefault(const Constant(false))();
+  /// Phase 16: risk score 0–100; null until evaluated.
+  RealColumn get riskScore => real().nullable()();
+  /// Phase 16: JSON array of factor names (e.g. highValue, newCustomer).
+  TextColumn get riskFactorsJson => text().nullable()();
 }
 
 @DataClassName('DecisionLogRow')
 class DecisionLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   TextColumn get localId => text()();
   TextColumn get type => text()();
   TextColumn get entityId => text()();
   TextColumn get reason => text()();
   TextColumn get criteriaSnapshot => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+  /// For incident decisions: type (e.g. damage_claim, non_collected).
+  TextColumn get incidentType => text().nullable()();
+  /// For incident decisions: total cost impact (refund + shipping + fees).
+  RealColumn get financialImpact => real().nullable()();
 }
 
 @DataClassName('UserRulesRow')
 class UserRulesTable extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   RealColumn get minProfitPercent => real()();
   RealColumn get maxSourcePrice => real().nullable()();
   TextColumn get preferredSupplierCountries => text()();
@@ -89,13 +112,55 @@ class UserRulesTable extends Table {
   RealColumn get defaultMarkupPercent => real()();
   TextColumn get searchKeywords => text()();
   TextColumn get marketplaceFeesJson => text().withDefault(const Constant('{}'))();
+  TextColumn get paymentFeesJson => text().withDefault(const Constant('{}'))();
   TextColumn get sellerReturnAddressJson => text().nullable()();
   TextColumn get marketplaceReturnPolicyJson => text().withDefault(const Constant('{}'))();
+  BoolColumn get targetsReadOnly => boolean().withDefault(const Constant(false))();
+  TextColumn get pricingStrategy => text().withDefault(const Constant('always_below_lowest'))();
+  TextColumn get categoryMinProfitPercentJson => text().withDefault(const Constant('{}'))();
+  RealColumn get premiumWhenBetterReviewsPercent => real().withDefault(const Constant(2.0))();
+  IntColumn get minSalesCountForPremium => integer().withDefault(const Constant(10))();
+  BoolColumn get kpiDrivenStrategyEnabled => boolean().withDefault(const Constant(false))();
+  /// Per-platform rate limit: platformId -> max requests per second (JSON object).
+  TextColumn get rateLimitMaxRequestsPerSecondJson => text().withDefault(const Constant('{}'))();
+  /// Phase 8: incident decision rules – JSON array of { condition, action }. Nullable.
+  TextColumn get incidentRulesJson => text().nullable()();
+  /// Phase 16: if order risk score > this value, set to pendingApproval. Nullable (disabled when null).
+  RealColumn get riskScoreThreshold => real().nullable()();
+  /// Phase 17: default expected return rate % for return-rate-aware P_min (e.g. 15 = 15%). Nullable.
+  RealColumn get defaultReturnRatePercent => real().nullable()();
+  /// Phase 17: default return cost per unit (PLN) for return-rate-aware P_min. Nullable.
+  RealColumn get defaultReturnCostPerUnit => real().nullable()();
+  /// When true, fulfillment is skipped when inventory availableToSell < order quantity (Phase 18).
+  BoolColumn get blockFulfillWhenInsufficientStock => boolean().withDefault(const Constant(false))();
+  /// Phase 20: when true, ProfitGuard auto-pauses listing when margin < minProfitPercent.
+  BoolColumn get autoPauseListingWhenMarginBelowThreshold => boolean().withDefault(const Constant(false))();
+  /// Phase 21: default supplier processing days; used for shipping validation.
+  IntColumn get defaultSupplierProcessingDays => integer().withDefault(const Constant(2))();
+  /// Phase 21: default supplier shipping days when product has no estimatedDays.
+  IntColumn get defaultSupplierShippingDays => integer().withDefault(const Constant(7))();
+  /// Phase 21: marketplace max delivery days; reject listing if expected delivery > this. Nullable = skip check.
+  IntColumn get marketplaceMaxDeliveryDays => integer().nullable()();
+  /// Phase 26: max return+incident rate %; when exceeded and auto-pause on, listing is paused. Null = no limit.
+  RealColumn get listingHealthMaxReturnRatePercent => real().nullable()();
+  /// Phase 26: max late delivery rate %; when exceeded and auto-pause on, listing is paused. Null = no limit.
+  RealColumn get listingHealthMaxLateRatePercent => real().nullable()();
+  /// Phase 26: when true, auto-pause listings when health thresholds exceeded.
+  BoolColumn get autoPauseListingWhenHealthPoor => boolean().withDefault(const Constant(false))();
+  /// Phase 19: reduce effective available-to-sell by this many units (stock drift buffer).
+  IntColumn get safetyStockBuffer => integer().withDefault(const Constant(0))();
+  /// Phase 25: max return rate % for customer abuse check; null = disabled.
+  RealColumn get customerAbuseMaxReturnRatePercent => real().nullable()();
+  /// Phase 25: max complaint rate % for customer abuse check; null = disabled.
+  RealColumn get customerAbuseMaxComplaintRatePercent => real().nullable()();
+  /// Per-warehouse price refresh interval (minutes). sourcePlatformId -> minutes. Warehouses publish 1-2x/day; we pull from XML/CSV/API when stale. Default 720.
+  TextColumn get priceRefreshIntervalMinutesBySourceJson => text().withDefault(const Constant('{}'))();
 }
 
 @DataClassName('SupplierRow')
 class Suppliers extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   TextColumn get supplierId => text()();
   TextColumn get name => text()();
   TextColumn get platformType => text()();
@@ -118,6 +183,7 @@ class Suppliers extends Table {
 @DataClassName('SupplierOfferRow')
 class SupplierOffers extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   TextColumn get offerId => text()();
   TextColumn get productId => text()();
   TextColumn get supplierId => text()();
@@ -135,6 +201,7 @@ class SupplierOffers extends Table {
 @DataClassName('ReturnRow')
 class Returns extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   TextColumn get returnId => text()();
   TextColumn get orderId => text()();
   TextColumn get reason => text()();
@@ -155,16 +222,217 @@ class Returns extends Table {
   TextColumn get sourcePlatformId => text().nullable()();
   TextColumn get targetPlatformId => text().nullable()();
   TextColumn get returnDestination => text().nullable()();
+  /// Routing target: SELLER_ADDRESS, SUPPLIER_WAREHOUSE, RETURN_CENTER, DISPOSAL.
+  TextColumn get returnRoutingDestination => text().nullable()();
+}
+
+/// Supplier return policy (Phase 2). One per supplier; extends Supplier return fields with policy type and RMA/warehouse flags.
+@DataClassName('SupplierReturnPolicyRow')
+class SupplierReturnPolicies extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get supplierId => text()();
+  TextColumn get policyType => text()(); // NO_RETURNS, DEFECT_ONLY, RETURN_WINDOW, FULL_RETURNS, RETURN_TO_WAREHOUSE, SELLER_HANDLES_RETURNS
+  IntColumn get returnWindowDays => integer().nullable()();
+  RealColumn get restockingFeePercent => real().nullable()();
+  TextColumn get returnShippingPaidBy => text().nullable()(); // SELLER, CUSTOMER, SUPPLIER
+  BoolColumn get requiresRma => boolean().withDefault(const Constant(false))();
+  BoolColumn get warehouseReturnSupported => boolean().withDefault(const Constant(false))();
+  BoolColumn get virtualRestockSupported => boolean().withDefault(const Constant(false))();
+}
+
+/// Post-order incident record (Phase 3). One per incident (return, complaint, non-collected, damage, etc.).
+/// Phase 7: attachmentIds stores JSON array of attachment refs (e.g. photo IDs for damage claims).
+@DataClassName('IncidentRecordRow')
+class IncidentRecords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get orderId => text()();
+  TextColumn get incidentType => text()();
+  TextColumn get status => text()(); // open, supplier_contacted, marketplace_contacted, resolved
+  TextColumn get trigger => text().withDefault(const Constant('manual'))(); // manual, webhook, sync
+  TextColumn get automaticDecision => text().nullable()();
+  TextColumn get supplierInteraction => text().nullable()();
+  TextColumn get marketplaceInteraction => text().nullable()();
+  RealColumn get refundAmount => real().nullable()();
+  RealColumn get financialImpact => real().nullable()();
+  TextColumn get decisionLogId => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get resolvedAt => dateTime().nullable()();
+  /// JSON array of attachment IDs (e.g. for damage claim photos). Nullable for Phase 7.
+  TextColumn get attachmentIds => text().nullable()();
+}
+
+/// Returned stock from customer/supplier (Phase 5). Used to fulfill from returned inventory before ordering from supplier.
+@DataClassName('ReturnedStockRow')
+class ReturnedStocks extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get productId => text()();
+  TextColumn get supplierId => text()();
+  TextColumn get condition => text().withDefault(const Constant('as_new'))(); // as_new, damaged, etc.
+  IntColumn get quantity => integer()();
+  BoolColumn get restockable => boolean().withDefault(const Constant(true))();
+  TextColumn get sourceOrderId => text().nullable()();
+  TextColumn get sourceReturnId => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
+/// Phase 14: financial ledger – prepayment, held, released, refund, loss, adjustment. Balance = sum(amount) per tenant.
+@DataClassName('FinancialLedgerRow')
+class FinancialLedger extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get type => text()(); // supplier_prepayment, marketplace_held, marketplace_released, refund, loss, adjustment
+  TextColumn get orderId => text().nullable()();
+  RealColumn get amount => real()(); // signed: positive = inflow, negative = outflow
+  TextColumn get currency => text().withDefault(const Constant('PLN'))();
+  TextColumn get referenceId => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
 }
 
 @DataClassName('MarketplaceAccountRow')
 class MarketplaceAccounts extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
   TextColumn get accountId => text()();
   TextColumn get platformId => text()();
   TextColumn get displayName => text()();
   BoolColumn get isActive => boolean().withDefault(const Constant(false))();
   DateTimeColumn get connectedAt => dateTime().nullable()();
+}
+
+@DataClassName('MessageThreadRow')
+class MessageThreads extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get localId => text()();
+  TextColumn get orderId => text()();
+  TextColumn get targetPlatformId => text()();
+  TextColumn get marketplaceAccountId => text().nullable()();
+  TextColumn get externalThreadId => text().nullable()();
+  TextColumn get status => text()(); // open, waitingForCustomer, resolved
+  DateTimeColumn get lastMessageAt => dateTime().nullable()();
+  IntColumn get unreadCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
+@DataClassName('MessageRow')
+class Messages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get threadLocalId => text()();
+  TextColumn get direction => text()(); // incoming, outgoing, internal
+  TextColumn get authorLabel => text().nullable()(); // buyer login or 'You'
+  TextColumn get body => text()();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
+@DataClassName('FeatureFlagRow')
+class FeatureFlags extends Table {
+  TextColumn get name => text()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  BoolColumn get enabled => boolean().withDefault(const Constant(false))();
+  @override
+  Set<Column> get primaryKey => {name};
+}
+
+/// Async job queue for Phase B: scan, fulfill_order, price_refresh run as jobs with retries and dead-letter.
+@DataClassName('BackgroundJobRow')
+class BackgroundJobs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get jobType => text()();
+  TextColumn get payloadJson => text().withDefault(const Constant('{}'))();
+  TextColumn get status => text()(); // pending, running, completed, failed
+  IntColumn get attempts => integer().withDefault(const Constant(0))();
+  IntColumn get maxAttempts => integer().withDefault(const Constant(3))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get startedAt => dateTime().nullable()();
+  DateTimeColumn get completedAt => dateTime().nullable()();
+  TextColumn get errorMessage => text().nullable()();
+}
+
+/// Distributed lock table (Phase B3). One row per lock key; expires_at for TTL.
+@DataClassName('DistributedLockRow')
+class DistributedLocks extends Table {
+  TextColumn get lockKey => text()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  DateTimeColumn get expiresAt => dateTime()();
+  @override
+  Set<Column> get primaryKey => {lockKey};
+}
+
+/// Billing plan (Phase B5). Defines limits; -1 means unlimited.
+@DataClassName('BillingPlanRow')
+class BillingPlans extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  IntColumn get maxListings => integer()(); // -1 = unlimited
+  IntColumn get maxOrdersPerMonth => integer()(); // -1 = unlimited
+  TextColumn get stripePriceId => text().nullable()();
+}
+
+/// Tenant's current plan (Phase B5). One row per tenant.
+@DataClassName('TenantPlanRow')
+class TenantPlans extends Table {
+  IntColumn get tenantId => integer()();
+  IntColumn get planId => integer()();
+  TextColumn get stripeCustomerId => text().nullable()();
+  TextColumn get stripeSubscriptionId => text().nullable()();
+  DateTimeColumn get currentPeriodStart => dateTime().nullable()();
+  DateTimeColumn get currentPeriodEnd => dateTime().nullable()();
+  @override
+  Set<Column> get primaryKey => {tenantId};
+}
+
+/// Phase 24: Supplier reliability score (cancellations, late shipments, wrong items, avg shipping).
+@DataClassName('SupplierReliabilityScoreRow')
+class SupplierReliabilityScores extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get supplierId => text()();
+  RealColumn get score => real()(); // 0-100
+  TextColumn get metricsJson => text().withDefault(const Constant('{}'))();
+  DateTimeColumn get lastEvaluatedAt => dateTime()();
+}
+
+/// Phase 26: Listing health metrics (cancellation, late shipment, return rate per listing).
+@DataClassName('ListingHealthMetricsRow')
+class ListingHealthMetrics extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get listingId => text()();
+  IntColumn get totalOrders => integer()();
+  IntColumn get cancelledCount => integer()();
+  IntColumn get lateCount => integer()();
+  IntColumn get returnOrIncidentCount => integer()();
+  DateTimeColumn get lastEvaluatedAt => dateTime()();
+}
+
+/// Phase 25: Customer abuse metrics (return/complaint/refund rate per customer over window).
+@DataClassName('CustomerMetricsRow')
+class CustomerMetrics extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get customerId => text()();
+  RealColumn get returnRate => real()();
+  RealColumn get complaintRate => real()();
+  RealColumn get refundRate => real()();
+  IntColumn get orderCount => integer()();
+  DateTimeColumn get windowEnd => dateTime()();
+}
+
+/// Phase 28: Materialized stock state for fast path (supplier + returned - reserved = available).
+@DataClassName('StockStateRow')
+class StockState extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get productId => text()();
+  TextColumn get supplierId => text().nullable()();
+  IntColumn get supplierStock => integer().nullable()();
+  IntColumn get returnedStock => integer().withDefault(const Constant(0))();
+  IntColumn get reservedStock => integer().withDefault(const Constant(0))();
+  IntColumn get availableStock => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastUpdatedAt => dateTime()();
 }
 
 @DriftDatabase(tables: [
@@ -176,7 +444,22 @@ class MarketplaceAccounts extends Table {
   Suppliers,
   SupplierOffers,
   MarketplaceAccounts,
+  MessageThreads,
+  Messages,
   Returns,
+  SupplierReturnPolicies,
+  IncidentRecords,
+  ReturnedStocks,
+  FinancialLedger,
+  FeatureFlags,
+  BackgroundJobs,
+  DistributedLocks,
+  BillingPlans,
+  TenantPlans,
+  SupplierReliabilityScores,
+  ListingHealthMetrics,
+  CustomerMetrics,
+  StockState,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(storage.openAppDatabaseConnection());
@@ -185,7 +468,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 34;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -242,6 +525,133 @@ class AppDatabase extends _$AppDatabase {
       if (from < 7) {
         // v6 -> v7: remove fulfillment delay (orders fulfilled immediately to avoid OOS during wait)
         await customStatement('ALTER TABLE user_rules DROP COLUMN fulfillment_delay_minutes');
+      }
+      if (from < 8) {
+        // v7 -> v8: order quantity and listing variantId
+        await m.addColumn(orders, orders.quantity);
+        await m.addColumn(listings, listings.variantId);
+      }
+      if (from < 9) {
+        // v8 -> v9: global read-only switch for target writes
+        await m.addColumn(userRulesTable, userRulesTable.targetsReadOnly);
+      }
+      if (from < 10) {
+        // v9 -> v10: payment fees, pricing strategy, category margins, KPI strategy
+        await m.addColumn(userRulesTable, userRulesTable.paymentFeesJson);
+        await m.addColumn(userRulesTable, userRulesTable.pricingStrategy);
+        await m.addColumn(userRulesTable, userRulesTable.categoryMinProfitPercentJson);
+        await m.addColumn(userRulesTable, userRulesTable.premiumWhenBetterReviewsPercent);
+        await m.addColumn(userRulesTable, userRulesTable.minSalesCountForPremium);
+        await m.addColumn(userRulesTable, userRulesTable.kpiDrivenStrategyEnabled);
+      }
+      if (from < 11) {
+        // v10 -> v11: idempotency - unique index so same (target_platform_id, target_order_id, listing_id) cannot be inserted twice
+        await customStatement(
+          'CREATE UNIQUE INDEX IF NOT EXISTS orders_target_platform_order_listing_unique '
+          'ON orders(target_platform_id, target_order_id, listing_id)',
+        );
+      }
+      if (from < 12) {
+        // v11 -> v12: feature flags table (name, enabled) for toggles without code deploy
+        await m.createTable(featureFlags);
+      }
+      if (from < 13) {
+        await m.addColumn(userRulesTable, userRulesTable.rateLimitMaxRequestsPerSecondJson);
+      }
+      if (from < 14) {
+        await m.addColumn(products, products.tenantId);
+        await m.addColumn(listings, listings.tenantId);
+        await m.addColumn(orders, orders.tenantId);
+        await m.addColumn(decisionLogs, decisionLogs.tenantId);
+        await m.addColumn(userRulesTable, userRulesTable.tenantId);
+        await m.addColumn(suppliers, suppliers.tenantId);
+        await m.addColumn(supplierOffers, supplierOffers.tenantId);
+        await m.addColumn(returns, returns.tenantId);
+        await m.addColumn(marketplaceAccounts, marketplaceAccounts.tenantId);
+        await m.addColumn(featureFlags, featureFlags.tenantId);
+      }
+      if (from < 15) {
+        await m.createTable(backgroundJobs);
+      }
+      if (from < 16) {
+        await m.createTable(distributedLocks);
+      }
+      if (from < 17) {
+        await m.createTable(billingPlans);
+        await m.createTable(tenantPlans);
+        await customStatement(
+          "INSERT INTO billing_plans (name, max_listings, max_orders_per_month) VALUES ('free', 10, 50), ('pro', -1, -1)",
+        );
+        await customStatement(
+          "INSERT INTO tenant_plans (tenant_id, plan_id) VALUES (1, (SELECT id FROM billing_plans WHERE name = 'free' LIMIT 1))",
+        );
+      }
+      if (from < 18) {
+        await m.addColumn(orders, orders.lifecycleState);
+        await m.addColumn(decisionLogs, decisionLogs.incidentType);
+        await m.addColumn(decisionLogs, decisionLogs.financialImpact);
+        await m.addColumn(returns, returns.returnRoutingDestination);
+        await m.createTable(supplierReturnPolicies);
+        await m.createTable(incidentRecords);
+        await m.createTable(returnedStocks);
+      }
+      if (from < 19) {
+        await m.addColumn(incidentRecords, incidentRecords.attachmentIds);
+      }
+      if (from < 20) {
+        await m.addColumn(userRulesTable, userRulesTable.incidentRulesJson);
+      }
+      if (from < 21) {
+        await m.addColumn(orders, orders.financialState);
+        await m.addColumn(orders, orders.queuedForCapital);
+        await m.createTable(financialLedger);
+      }
+      if (from < 22) {
+        await m.addColumn(orders, orders.riskScore);
+        await m.addColumn(orders, orders.riskFactorsJson);
+        await m.addColumn(userRulesTable, userRulesTable.riskScoreThreshold);
+      }
+      if (from < 23) {
+        await m.addColumn(userRulesTable, userRulesTable.defaultReturnRatePercent);
+        await m.addColumn(userRulesTable, userRulesTable.defaultReturnCostPerUnit);
+      }
+      if (from < 24) {
+        await m.addColumn(userRulesTable, userRulesTable.blockFulfillWhenInsufficientStock);
+      }
+      if (from < 25) {
+        await m.addColumn(userRulesTable, userRulesTable.autoPauseListingWhenMarginBelowThreshold);
+      }
+      if (from < 26) {
+        await m.addColumn(userRulesTable, userRulesTable.defaultSupplierProcessingDays);
+        await m.addColumn(userRulesTable, userRulesTable.defaultSupplierShippingDays);
+        await m.addColumn(userRulesTable, userRulesTable.marketplaceMaxDeliveryDays);
+      }
+      if (from < 27) {
+        await m.createTable(supplierReliabilityScores);
+      }
+      if (from < 28) {
+        await m.createTable(listingHealthMetrics);
+      }
+      if (from < 29) {
+        await m.addColumn(userRulesTable, userRulesTable.listingHealthMaxReturnRatePercent);
+        await m.addColumn(userRulesTable, userRulesTable.listingHealthMaxLateRatePercent);
+        await m.addColumn(userRulesTable, userRulesTable.autoPauseListingWhenHealthPoor);
+      }
+      if (from < 30) {
+        await m.addColumn(userRulesTable, userRulesTable.safetyStockBuffer);
+      }
+      if (from < 31) {
+        await m.createTable(customerMetrics);
+      }
+      if (from < 32) {
+        await m.addColumn(userRulesTable, userRulesTable.customerAbuseMaxReturnRatePercent);
+        await m.addColumn(userRulesTable, userRulesTable.customerAbuseMaxComplaintRatePercent);
+      }
+      if (from < 33) {
+        await m.createTable(stockState);
+      }
+      if (from < 34) {
+        await m.addColumn(userRulesTable, userRulesTable.priceRefreshIntervalMinutesBySourceJson);
       }
     },
   );

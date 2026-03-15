@@ -179,6 +179,7 @@ class Fixtures {
     int? promisedMinDays = 8,
     int? promisedMaxDays = 15,
     DateTime? createdAt,
+    String? variantId,
   }) {
     return Listing(
       id: id ?? 'listing_${_uid()}',
@@ -191,6 +192,7 @@ class Fixtures {
       promisedMinDays: promisedMinDays,
       promisedMaxDays: promisedMaxDays,
       createdAt: createdAt ?? DateTime.now(),
+      variantId: variantId,
     );
   }
 
@@ -227,6 +229,7 @@ class Fixtures {
     OrderStatus status = OrderStatus.pending,
     double sourceCost = 53.70,
     double sellingPrice = 99.90,
+    int quantity = 1,
     String? trackingNumber,
     CustomerAddress? customerAddress,
     DateTime? createdAt,
@@ -240,6 +243,7 @@ class Fixtures {
       status: status,
       sourceCost: sourceCost,
       sellingPrice: sellingPrice,
+      quantity: quantity,
       trackingNumber: trackingNumber,
       createdAt: createdAt ?? DateTime.now(),
     );

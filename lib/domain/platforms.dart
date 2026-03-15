@@ -125,4 +125,77 @@ abstract class TargetPlatform {
 
   /// Get current order status from the marketplace (to detect buyer cancellation).
   Future<OrderStatus?> getOrderStatus(String targetOrderId);
+
+  // --- Phase 12: Returns & refunds (optional; throw UnsupportedError if not implemented) ---
+
+  /// List customer returns (buyer-initiated). [since] filters by creation date.
+  Future<List<CustomerReturnSummary>> getCustomerReturns({DateTime? since}) async {
+    throw UnsupportedError('getCustomerReturns not supported on $id');
+  }
+
+  /// Get a single customer return by id.
+  Future<CustomerReturnDetails?> getCustomerReturn(String returnId) async {
+    throw UnsupportedError('getCustomerReturn not supported on $id');
+  }
+
+  /// Reject a customer return refund with a reason (e.g. "Item damaged on return").
+  Future<void> rejectReturn(String returnId, String reason) async {
+    throw UnsupportedError('rejectReturn not supported on $id');
+  }
+
+  /// Issue a refund for an order. [targetOrderId] is the marketplace order/checkout id; [amount] in PLN; [reason] free text.
+  Future<void> issueRefund(String targetOrderId, double amount, String reason) async {
+    throw UnsupportedError('issueRefund not supported on $id');
+  }
+}
+
+/// Phase 12: Summary of a customer return (e.g. from Allegro GET /order/customer-returns).
+class CustomerReturnSummary {
+  const CustomerReturnSummary({
+    required this.id,
+    required this.orderId,
+    required this.status,
+    this.createdAt,
+    this.referenceNumber,
+  });
+  final String id;
+  final String orderId;
+  final String status;
+  final DateTime? createdAt;
+  final String? referenceNumber;
+}
+
+/// Phase 12: Details of a single customer return (items, refund info, rejection).
+class CustomerReturnDetails {
+  const CustomerReturnDetails({
+    required this.id,
+    required this.orderId,
+    required this.status,
+    this.createdAt,
+    this.referenceNumber,
+    this.items = const [],
+    this.rejectionReason,
+  });
+  final String id;
+  final String orderId;
+  final String status;
+  final DateTime? createdAt;
+  final String? referenceNumber;
+  final List<CustomerReturnItem> items;
+  final String? rejectionReason;
+}
+
+class CustomerReturnItem {
+  const CustomerReturnItem({
+    required this.offerId,
+    required this.quantity,
+    this.name,
+    this.reasonType,
+    this.userComment,
+  });
+  final String offerId;
+  final int quantity;
+  final String? name;
+  final String? reasonType;
+  final String? userComment;
 }

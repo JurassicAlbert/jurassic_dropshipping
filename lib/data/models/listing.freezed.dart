@@ -34,6 +34,7 @@ mixin _$Listing {
   int? get promisedMaxDays => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get publishedAt => throw _privateConstructorUsedError;
+  String? get variantId => throw _privateConstructorUsedError;
 
   /// Serializes this Listing to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -63,6 +64,7 @@ abstract class $ListingCopyWith<$Res> {
     int? promisedMaxDays,
     DateTime? createdAt,
     DateTime? publishedAt,
+    String? variantId,
   });
 }
 
@@ -94,6 +96,7 @@ class _$ListingCopyWithImpl<$Res, $Val extends Listing>
     Object? promisedMaxDays = freezed,
     Object? createdAt = freezed,
     Object? publishedAt = freezed,
+    Object? variantId = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -149,6 +152,10 @@ class _$ListingCopyWithImpl<$Res, $Val extends Listing>
                 ? _value.publishedAt
                 : publishedAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
+            variantId: freezed == variantId
+                ? _value.variantId
+                : variantId // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -177,6 +184,7 @@ abstract class _$$ListingImplCopyWith<$Res> implements $ListingCopyWith<$Res> {
     int? promisedMaxDays,
     DateTime? createdAt,
     DateTime? publishedAt,
+    String? variantId,
   });
 }
 
@@ -207,6 +215,7 @@ class __$$ListingImplCopyWithImpl<$Res>
     Object? promisedMaxDays = freezed,
     Object? createdAt = freezed,
     Object? publishedAt = freezed,
+    Object? variantId = freezed,
   }) {
     return _then(
       _$ListingImpl(
@@ -262,6 +271,10 @@ class __$$ListingImplCopyWithImpl<$Res>
             ? _value.publishedAt
             : publishedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        variantId: freezed == variantId
+            ? _value.variantId
+            : variantId // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -284,6 +297,7 @@ class _$ListingImpl implements _Listing {
     this.promisedMaxDays,
     this.createdAt,
     this.publishedAt,
+    this.variantId,
   });
 
   factory _$ListingImpl.fromJson(Map<String, dynamic> json) =>
@@ -315,10 +329,12 @@ class _$ListingImpl implements _Listing {
   final DateTime? createdAt;
   @override
   final DateTime? publishedAt;
+  @override
+  final String? variantId;
 
   @override
   String toString() {
-    return 'Listing(id: $id, productId: $productId, targetPlatformId: $targetPlatformId, targetListingId: $targetListingId, status: $status, sellingPrice: $sellingPrice, sourceCost: $sourceCost, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedMinDays: $promisedMinDays, promisedMaxDays: $promisedMaxDays, createdAt: $createdAt, publishedAt: $publishedAt)';
+    return 'Listing(id: $id, productId: $productId, targetPlatformId: $targetPlatformId, targetListingId: $targetListingId, status: $status, sellingPrice: $sellingPrice, sourceCost: $sourceCost, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedMinDays: $promisedMinDays, promisedMaxDays: $promisedMaxDays, createdAt: $createdAt, publishedAt: $publishedAt, variantId: $variantId)';
   }
 
   @override
@@ -349,7 +365,9 @@ class _$ListingImpl implements _Listing {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.publishedAt, publishedAt) ||
-                other.publishedAt == publishedAt));
+                other.publishedAt == publishedAt) &&
+            (identical(other.variantId, variantId) ||
+                other.variantId == variantId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -369,6 +387,7 @@ class _$ListingImpl implements _Listing {
     promisedMaxDays,
     createdAt,
     publishedAt,
+    variantId,
   );
 
   /// Create a copy of Listing
@@ -400,6 +419,7 @@ abstract class _Listing implements Listing {
     final int? promisedMaxDays,
     final DateTime? createdAt,
     final DateTime? publishedAt,
+    final String? variantId,
   }) = _$ListingImpl;
 
   factory _Listing.fromJson(Map<String, dynamic> json) = _$ListingImpl.fromJson;
@@ -430,6 +450,8 @@ abstract class _Listing implements Listing {
   DateTime? get createdAt;
   @override
   DateTime? get publishedAt;
+  @override
+  String? get variantId;
 
   /// Create a copy of Listing
   /// with the given fields replaced by the non-null parameter values.

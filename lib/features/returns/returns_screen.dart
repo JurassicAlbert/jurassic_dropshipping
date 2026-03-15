@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
+import 'package:jurassic_dropshipping/domain/post_order/return_routing.dart';
+import 'package:jurassic_dropshipping/domain/post_order/returned_stock.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
@@ -90,7 +93,10 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final r = filtered[index];
-                        return _ReturnCard(returnRequest: r);
+                        return InkWell(
+                          onTap: () => _showEditDialog(context, r),
+                          child: _ReturnCard(returnRequest: r),
+                        );
                       },
                     ),
             ),
@@ -98,6 +104,234 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
         );
       },
     );
+  }
+  Future<void> _showEditDialog(BuildContext context, ReturnRequest request) async {
+    final repo = ref.read(returnRepositoryProvider);
+    final orderRepo = ref.read(orderRepositoryProvider);
+    final listingRepo = ref.read(listingRepositoryProvider);
+    final productRepo = ref.read(productRepositoryProvider);
+    final supplierRepo = ref.read(supplierRepositoryProvider);
+    final policyRepo = ref.read(supplierReturnPolicyRepositoryProvider);
+    final routingService = ref.read(returnRoutingServiceProvider);
+    final notesController = TextEditingController(text: request.notes ?? '');
+    final refundController = TextEditingController(
+      text: request.refundAmount != null ? request.refundAmount!.toStringAsFixed(2) : '',
+    );
+    final shippingController = TextEditingController(
+      text: request.returnShippingCost != null ? request.returnShippingCost!.toStringAsFixed(2) : '',
+    );
+    final restockingController = TextEditingController(
+      text: request.restockingFee != null ? request.restockingFee!.toStringAsFixed(2) : '',
+    );
+    ReturnStatus status = request.status;
+    ReturnRoutingDestination? dialogRouting = request.returnRoutingDestination;
+    bool addToReturnedStock = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              title: Text('Edit return ${request.id}'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButton<ReturnStatus>(
+                      isExpanded: true,
+                      value: status,
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => status = value);
+                        }
+                      },
+                      items: ReturnStatus.values
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s,
+                              child: Text(s.name),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: refundController,
+                      decoration: const InputDecoration(
+                        labelText: 'Refund amount',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: shippingController,
+                      decoration: const InputDecoration(
+                        labelText: 'Return shipping cost',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: restockingController,
+                      decoration: const InputDecoration(
+                        labelText: 'Restocking fee',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: notesController,
+                      decoration: const InputDecoration(
+                        labelText: 'Notes',
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
+                    ),
+                    if (dialogRouting != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        'Routing: ${_routingLabel(dialogRouting!)}',
+                        style: Theme.of(ctx).textTheme.bodyMedium,
+                      ),
+                    ],
+                    if (status == ReturnStatus.received) ...[
+                      const SizedBox(height: 12),
+                      CheckboxListTile(
+                        value: addToReturnedStock,
+                        onChanged: (v) => setState(() => addToReturnedStock = v ?? false),
+                        title: const Text('Add to returned stock'),
+                        subtitle: const Text('Create returned-stock entry for this return (1 unit)'),
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final messenger = ScaffoldMessenger.of(ctx);
+                        final order = await orderRepo.getByLocalId(request.orderId);
+                        if (order == null) {
+                          if (!ctx.mounted) return;
+                          messenger.showSnackBar(
+                            const SnackBar(content: Text('Order not found')),
+                          );
+                          return;
+                        }
+                        final listing = await listingRepo.getByLocalId(order.listingId) ??
+                            await listingRepo.getByTargetListingId(order.targetPlatformId, order.listingId);
+                        if (listing == null) {
+                          if (!ctx.mounted) return;
+                          messenger.showSnackBar(
+                            const SnackBar(content: Text('Listing not found')),
+                          );
+                          return;
+                        }
+                        final product = await productRepo.getByLocalId(listing.productId);
+                        final supplier = product?.supplierId != null
+                            ? await supplierRepo.getById(product!.supplierId!)
+                            : null;
+                        final policy = product?.supplierId != null
+                            ? await policyRepo.getBySupplierId(product!.supplierId!)
+                            : null;
+                        final dest = routingService.routeReturn(
+                          request,
+                          supplier: supplier,
+                          policy: policy,
+                        );
+                        setState(() => dialogRouting = dest);
+                      },
+                      icon: const Icon(Icons.route, size: 18),
+                      label: const Text('Compute routing'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    final navigator = Navigator.of(context);
+                    final messenger = ScaffoldMessenger.of(context);
+                    final refund = double.tryParse(refundController.text.trim());
+                    final shipping = double.tryParse(shippingController.text.trim());
+                    final restocking = double.tryParse(restockingController.text.trim());
+                    final updated = request.copyWith(
+                      status: status,
+                      notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
+                      refundAmount: refund,
+                      returnShippingCost: shipping,
+                      restockingFee: restocking,
+                      returnRoutingDestination: dialogRouting ?? request.returnRoutingDestination,
+                      resolvedAt: status == ReturnStatus.refunded || status == ReturnStatus.rejected
+                          ? (request.resolvedAt ?? DateTime.now())
+                          : request.resolvedAt,
+                    );
+                    if (status == ReturnStatus.received && addToReturnedStock) {
+                      final orderRepo = ref.read(orderRepositoryProvider);
+                      final listingRepo = ref.read(listingRepositoryProvider);
+                      final productRepo = ref.read(productRepositoryProvider);
+                      final returnedStockRepo = ref.read(returnedStockRepositoryProvider);
+                      final order = await orderRepo.getByLocalId(request.orderId);
+                      if (order != null) {
+                        final listing = await listingRepo.getByLocalId(order.listingId) ??
+                            await listingRepo.getByTargetListingId(order.targetPlatformId, order.listingId);
+                        if (listing != null) {
+                          final product = await productRepo.getByLocalId(listing.productId);
+                          final supplierId = product?.supplierId ?? request.supplierId ?? '';
+                          if (supplierId.isNotEmpty) {
+                            await returnedStockRepo.insert(ReturnedStock(
+                              id: 0,
+                              productId: listing.productId,
+                              supplierId: supplierId,
+                              quantity: 1,
+                              sourceOrderId: order.id,
+                              sourceReturnId: request.id,
+                              createdAt: DateTime.now(),
+                            ));
+                            if (mounted) {
+                              messenger.showSnackBar(
+                                const SnackBar(content: Text('Return marked received and added to returned stock')),
+                              );
+                            }
+                          }
+                        }
+                      }
+                    }
+                    await repo.update(updated);
+                    if (!mounted) return;
+                    ref.invalidate(returnRequestsProvider);
+                    ref.invalidate(returnedStockListProvider);
+                    navigator.pop();
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    notesController.dispose();
+    refundController.dispose();
+    shippingController.dispose();
+    restockingController.dispose();
+  }
+
+  static String _routingLabel(ReturnRoutingDestination d) {
+    return switch (d) {
+      ReturnRoutingDestination.sellerAddress => 'Seller address',
+      ReturnRoutingDestination.supplierWarehouse => 'Supplier warehouse',
+      ReturnRoutingDestination.returnCenter => 'Return center',
+      ReturnRoutingDestination.disposal => 'Disposal',
+    };
   }
 }
 
@@ -163,6 +397,16 @@ class _ReturnCard extends StatelessWidget {
                 'Return to: ${r.returnDestination == ReturnDestination.toSeller ? "Seller (you)" : "Supplier"}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
+            if (r.returnRoutingDestination != null)
+              Text(
+                'Routing: ${switch (r.returnRoutingDestination!) {
+                  ReturnRoutingDestination.sellerAddress => 'Seller address',
+                  ReturnRoutingDestination.supplierWarehouse => 'Supplier warehouse',
+                  ReturnRoutingDestination.returnCenter => 'Return center',
+                  ReturnRoutingDestination.disposal => 'Disposal',
+                }}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             if (r.refundAmount != null)
               Text('Refund: \$${r.refundAmount!.toStringAsFixed(2)}'),
             if (r.returnShippingCost != null)
@@ -190,6 +434,14 @@ class _ReturnCard extends StatelessWidget {
                 'Resolved: ${r.resolvedAt!.toLocal().toString().substring(0, 16)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: TextButton.icon(
+                onPressed: () => context.go('/incidents?orderId=${Uri.encodeComponent(r.orderId)}'),
+                icon: const Icon(Icons.warning_amber, size: 18),
+                label: const Text('View incidents for this order'),
+              ),
+            ),
           ],
         ),
       ),

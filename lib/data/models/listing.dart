@@ -7,6 +7,8 @@ enum ListingStatus {
   draft,
   pendingApproval,
   active,
+  /// Phase 20: automatically set when margin drops below threshold (price drift protection).
+  paused,
   soldOut,
 }
 
@@ -26,6 +28,7 @@ class Listing with _$Listing {
     int? promisedMaxDays,
     DateTime? createdAt,
     DateTime? publishedAt,
+    String? variantId,
   }) = _Listing;
 
   factory Listing.fromJson(Map<String, dynamic> json) =>

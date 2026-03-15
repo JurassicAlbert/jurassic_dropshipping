@@ -31,6 +31,23 @@ enum OrderStatus {
   cancelled,
 }
 
+/// Post-order lifecycle state (Phase 1). Stored on Order; validated by PostOrderLifecycleEngine.
+enum OrderLifecycleState {
+  created,
+  pendingApproval,
+  approved,
+  sentToSupplier,
+  shipped,
+  delivered,
+  returnRequested,
+  returnApproved,
+  returned,
+  complaintOpened,
+  refunded,
+  failed,
+  cancelled,
+}
+
 @freezed
 class Order with _$Order {
   const factory Order({
@@ -43,6 +60,7 @@ class Order with _$Order {
     String? sourceOrderId,
     required double sourceCost,
     required double sellingPrice,
+    @Default(1) int quantity,
     String? trackingNumber,
     String? decisionLogId,
     String? marketplaceAccountId,
@@ -51,6 +69,16 @@ class Order with _$Order {
     DateTime? deliveredAt,
     DateTime? approvedAt,
     DateTime? createdAt,
+    /// Post-order lifecycle; null until backfilled or set by lifecycle engine.
+    String? lifecycleState,
+    /// Phase 14: financial state (unpaid, supplier_paid, marketplace_released, refunded, loss). Nullable.
+    String? financialState,
+    /// Phase 14: true when order is waiting for capital before fulfillment.
+    @Default(false) bool queuedForCapital,
+    /// Phase 16: risk score 0–100; null until evaluated.
+    double? riskScore,
+    /// Phase 16: JSON array of factor names.
+    String? riskFactorsJson,
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);

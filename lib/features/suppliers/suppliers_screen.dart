@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/supplier.dart';
+import 'package:jurassic_dropshipping/domain/supplier_reliability/supplier_reliability_score.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
@@ -13,9 +14,11 @@ class SuppliersScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final suppliersAsync = ref.watch(suppliersProvider);
+    final scoresAsync = ref.watch(supplierReliabilityScoresProvider);
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(suppliersProvider);
+        ref.invalidate(supplierReliabilityScoresProvider);
       },
       child: suppliersAsync.when(
         data: (suppliers) {
@@ -26,9 +29,32 @@ class SuppliersScreen extends ConsumerWidget {
               subtitle: 'Load demo data from Settings to see suppliers',
             );
           }
-          return ListView.builder(
-            itemCount: suppliers.length,
-            itemBuilder: (_, i) => _SupplierTile(supplier: suppliers[i]),
+          final scoreMap = scoresAsync.valueOrNull != null
+              ? {for (final s in scoresAsync.valueOrNull!) s.supplierId: s}
+              : <String, SupplierReliabilityScore>{};
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    await ref.read(supplierReliabilityScoringServiceProvider).evaluateAll();
+                    ref.invalidate(supplierReliabilityScoresProvider);
+                  },
+                  icon: const Icon(Icons.analytics_outlined, size: 18),
+                  label: const Text('Refresh reliability scores'),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: suppliers.length,
+                  itemBuilder: (_, i) => _SupplierTile(
+                    supplier: suppliers[i],
+                    score: scoreMap[suppliers[i].id],
+                  ),
+                ),
+              ),
+            ],
           );
         },
         loading: () => const LoadingSkeleton(),
@@ -42,8 +68,9 @@ class SuppliersScreen extends ConsumerWidget {
 }
 
 class _SupplierTile extends StatelessWidget {
-  const _SupplierTile({required this.supplier});
+  const _SupplierTile({required this.supplier, this.score});
   final Supplier supplier;
+  final SupplierReliabilityScore? score;
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +123,14 @@ class _SupplierTile extends StatelessWidget {
                 ),
               ],
             ),
+            if (score != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Reliability: ${score!.score.toStringAsFixed(0)}/100',
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.tertiary),
+                ),
+              ),
           ],
         ),
         isThreeLine: true,

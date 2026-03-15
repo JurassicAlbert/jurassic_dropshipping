@@ -24,6 +24,8 @@ class DashboardScreen extends ConsumerWidget {
         ref.invalidate(ordersProvider);
         ref.invalidate(returnRequestsProvider);
         ref.invalidate(rulesProvider);
+        ref.invalidate(listingHealthMetricsListProvider);
+        ref.invalidate(customerMetricsListProvider);
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -126,6 +128,64 @@ class DashboardScreen extends ConsumerWidget {
                 ],
 
                 const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          await ref.read(listingHealthScoringServiceProvider).evaluateAll();
+                          ref.invalidate(listingHealthMetricsListProvider);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Listing health metrics refreshed')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.health_and_safety_outlined, size: 18),
+                        label: const Text('Refresh listing health'),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          await ref.read(customerAbuseScoringServiceProvider).evaluateAll();
+                          ref.invalidate(customerMetricsListProvider);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Customer metrics refreshed')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.person_off_outlined, size: 18),
+                        label: const Text('Refresh customer metrics'),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          await ref.read(stockStateRefreshServiceProvider).refreshAll();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Stock state refreshed (Phase 28)')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.inventory_2_outlined, size: 18),
+                        label: const Text('Refresh stock state'),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          ref.read(observabilitySnapshotVersionProvider.notifier).state++;
+                        },
+                        icon: const Icon(Icons.insights_outlined, size: 18),
+                        label: const Text('Refresh observability'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _ObservabilityCard(),
+                const SizedBox(height: 8),
                 rulesAsync.when(
                   data: (rules) => Card(
                     child: ListTile(
@@ -420,6 +480,54 @@ class _AutomationCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ObservabilityCard extends ConsumerWidget {
+  const _ObservabilityCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final snapshot = ref.watch(observabilitySnapshotProvider);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Observability (Phase 32)',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 16,
+              runSpacing: 6,
+              children: [
+                _metricChip('orders/min', snapshot.ordersSyncedLastMinute),
+                _metricChip('orders total', snapshot.ordersSyncedTotal),
+                _metricChip('fulfill ok', snapshot.fulfillmentSuccessTotal),
+                _metricChip('fulfill fail', snapshot.fulfillmentFailedTotal),
+                _metricChip('listing enq', snapshot.listingUpdatesEnqueuedTotal),
+                _metricChip('listing done', snapshot.listingUpdatesProcessedTotal),
+                _metricChip('jobs ok', snapshot.jobsProcessedTotal),
+                _metricChip('jobs fail', snapshot.jobsFailedTotal),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _metricChip(String label, int value) {
+    return Chip(
+      label: Text('$label: $value', style: const TextStyle(fontSize: 11)),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.compact,
     );
   }
 }

@@ -77,8 +77,8 @@ class _ListingApprovalTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final targets = ref.watch(targetsListProvider);
     final listingRepo = ref.read(listingRepositoryProvider);
+    final targets = ref.watch(targetsListProvider);
     final stockAsync = ref.watch(listingStockAtSourceProvider(listing.id));
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -115,14 +115,25 @@ class _ListingApprovalTile extends ConsumerWidget {
               child: const Text('Reject'),
             ),
             FilledButton(
-              onPressed: targets.isEmpty
-                  ? null
-                  : () async {
+              onPressed: targets.any((t) => t.id == listing.targetPlatformId)
+                  ? () async {
                       try {
                         final productRepo = ref.read(productRepositoryProvider);
                         final product = await productRepo.getByLocalId(listing.productId);
                         if (product == null) return;
-                        final target = targets.first;
+                        final target = targets.firstWhere(
+                          (t) => t.id == listing.targetPlatformId,
+                          orElse: () => targets.first,
+                        );
+                        // If this listing is variant-specific, use that variant's stock only.
+                        final int? variantStock = () {
+                          if (listing.variantId == null) return null;
+                          final variant = product.variants
+                              .where((v) => v.id == listing.variantId)
+                              .firstOrNull;
+                          return variant?.stock;
+                        }();
+
                         final draft = ListingDraft(
                           productId: listing.productId,
                           targetPlatformId: target.id,
@@ -131,16 +142,22 @@ class _ListingApprovalTile extends ConsumerWidget {
                           sellingPrice: listing.sellingPrice,
                           sourceCost: listing.sourceCost,
                           imageUrls: product.imageUrls,
-                          stock: product.variants.fold<int>(0, (s, v) => s + v.stock),
+                          stock: variantStock ??
+                              product.variants.fold<int>(0, (s, v) => s + v.stock),
                         );
                         final offerId = await target.createListing(draft);
                         await listingRepo.updateStatus(listing.id, ListingStatus.active, targetListingId: offerId, publishedAt: DateTime.now());
                         ref.invalidate(pendingListingsProvider);
                         ref.invalidate(listingsProvider);
                       } catch (e) {
-                        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed: $e')),
+                          );
+                        }
                       }
-                    },
+                    }
+                  : null,
               child: const Text('Approve'),
             ),
           ],

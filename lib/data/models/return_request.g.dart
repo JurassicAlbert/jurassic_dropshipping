@@ -35,6 +35,9 @@ _$ReturnRequestImpl _$$ReturnRequestImplFromJson(Map<String, dynamic> json) =>
         _$ReturnDestinationEnumMap,
         json['returnDestination'],
       ),
+      returnRoutingDestination: _returnRoutingFromJson(
+        json['returnRoutingDestination'] as String?,
+      ),
     );
 
 Map<String, dynamic> _$$ReturnRequestImplToJson(
@@ -60,6 +63,9 @@ Map<String, dynamic> _$$ReturnRequestImplToJson(
   'sourcePlatformId': instance.sourcePlatformId,
   'targetPlatformId': instance.targetPlatformId,
   'returnDestination': _$ReturnDestinationEnumMap[instance.returnDestination],
+  'returnRoutingDestination': _returnRoutingToJson(
+    instance.returnRoutingDestination,
+  ),
 };
 
 const _$ReturnReasonEnumMap = {

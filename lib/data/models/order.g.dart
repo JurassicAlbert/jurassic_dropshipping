@@ -44,6 +44,7 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   sourceOrderId: json['sourceOrderId'] as String?,
   sourceCost: (json['sourceCost'] as num).toDouble(),
   sellingPrice: (json['sellingPrice'] as num).toDouble(),
+  quantity: (json['quantity'] as num?)?.toInt() ?? 1,
   trackingNumber: json['trackingNumber'] as String?,
   decisionLogId: json['decisionLogId'] as String?,
   marketplaceAccountId: json['marketplaceAccountId'] as String?,
@@ -62,6 +63,11 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   createdAt: json['createdAt'] == null
       ? null
       : DateTime.parse(json['createdAt'] as String),
+  lifecycleState: json['lifecycleState'] as String?,
+  financialState: json['financialState'] as String?,
+  queuedForCapital: json['queuedForCapital'] as bool? ?? false,
+  riskScore: (json['riskScore'] as num?)?.toDouble(),
+  riskFactorsJson: json['riskFactorsJson'] as String?,
 );
 
 Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
@@ -75,6 +81,7 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'sourceOrderId': instance.sourceOrderId,
       'sourceCost': instance.sourceCost,
       'sellingPrice': instance.sellingPrice,
+      'quantity': instance.quantity,
       'trackingNumber': instance.trackingNumber,
       'decisionLogId': instance.decisionLogId,
       'marketplaceAccountId': instance.marketplaceAccountId,
@@ -83,6 +90,11 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'deliveredAt': instance.deliveredAt?.toIso8601String(),
       'approvedAt': instance.approvedAt?.toIso8601String(),
       'createdAt': instance.createdAt?.toIso8601String(),
+      'lifecycleState': instance.lifecycleState,
+      'financialState': instance.financialState,
+      'queuedForCapital': instance.queuedForCapital,
+      'riskScore': instance.riskScore,
+      'riskFactorsJson': instance.riskFactorsJson,
     };
 
 const _$OrderStatusEnumMap = {
