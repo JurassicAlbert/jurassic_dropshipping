@@ -25,6 +25,9 @@ _$SupplierImpl _$$SupplierImplFromJson(Map<String, dynamic> json) =>
       warehouseEmail: json['warehouseEmail'] as String?,
       feedSource: json['feedSource'] as String?,
       shopUrl: json['shopUrl'] as String?,
+      regulationsUrl: json['regulationsUrl'] as String?,
+      termsUrl: json['termsUrl'] as String?,
+      returnPolicyUrl: json['returnPolicyUrl'] as String?,
     );
 
 Map<String, dynamic> _$$SupplierImplToJson(_$SupplierImpl instance) =>
@@ -46,4 +49,7 @@ Map<String, dynamic> _$$SupplierImplToJson(_$SupplierImpl instance) =>
       'warehouseEmail': instance.warehouseEmail,
       'feedSource': instance.feedSource,
       'shopUrl': instance.shopUrl,
+      'regulationsUrl': instance.regulationsUrl,
+      'termsUrl': instance.termsUrl,
+      'returnPolicyUrl': instance.returnPolicyUrl,
     };

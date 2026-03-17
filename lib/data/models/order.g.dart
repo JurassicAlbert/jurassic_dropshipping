@@ -68,6 +68,8 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   queuedForCapital: json['queuedForCapital'] as bool? ?? false,
   riskScore: (json['riskScore'] as num?)?.toDouble(),
   riskFactorsJson: json['riskFactorsJson'] as String?,
+  buyerMessage: json['buyerMessage'] as String?,
+  deliveryMethodName: json['deliveryMethodName'] as String?,
 );
 
 Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
@@ -95,6 +97,8 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'queuedForCapital': instance.queuedForCapital,
       'riskScore': instance.riskScore,
       'riskFactorsJson': instance.riskFactorsJson,
+      'buyerMessage': instance.buyerMessage,
+      'deliveryMethodName': instance.deliveryMethodName,
     };
 
 const _$OrderStatusEnumMap = {

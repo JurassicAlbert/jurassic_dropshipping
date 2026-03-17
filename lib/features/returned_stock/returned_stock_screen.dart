@@ -6,7 +6,10 @@ import 'package:jurassic_dropshipping/data/repositories/returned_stock_repositor
 import 'package:jurassic_dropshipping/domain/post_order/returned_stock.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 
 /// Returned stock management (Phase 11). List by product/supplier; quantity, condition, restockable; reduce or write off.
 class ReturnedStockScreen extends ConsumerWidget {
@@ -32,9 +35,18 @@ class ReturnedStockScreen extends ConsumerWidget {
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: list.length,
+          itemCount: list.length + 1,
           itemBuilder: (context, index) {
-            final s = list[index];
+            if (index == 0) {
+              return const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: ScreenHelpSection(
+                  description: ScreenHelpTexts.returnedStock,
+                  howToUse: 'How to use: Reduce quantity when you fulfill from this stock; use Write off for items that cannot be restocked.',
+                ),
+              );
+            }
+            final s = list[index - 1];
             return _StockCard(stock: s);
           },
         );
@@ -112,16 +124,27 @@ class _StockCard extends ConsumerWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  TextButton.icon(
-                    onPressed: () => _showReduceDialog(context, ref, repo, stock),
-                    icon: const Icon(Icons.remove_circle_outline, size: 18),
-                    label: const Text('Reduce'),
+                  Tooltip(
+                    message: 'Reduce quantity when you fulfill from this returned stock',
+                    child: TextButton.icon(
+                      onPressed: () => _showReduceDialog(context, ref, repo, stock),
+                      icon: const Icon(Icons.remove_circle_outline, size: 18),
+                      label: const Text('Reduce'),
+                    ),
                   ),
                   const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: () => _writeOff(context, ref, repo, stock),
-                    icon: const Icon(Icons.block, size: 18),
-                    label: const Text('Write off'),
+                  Tooltip(
+                    message: 'Write off this stock (cannot be restocked). Use for damaged or lost items.',
+                    child: OutlinedButton.icon(
+                      onPressed: () => _writeOff(context, ref, repo, stock),
+                      icon: const Icon(Icons.block, size: 18),
+                      label: const Text('Write off'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InfoIcon(
+                    tooltip: 'Reduce: use when you sell or use this returned item (quantity goes down). '
+                        'Write off: use when the item cannot be resold (e.g. damaged); it will no longer count as available stock.',
                   ),
                 ],
               ),
@@ -194,6 +217,7 @@ class _StockCard extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
           FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Write off'),
           ),

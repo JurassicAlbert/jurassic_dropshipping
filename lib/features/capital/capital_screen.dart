@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 
 /// Capital / ledger screen (Phase 14). Shows available balance, add adjustment, orders queued for capital.
 class CapitalScreen extends ConsumerStatefulWidget {
@@ -36,6 +39,11 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const ScreenHelpSection(
+            description: ScreenHelpTexts.capital,
+            howToUse: 'How to use: Record adjustments to correct balance. View orders queued for capital and open them from here.',
+          ),
+          const SizedBox(height: 8),
           balanceAsync.when(
             loading: () => const LoadingSkeleton(),
             error: (e, _) => ErrorCard(
@@ -78,9 +86,18 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Add adjustment',
-                    style: Theme.of(context).textTheme.titleSmall,
+                  Row(
+                    children: [
+                      Text(
+                        'Add adjustment',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(width: 6),
+                      InfoIcon(
+                        tooltip: 'Use this to set your starting capital or correct the balance (e.g. money in, bank error). '
+                            'Positive amount increases available capital; negative decreases it. Orders "Queued for capital" need enough balance before fulfillment.',
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -106,10 +123,13 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: () => _addAdjustment(context),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Record adjustment'),
+                  Tooltip(
+                    message: 'Add a capital adjustment (positive or negative) to correct your balance. Used for initial funding or corrections.',
+                    child: FilledButton.icon(
+                      onPressed: () => _addAdjustment(context),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('Record adjustment'),
+                    ),
                   ),
                 ],
               ),

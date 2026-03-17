@@ -8,6 +8,7 @@ import 'package:jurassic_dropshipping/features/settings/settings_screen.dart';
 import 'package:jurassic_dropshipping/features/analytics/analytics_screen.dart';
 import 'package:jurassic_dropshipping/features/shell/shell_screen.dart';
 import 'package:jurassic_dropshipping/features/suppliers/suppliers_screen.dart';
+import 'package:jurassic_dropshipping/features/suppliers/supplier_detail_screen.dart';
 import 'package:jurassic_dropshipping/features/marketplaces/marketplaces_screen.dart';
 import 'package:jurassic_dropshipping/features/returns/returns_screen.dart';
 import 'package:jurassic_dropshipping/features/incidents/incident_detail_screen.dart';
@@ -15,6 +16,9 @@ import 'package:jurassic_dropshipping/features/incidents/incidents_screen.dart';
 import 'package:jurassic_dropshipping/features/return_policies/return_policies_screen.dart';
 import 'package:jurassic_dropshipping/features/returned_stock/returned_stock_screen.dart';
 import 'package:jurassic_dropshipping/features/capital/capital_screen.dart';
+import 'package:jurassic_dropshipping/features/risk_dashboard/risk_dashboard_screen.dart';
+import 'package:jurassic_dropshipping/features/profit_dashboard/profit_dashboard_screen.dart';
+import 'package:jurassic_dropshipping/features/how_it_works/how_it_works_screen.dart';
 
 final goRouter = GoRouter(
   initialLocation: '/dashboard',
@@ -24,6 +28,7 @@ final goRouter = GoRouter(
       routes: [
         GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen()),
         GoRoute(path: '/analytics', builder: (context, state) => const AnalyticsScreen()),
+        GoRoute(path: '/profit-dashboard', builder: (context, state) => const ProfitDashboardScreen()),
         GoRoute(path: '/products', builder: (context, state) => const ProductsScreen()),
         GoRoute(
           path: '/orders',
@@ -33,12 +38,20 @@ final goRouter = GoRouter(
           ),
         ),
         GoRoute(path: '/suppliers', builder: (context, state) => const SuppliersScreen()),
+        GoRoute(
+          path: '/suppliers/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            return SupplierDetailScreen(supplierId: id);
+          },
+        ),
         GoRoute(path: '/marketplaces', builder: (context, state) => const MarketplacesScreen()),
         GoRoute(path: '/returns', builder: (context, state) => const ReturnsScreen()),
         GoRoute(
           path: '/incidents',
           builder: (context, state) => IncidentsScreen(filterOrderId: state.uri.queryParameters['orderId']),
         ),
+        GoRoute(path: '/risk-dashboard', builder: (context, state) => const RiskDashboardScreen()),
         GoRoute(
           path: '/incidents/:id',
           builder: (context, state) {
@@ -58,6 +71,7 @@ final goRouter = GoRouter(
         ),
         GoRoute(path: '/return-policies', builder: (context, state) => const ReturnPoliciesScreen()),
         GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+        GoRoute(path: '/how-it-works', builder: (context, state) => const HowItWorksScreen()),
       ],
     ),
   ],

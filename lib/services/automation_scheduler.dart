@@ -108,9 +108,11 @@ class AutomationScheduler {
 
     startScanner(interval: interval);
     startOrderSync(interval: interval);
-    startPriceRefresh(interval: const Duration(hours: 6));
+    // Run every 15 min; PriceRefreshService uses per-source interval from Settings (priceRefreshIntervalMinutesBySource).
+    startPriceRefresh(interval: const Duration(minutes: 15));
     startMarketplaceListingSync(interval: const Duration(hours: 6));
-    startProductRefresh(interval: const Duration(hours: 2));
+    // Product refresh from warehouse/source; run every 30 min so listings stay in sync with source data.
+    startProductRefresh(interval: const Duration(minutes: 30));
     startLowStockRefresh(interval: const Duration(minutes: 30));
   }
 

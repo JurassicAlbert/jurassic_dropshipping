@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
+import 'package:jurassic_dropshipping/domain/listing_health/listing_health_metrics.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 import 'package:jurassic_dropshipping/features/shared/search_filter_bar.dart';
 
 class ProductsScreen extends ConsumerStatefulWidget {
@@ -53,45 +58,86 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final listingsAsync = ref.watch(listingsProvider);
+    final healthAsync = ref.watch(listingHealthMetricsListProvider);
     return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(listingsProvider),
+      onRefresh: () async {
+        ref.invalidate(listingsProvider);
+        ref.invalidate(listingHealthMetricsListProvider);
+      },
       child: listingsAsync.when(
         data: (listings) {
           final filtered = _applyFilters(listings);
+          final healthMap = healthAsync.valueOrNull != null
+              ? {for (final h in healthAsync.valueOrNull!) h.listingId: h}
+              : <String, ListingHealthRecord>{};
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+                child: ScreenHelpSection(
+                  description: ScreenHelpTexts.products,
+                  howToUse: 'How to use: Use the search bar and status chips to filter. Tap a listing to see details. Run a scan from Dashboard to add products.',
+                ),
+              ),
               SearchFilterBar(
                 controller: _searchController,
                 onChanged: (_) => setState(() {}),
                 hintText: 'Search by listing ID or product ID...',
                 filterChips: [
                   for (final entry in {'all': 'All', 'active': 'Active', 'pending': 'Pending', 'draft': 'Draft'}.entries)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(entry.value),
-                        selected: _statusFilter == entry.key,
-                        onSelected: (_) => setState(() => _statusFilter = entry.key),
+                    Tooltip(
+                      message: 'Filter listings by status: ${entry.value}',
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(entry.value),
+                          selected: _statusFilter == entry.key,
+                          onSelected: (_) => setState(() => _statusFilter = entry.key),
+                        ),
                       ),
                     ),
                 ],
               ),
               Expanded(
                 child: filtered.isEmpty
-                    ? const EmptyState(
+                    ? EmptyState(
                         icon: Icons.inventory_2,
-                        title: 'No listings yet',
-                        subtitle: 'Run a scan from Dashboard to find products',
+                        title: 'No products found',
+                        subtitle: 'Run a supplier scan to import available products.',
+                        action: FilledButton.icon(
+                          onPressed: () => context.go('/dashboard'),
+                          icon: const Icon(Icons.dashboard, size: 18),
+                          label: const Text('Go to Dashboard'),
+                        ),
                       )
                     : ListView.builder(
                         itemCount: filtered.length,
                         itemBuilder: (_, i) {
                           final l = filtered[i];
                           final profit = l.sellingPrice - l.sourceCost;
+                          final marginPct = l.sellingPrice > 0 ? (profit / l.sellingPrice * 100) : 0.0;
+                          final health = healthMap[l.id];
+                          final healthLabel = _healthLabel(l, health, marginPct);
                           return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
                             child: ListTile(
-                              title: Text(l.id),
+                              title: Row(
+                                children: [
+                                  Expanded(child: Text(l.id)),
+                                  if (healthLabel != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      child: Chip(
+                                        label: Text(healthLabel.label, style: const TextStyle(fontSize: 10)),
+                                        backgroundColor: healthLabel.color,
+                                        padding: EdgeInsets.zero,
+                                        visualDensity: VisualDensity.compact,
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                    ),
+                                ],
+                              ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -108,7 +154,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                 ],
                               ),
                               trailing: _statusChip(l.status),
-                              isThreeLine: l.promisedMinDays != null || l.promisedMaxDays != null,
+                              isThreeLine: true,
                             ),
                           );
                         },
@@ -126,6 +172,20 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     );
   }
 
+  ({String label, Color color})? _healthLabel(Listing l, ListingHealthRecord? health, double marginPct) {
+    if (l.status == ListingStatus.paused) return (label: 'Paused', color: Colors.amber);
+    if (l.status == ListingStatus.soldOut) return (label: 'Out of stock', color: Colors.red.shade700);
+    if (marginPct < 0) return (label: 'Negative margin', color: Colors.red);
+    if (marginPct < 10 && marginPct >= 0) return (label: 'Low margin', color: Colors.orange);
+    if (health != null) {
+      if (health.returnRate >= 0.2) return (label: 'High return rate', color: Colors.orange);
+      if (health.lateRate >= 0.15) return (label: 'Late delivery risk', color: Colors.amber);
+    }
+    if (l.status == ListingStatus.active && health != null && health.returnRate < 0.1 && marginPct >= 10)
+      return (label: 'Healthy', color: Colors.green.shade700);
+    return null;
+  }
+
   Widget _statusChip(ListingStatus status) {
     final Color color;
     switch (status) {
@@ -140,6 +200,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         break;
       case ListingStatus.soldOut:
         color = Colors.red;
+        break;
+      case ListingStatus.paused:
+        color = Colors.amber;
         break;
     }
     return Chip(

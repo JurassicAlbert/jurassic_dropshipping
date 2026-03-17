@@ -33,6 +33,12 @@ class Supplier with _$Supplier {
     String? feedSource,
     /// External shop URL or identifier
     String? shopUrl,
+    /// Regulations / T&C URL (e.g. supplier terms, country rules).
+    String? regulationsUrl,
+    /// Terms and conditions URL.
+    String? termsUrl,
+    /// Return policy document URL.
+    String? returnPolicyUrl,
   }) = _Supplier;
 
   factory Supplier.fromJson(Map<String, dynamic> json) =>

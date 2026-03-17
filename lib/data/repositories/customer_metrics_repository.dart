@@ -50,7 +50,7 @@ class CustomerMetricsRepository {
     } else {
       await _db.into(_db.customerMetrics).insert(
             CustomerMetricsCompanion.insert(
-              tenantId: tenantId,
+              tenantId: Value(tenantId),
               customerId: customerId,
               returnRate: returnRate,
               complaintRate: complaintRate,

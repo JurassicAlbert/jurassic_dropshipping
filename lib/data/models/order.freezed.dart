@@ -372,6 +372,12 @@ mixin _$Order {
   /// Phase 16: JSON array of factor names.
   String? get riskFactorsJson => throw _privateConstructorUsedError;
 
+  /// Buyer message / parcel comment (e.g. for warehouse). From Allegro when API provides it.
+  String? get buyerMessage => throw _privateConstructorUsedError;
+
+  /// Delivery method name (e.g. InPost Locker). From Allegro when API provides it.
+  String? get deliveryMethodName => throw _privateConstructorUsedError;
+
   /// Serializes this Order to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -410,6 +416,8 @@ abstract class $OrderCopyWith<$Res> {
     bool queuedForCapital,
     double? riskScore,
     String? riskFactorsJson,
+    String? buyerMessage,
+    String? deliveryMethodName,
   });
 
   $CustomerAddressCopyWith<$Res> get customerAddress;
@@ -453,6 +461,8 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? queuedForCapital = null,
     Object? riskScore = freezed,
     Object? riskFactorsJson = freezed,
+    Object? buyerMessage = freezed,
+    Object? deliveryMethodName = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -548,6 +558,14 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.riskFactorsJson
                 : riskFactorsJson // ignore: cast_nullable_to_non_nullable
                       as String?,
+            buyerMessage: freezed == buyerMessage
+                ? _value.buyerMessage
+                : buyerMessage // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            deliveryMethodName: freezed == deliveryMethodName
+                ? _value.deliveryMethodName
+                : deliveryMethodName // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -596,6 +614,8 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     bool queuedForCapital,
     double? riskScore,
     String? riskFactorsJson,
+    String? buyerMessage,
+    String? deliveryMethodName,
   });
 
   @override
@@ -639,6 +659,8 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? queuedForCapital = null,
     Object? riskScore = freezed,
     Object? riskFactorsJson = freezed,
+    Object? buyerMessage = freezed,
+    Object? deliveryMethodName = freezed,
   }) {
     return _then(
       _$OrderImpl(
@@ -734,6 +756,14 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.riskFactorsJson
             : riskFactorsJson // ignore: cast_nullable_to_non_nullable
                   as String?,
+        buyerMessage: freezed == buyerMessage
+            ? _value.buyerMessage
+            : buyerMessage // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        deliveryMethodName: freezed == deliveryMethodName
+            ? _value.deliveryMethodName
+            : deliveryMethodName // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -766,6 +796,8 @@ class _$OrderImpl implements _Order {
     this.queuedForCapital = false,
     this.riskScore,
     this.riskFactorsJson,
+    this.buyerMessage,
+    this.deliveryMethodName,
   });
 
   factory _$OrderImpl.fromJson(Map<String, dynamic> json) =>
@@ -830,9 +862,17 @@ class _$OrderImpl implements _Order {
   @override
   final String? riskFactorsJson;
 
+  /// Buyer message / parcel comment (e.g. for warehouse). From Allegro when API provides it.
+  @override
+  final String? buyerMessage;
+
+  /// Delivery method name (e.g. InPost Locker). From Allegro when API provides it.
+  @override
+  final String? deliveryMethodName;
+
   @override
   String toString() {
-    return 'Order(id: $id, listingId: $listingId, targetOrderId: $targetOrderId, targetPlatformId: $targetPlatformId, customerAddress: $customerAddress, status: $status, sourceOrderId: $sourceOrderId, sourceCost: $sourceCost, sellingPrice: $sellingPrice, quantity: $quantity, trackingNumber: $trackingNumber, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedDeliveryMin: $promisedDeliveryMin, promisedDeliveryMax: $promisedDeliveryMax, deliveredAt: $deliveredAt, approvedAt: $approvedAt, createdAt: $createdAt, lifecycleState: $lifecycleState, financialState: $financialState, queuedForCapital: $queuedForCapital, riskScore: $riskScore, riskFactorsJson: $riskFactorsJson)';
+    return 'Order(id: $id, listingId: $listingId, targetOrderId: $targetOrderId, targetPlatformId: $targetPlatformId, customerAddress: $customerAddress, status: $status, sourceOrderId: $sourceOrderId, sourceCost: $sourceCost, sellingPrice: $sellingPrice, quantity: $quantity, trackingNumber: $trackingNumber, decisionLogId: $decisionLogId, marketplaceAccountId: $marketplaceAccountId, promisedDeliveryMin: $promisedDeliveryMin, promisedDeliveryMax: $promisedDeliveryMax, deliveredAt: $deliveredAt, approvedAt: $approvedAt, createdAt: $createdAt, lifecycleState: $lifecycleState, financialState: $financialState, queuedForCapital: $queuedForCapital, riskScore: $riskScore, riskFactorsJson: $riskFactorsJson, buyerMessage: $buyerMessage, deliveryMethodName: $deliveryMethodName)';
   }
 
   @override
@@ -883,7 +923,11 @@ class _$OrderImpl implements _Order {
             (identical(other.riskScore, riskScore) ||
                 other.riskScore == riskScore) &&
             (identical(other.riskFactorsJson, riskFactorsJson) ||
-                other.riskFactorsJson == riskFactorsJson));
+                other.riskFactorsJson == riskFactorsJson) &&
+            (identical(other.buyerMessage, buyerMessage) ||
+                other.buyerMessage == buyerMessage) &&
+            (identical(other.deliveryMethodName, deliveryMethodName) ||
+                other.deliveryMethodName == deliveryMethodName));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -913,6 +957,8 @@ class _$OrderImpl implements _Order {
     queuedForCapital,
     riskScore,
     riskFactorsJson,
+    buyerMessage,
+    deliveryMethodName,
   ]);
 
   /// Create a copy of Order
@@ -954,6 +1000,8 @@ abstract class _Order implements Order {
     final bool queuedForCapital,
     final double? riskScore,
     final String? riskFactorsJson,
+    final String? buyerMessage,
+    final String? deliveryMethodName,
   }) = _$OrderImpl;
 
   factory _Order.fromJson(Map<String, dynamic> json) = _$OrderImpl.fromJson;
@@ -1014,6 +1062,14 @@ abstract class _Order implements Order {
   /// Phase 16: JSON array of factor names.
   @override
   String? get riskFactorsJson;
+
+  /// Buyer message / parcel comment (e.g. for warehouse). From Allegro when API provides it.
+  @override
+  String? get buyerMessage;
+
+  /// Delivery method name (e.g. InPost Locker). From Allegro when API provides it.
+  @override
+  String? get deliveryMethodName;
 
   /// Create a copy of Order
   /// with the given fields replaced by the non-null parameter values.

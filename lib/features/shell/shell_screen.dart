@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/features/auth/auth_gate.dart';
+import 'package:jurassic_dropshipping/features/shared/command_palette_overlay.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 
 class ShellScreen extends ConsumerWidget {
   const ShellScreen({super.key, required this.child});
@@ -13,61 +16,55 @@ class ShellScreen extends ConsumerWidget {
   static const _routes = [
     '/dashboard',
     '/analytics',
+    '/profit-dashboard',
     '/products',
     '/orders',
     '/suppliers',
     '/marketplaces',
     '/returns',
     '/incidents',
+    '/risk-dashboard',
     '/returned-stock',
     '/capital',
     '/approval',
     '/decision-log',
     '/return-policies',
     '/settings',
+    '/how-it-works',
   ];
 
-  static const _labels = [
-    'Dashboard',
-    'Analytics',
-    'Products',
-    'Orders',
-    'Suppliers',
-    'Marketplaces',
-    'Returns',
-    'Incidents',
-    'Returned stock',
-    'Capital',
-    'Approval Queue',
-    'Decision Log',
-    'Return policies',
-    'Settings',
-  ];
+  /// Nav labels come from [appLocalizationsProvider] (localized).
+  static List<String> _labels(WidgetRef ref) =>
+      ref.watch(appLocalizationsProvider).navLabels;
 
   static const _icons = [
     Icons.dashboard,
     Icons.analytics,
+    Icons.trending_up,
     Icons.inventory_2,
     Icons.shopping_cart,
     Icons.store,
     Icons.public,
     Icons.assignment_return,
     Icons.warning_amber,
+    Icons.warning_amber_rounded,
     Icons.inventory,
     Icons.account_balance,
     Icons.pending_actions,
     Icons.list_alt,
     Icons.policy,
     Icons.settings,
+    Icons.help_outline,
   ];
 
-  String _pageTitle(String path) {
+  String _pageTitle(WidgetRef ref, String path) {
     final idx = _routes.indexOf(path);
-    if (idx >= 0) return _labels[idx];
-    return 'Jurassic Dropshipping';
+    final l10n = ref.watch(appLocalizationsProvider);
+    if (idx >= 0) return l10n.navLabelAt(idx);
+    return l10n.appTitle;
   }
 
-  Widget _buildNavItems(BuildContext context) {
+  Widget _buildNavItems(BuildContext context, WidgetRef ref) {
     final current = GoRouterState.of(context).uri.path;
     final theme = Theme.of(context);
 
@@ -85,15 +82,22 @@ class ShellScreen extends ConsumerWidget {
       );
     }
 
+    final labels = _labels(ref);
     Widget navTile(int index) {
-      return ListTile(
-        leading: Icon(_icons[index]),
-        title: Text(_labels[index]),
-        selected: current == _routes[index],
-        onTap: () {
-          context.go(_routes[index]);
-          Navigator.of(context).pop();
-        },
+      final tooltip = index < ScreenHelpTexts.navTooltips.length
+          ? ScreenHelpTexts.navTooltips[index]
+          : labels[index];
+      return Tooltip(
+        message: tooltip,
+        child: ListTile(
+          leading: Icon(_icons[index]),
+          title: Text(labels[index]),
+          selected: current == _routes[index],
+          onTap: () {
+            context.go(_routes[index]);
+            Navigator.of(context).pop();
+          },
+        ),
       );
     }
 
@@ -101,14 +105,54 @@ class ShellScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         sectionHeader('MAIN'),
-        for (var i = 0; i < 4; i++) navTile(i),
+        for (var i = 0; i < 5; i++) navTile(i),
         const Divider(indent: 16, endIndent: 16),
         sectionHeader('OPERATIONS'),
-        for (var i = 4; i < 10; i++) navTile(i),
+        for (var i = 5; i < 12; i++) navTile(i),
         const Divider(indent: 16, endIndent: 16),
         sectionHeader('ADMIN'),
-        for (var i = 10; i < 14; i++) navTile(i),
+        for (var i = 12; i < 17; i++) navTile(i),
       ],
+    );
+  }
+
+  /// Opens the "Jump to order by ID" dialog. Exposed for command palette.
+  static void showJumpToOrderDialog(BuildContext context, WidgetRef ref) {
+    final l10n = ref.read(appLocalizationsProvider);
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.jumpToOrder),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: l10n.orderId,
+            hintText: l10n.orderIdHint,
+            border: const OutlineInputBorder(),
+          ),
+          onSubmitted: (value) {
+            final id = value.trim();
+            if (id.isNotEmpty) {
+              Navigator.of(ctx).pop();
+              context.go('/orders?orderId=${Uri.encodeComponent(id)}');
+            }
+          },
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(l10n.cancel)),
+          FilledButton(
+            onPressed: () {
+              final id = controller.text.trim();
+              if (id.isNotEmpty) {
+                Navigator.of(ctx).pop();
+                context.go('/orders?orderId=${Uri.encodeComponent(id)}');
+              }
+            },
+            child: Text(l10n.go),
+          ),
+        ],
+      ),
     );
   }
 
@@ -131,13 +175,16 @@ class ShellScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_pageTitle(currentPath)),
+        title: Text(_pageTitle(ref, currentPath)),
         leading: useRail
             ? null
             : Builder(
-                builder: (ctx) => IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => Scaffold.of(ctx).openDrawer(),
+                builder: (ctx) => Tooltip(
+                  message: ref.watch(appLocalizationsProvider).openNav,
+                  child: IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => Scaffold.of(ctx).openDrawer(),
+                  ),
                 ),
               ),
         actions: [
@@ -146,29 +193,33 @@ class ShellScreen extends ConsumerWidget {
               final readOnly = rules.targetsReadOnly;
               final bg = readOnly ? Colors.orange.shade100 : Colors.green.shade100;
               final fg = readOnly ? Colors.orange.shade800 : Colors.green.shade800;
-              final label = readOnly ? 'Read-only (no writes to marketplaces)' : 'Live writes enabled';
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: bg,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        readOnly ? Icons.visibility_off : Icons.play_circle_outline,
-                        size: 16,
-                        color: fg,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        label,
-                        style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w600),
-                      ),
-                    ],
+              final l10n = ref.watch(appLocalizationsProvider);
+              final label = readOnly ? l10n.readOnlyLabel : l10n.liveWritesLabel;
+              return Tooltip(
+                message: readOnly ? l10n.readOnlyTooltip : l10n.liveWritesTooltip,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: bg,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          readOnly ? Icons.visibility_off : Icons.play_circle_outline,
+                          size: 16,
+                          color: fg,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          label,
+                          style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -176,10 +227,33 @@ class ShellScreen extends ConsumerWidget {
             loading: () => const SizedBox.shrink(),
             error: (_, _) => const SizedBox.shrink(),
           ),
-          IconButton(
-            icon: const Icon(Icons.lock_outline),
-            tooltip: 'Lock app',
-            onPressed: () => _lockApp(context, ref),
+          Tooltip(
+            message: ref.watch(appLocalizationsProvider).searchTooltip,
+            child: IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () => showCommandPalette(context, ref),
+            ),
+          ),
+          Tooltip(
+            message: ref.watch(appLocalizationsProvider).helpTooltip,
+            child: IconButton(
+              icon: const Icon(Icons.help_outline),
+              onPressed: () => showCommandPalette(context, ref),
+            ),
+          ),
+          Tooltip(
+            message: ref.watch(appLocalizationsProvider).jumpToOrderTooltip,
+            child: IconButton(
+              icon: const Icon(Icons.pin_drop_outlined),
+              onPressed: () => showJumpToOrderDialog(context, ref),
+            ),
+          ),
+          Tooltip(
+            message: 'Lock the app; you will need to re-enter the password to continue',
+            child: IconButton(
+              icon: const Icon(Icons.lock_outline),
+              onPressed: () => _lockApp(context, ref),
+            ),
           ),
         ],
       ),
@@ -213,30 +287,46 @@ class ShellScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  _buildNavItems(context),
+                  _buildNavItems(context, ref),
                 ],
               ),
             ),
-      body: useRail
-          ? Row(
-              children: [
-                NavigationRail(
-                  extended: width >= 800,
-                  destinations: [
-                    for (var i = 0; i < _routes.length; i++)
-                      NavigationRailDestination(
-                        icon: Icon(_icons[i]),
-                        label: Text(_labels[i]),
-                      ),
+      body: Shortcuts(
+        shortcuts: {
+          LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyK):
+              const _OpenCommandPaletteIntent(),
+        },
+        child: Actions(
+          actions: {
+            _OpenCommandPaletteIntent: CallbackAction<_OpenCommandPaletteIntent>(
+              onInvoke: (_) {
+                showCommandPalette(context, ref);
+                return null;
+              },
+            ),
+          },
+          child: useRail
+              ? Row(
+                  children: [
+                    NavigationRail(
+                      extended: width >= 800,
+                      destinations: [
+                        for (var i = 0; i < _routes.length; i++)
+                          NavigationRailDestination(
+                            icon: Icon(_icons[i]),
+                            label: Text(_labels(ref)[i]),
+                          ),
+                      ],
+                      selectedIndex: _selectedIndex(currentPath),
+                      onDestinationSelected: (i) => context.go(_routes[i]),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(child: child),
                   ],
-                  selectedIndex: _selectedIndex(currentPath),
-                  onDestinationSelected: (i) => context.go(_routes[i]),
-                ),
-                const VerticalDivider(width: 1),
-                Expanded(child: child),
-              ],
-            )
-          : child,
+                )
+              : child,
+        ),
+      ),
     );
   }
 
@@ -244,4 +334,8 @@ class ShellScreen extends ConsumerWidget {
     final i = _routes.indexOf(path);
     return i >= 0 ? i : 0;
   }
+}
+
+class _OpenCommandPaletteIntent extends Intent {
+  const _OpenCommandPaletteIntent();
 }

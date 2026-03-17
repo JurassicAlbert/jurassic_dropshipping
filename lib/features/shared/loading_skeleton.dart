@@ -8,6 +8,8 @@ class LoadingSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.surfaceContainerHighest;
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: count,
       padding: const EdgeInsets.all(16),
       itemBuilder: (_, _) => Padding(

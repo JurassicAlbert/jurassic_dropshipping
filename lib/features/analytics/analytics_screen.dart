@@ -7,6 +7,8 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/features/analytics/analytics_engine.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
@@ -56,6 +58,11 @@ class AnalyticsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const ScreenHelpSection(
+                  description: ScreenHelpTexts.analytics,
+                  howToUse: 'How to use: Pull to refresh to reload data. Scroll to see KPIs, profit by platform, and returns analysis.',
+                ),
+                const SizedBox(height: 8),
                 Text(
                   'Analytics',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(

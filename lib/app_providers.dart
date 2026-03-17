@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter/material.dart' show Locale, ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/services/auth_service.dart';
@@ -83,6 +83,8 @@ import 'package:jurassic_dropshipping/services/targets/allegro_client.dart';
 import 'package:jurassic_dropshipping/services/targets/allegro_target_platform.dart';
 import 'package:jurassic_dropshipping/services/targets/temu_seller_client.dart';
 import 'package:jurassic_dropshipping/services/targets/temu_target_platform.dart';
+import 'package:jurassic_dropshipping/services/locale_service.dart';
+import 'package:jurassic_dropshipping/l10n/app_localizations.dart';
 
 /// Feature flag keys (stored in DB; when missing, default is false).
 const String kFeatureFlagTemuTarget = 'temu_target';
@@ -98,6 +100,29 @@ final featureFlagsProvider = FutureProvider<Map<String, bool>>((ref) async {
 });
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
+
+final localeServiceProvider = Provider<LocaleService>((ref) => LocaleService());
+final localeProvider = AsyncNotifierProvider<LocaleNotifier, Locale>(LocaleNotifier.new);
+
+class LocaleNotifier extends AsyncNotifier<Locale> {
+  @override
+  Future<Locale> build() async {
+    return ref.read(localeServiceProvider).getLocale();
+  }
+
+  Future<void> setLocale(Locale l) async {
+    final code = l.languageCode == 'en' ? 'en' : 'pl';
+    final locale = Locale(code);
+    await ref.read(localeServiceProvider).setLocale(locale);
+    state = AsyncData(locale);
+  }
+}
+
+/// Localized strings for the current locale. Use after [localeProvider] is loaded.
+final appLocalizationsProvider = Provider<AppLocalizations>((ref) {
+  final locale = ref.watch(localeProvider).valueOrNull ?? AppLocalizations.defaultLocale;
+  return AppLocalizations(locale);
+});
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
@@ -303,6 +328,11 @@ final observabilityMetricsProvider = Provider<ObservabilityMetrics>((ref) => Obs
 
 /// Phase 30: optional in-memory catalog cache (product/listing/offer). Reduces DB reads; invalidated on catalog_event.
 final catalogCacheProvider = Provider<CatalogCache>((ref) => CatalogCache());
+
+/// Pending background job count for dashboard system status.
+final pendingJobCountProvider = FutureProvider<int>((ref) async {
+  return ref.read(backgroundJobRepositoryProvider).countPending();
+});
 
 /// Snapshot of observability metrics; watch [observabilitySnapshotVersionProvider] and increment to refresh.
 final observabilitySnapshotVersionProvider = StateProvider<int>((ref) => 0);

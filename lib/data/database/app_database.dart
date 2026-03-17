@@ -79,6 +79,10 @@ class Orders extends Table {
   RealColumn get riskScore => real().nullable()();
   /// Phase 16: JSON array of factor names (e.g. highValue, newCustomer).
   TextColumn get riskFactorsJson => text().nullable()();
+  /// Buyer message / parcel comment (e.g. for warehouse). From Allegro when API provides it.
+  TextColumn get buyerMessage => text().nullable()();
+  /// Delivery method name (e.g. InPost Locker, to address). From Allegro when API provides it.
+  TextColumn get deliveryMethodName => text().nullable()();
 }
 
 @DataClassName('DecisionLogRow')
@@ -178,6 +182,12 @@ class Suppliers extends Table {
   TextColumn get warehouseEmail => text().nullable()();
   TextColumn get feedSource => text().nullable()();
   TextColumn get shopUrl => text().nullable()();
+  /// Regulations / T&C URL (e.g. supplier terms, country rules). Shown in supplier detail.
+  TextColumn get regulationsUrl => text().nullable()();
+  /// Terms and conditions URL.
+  TextColumn get termsUrl => text().nullable()();
+  /// Return policy document URL.
+  TextColumn get returnPolicyUrl => text().nullable()();
 }
 
 @DataClassName('SupplierOfferRow')
@@ -435,6 +445,93 @@ class StockState extends Table {
   DateTimeColumn get lastUpdatedAt => dateTime()();
 }
 
+/// Phase 37: Product matching groups (deduplication + supplier comparison + pricing optimization).
+@DataClassName('ProductGroupRow')
+class ProductGroups extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  /// Stable group id (hash-like string) used across runs.
+  TextColumn get groupId => text()();
+  /// Canonical product (local product id) representing the group.
+  TextColumn get canonicalProductId => text()();
+  /// EAN/GTIN if known (normalized).
+  TextColumn get ean => text().nullable()();
+  /// Supplier SKU / model if known (normalized).
+  TextColumn get sku => text().nullable()();
+  /// Normalized title for search/debug.
+  TextColumn get titleNormalized => text().nullable()();
+  /// Hash of canonical attributes used for change detection.
+  TextColumn get attributesHash => text().nullable()();
+  /// Hash of canonical images (placeholder-friendly; may be null until implemented).
+  TextColumn get imageHash => text().nullable()();
+  /// Matcher version so we can recompute groups deterministically.
+  IntColumn get matchVersion => integer().withDefault(const Constant(1))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+}
+
+@DataClassName('ProductGroupMemberRow')
+class ProductGroupMembers extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get groupId => text()();
+  /// Local product id that belongs to this group.
+  TextColumn get productId => text()();
+  /// Match confidence 0..1
+  RealColumn get confidence => real().withDefault(const Constant(0.0))();
+  /// Deterministic reason (ean|sku|title|attributes|image|mixed).
+  TextColumn get matchedBy => text().withDefault(const Constant('unknown'))();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
+/// Phase 37: Hash-based change detection and cached intelligence outputs per product.
+@DataClassName('ProductIntelligenceStateRow')
+class ProductIntelligenceStates extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get productId => text()();
+  /// Deterministic content hash for skip-unchanged (based on normalized title/desc/attrs/images/variants).
+  TextColumn get contentHash => text()();
+  /// Last computed group id (if matched).
+  TextColumn get groupId => text().nullable()();
+  RealColumn get qualityScore => real().nullable()();
+  RealColumn get returnRiskScore => real().nullable()();
+  /// Competition level (low|medium|high) based on group supplier count + price variance.
+  TextColumn get competitionLevel => text().nullable()();
+  TextColumn get debugJson => text().nullable()();
+  DateTimeColumn get lastProcessedAt => dateTime()();
+}
+
+/// Phase 37: Supplier switching log (deterministic + explainable).
+@DataClassName('SupplierSwitchEventRow')
+class SupplierSwitchEvents extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get groupId => text()();
+  TextColumn get fromSupplierId => text().nullable()();
+  TextColumn get toSupplierId => text()();
+  TextColumn get reason => text()();
+  RealColumn get marginBeforePercent => real().nullable()();
+  RealColumn get marginAfterPercent => real().nullable()();
+  TextColumn get listingId => text().nullable()();
+  TextColumn get orderId => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+}
+
+/// Phase 37: Auto-pausing decisions log (soft/hard + recovery).
+@DataClassName('ListingPauseEventRow')
+class ListingPauseEvents extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get tenantId => integer().withDefault(const Constant(1))();
+  TextColumn get listingId => text()();
+  /// soft|hard
+  TextColumn get pauseLevel => text()();
+  TextColumn get reason => text()();
+  TextColumn get metricsJson => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get recoveredAt => dateTime().nullable()();
+}
+
 @DriftDatabase(tables: [
   Products,
   Listings,
@@ -460,6 +557,11 @@ class StockState extends Table {
   ListingHealthMetrics,
   CustomerMetrics,
   StockState,
+  ProductGroups,
+  ProductGroupMembers,
+  ProductIntelligenceStates,
+  SupplierSwitchEvents,
+  ListingPauseEvents,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(storage.openAppDatabaseConnection());
@@ -468,7 +570,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 34;
+  int get schemaVersion => 37;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -652,6 +754,27 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 34) {
         await m.addColumn(userRulesTable, userRulesTable.priceRefreshIntervalMinutesBySourceJson);
+      }
+      if (from < 35) {
+        await m.addColumn(suppliers, suppliers.regulationsUrl);
+        await m.addColumn(suppliers, suppliers.termsUrl);
+        await m.addColumn(suppliers, suppliers.returnPolicyUrl);
+      }
+      if (from < 36) {
+        await m.addColumn(orders, orders.buyerMessage);
+        await m.addColumn(orders, orders.deliveryMethodName);
+      }
+      if (from < 37) {
+        // v36 -> v37: product intelligence pipeline persistence tables (matching, scoring, switching, pausing).
+        await m.createTable(productGroups);
+        await m.createTable(productGroupMembers);
+        await m.createTable(productIntelligenceStates);
+        await m.createTable(supplierSwitchEvents);
+        await m.createTable(listingPauseEvents);
+        await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_product_groups_group_id ON product_groups (tenant_id, group_id)');
+        await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_product_intel_product_id ON product_intelligence_states (tenant_id, product_id)');
+        await customStatement('CREATE INDEX IF NOT EXISTS idx_product_group_members_gid ON product_group_members (tenant_id, group_id)');
+        await customStatement('CREATE INDEX IF NOT EXISTS idx_pause_events_listing_id ON listing_pause_events (tenant_id, listing_id)');
       }
     },
   );

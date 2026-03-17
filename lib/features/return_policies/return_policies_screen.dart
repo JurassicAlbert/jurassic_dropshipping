@@ -4,7 +4,10 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/domain/post_order/supplier_return_policy.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
+import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 
 /// Supplier return policies (Phase 11). View and edit policies per supplier.
 class ReturnPoliciesScreen extends ConsumerStatefulWidget {
@@ -27,7 +30,15 @@ class _ReturnPoliciesScreenState extends ConsumerState<ReturnPoliciesScreen> {
       ),
       data: (policies) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: ScreenHelpSection(
+                description: ScreenHelpTexts.returnPolicies,
+                howToUse: 'How to use: Tap a policy to edit, or "Add policy" to create one per supplier.',
+              ),
+            ),
             if (policies.isEmpty)
               const Expanded(
                 child: EmptyState(
@@ -52,10 +63,23 @@ class _ReturnPoliciesScreenState extends ConsumerState<ReturnPoliciesScreen> {
               ),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: FilledButton.icon(
-                onPressed: () => _openPolicyDialog(context, ref),
-                icon: const Icon(Icons.add),
-                label: const Text('Add policy'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Tooltip(
+                    message: 'Create a new return policy for a supplier (return window, restocking fee, RMA).',
+                    child: FilledButton.icon(
+                      onPressed: () => _openPolicyDialog(context, ref),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add policy'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InfoIcon(
+                    tooltip: 'Add one policy per supplier. It defines return window, restocking fee, who pays return shipping, and RMA rules. '
+                        'The Returns screen uses this when you click "Compute routing" to suggest where a return should go.',
+                  ),
+                ],
               ),
             ),
           ],

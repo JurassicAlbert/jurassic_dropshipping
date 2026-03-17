@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
@@ -8,6 +9,10 @@ import 'package:jurassic_dropshipping/domain/post_order/post_order_lifecycle_eng
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/marketplace_names.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 import 'package:jurassic_dropshipping/features/shared/search_filter_bar.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
@@ -85,6 +90,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           final inventoryMapAsync = ref.watch(orderInventoryMapProvider(inventoryKey));
           return Column(
             children: [
+              const ScreenHelpSection(
+              description: ScreenHelpTexts.orders,
+              howToUse: 'How to use: Search by order ID or tracking. Use "Backfill lifecycle" to sync state from marketplace. Tap an order to see details.',
+            ),
               SearchFilterBar(
                 controller: _searchController,
                 onChanged: (_) => setState(() {}),
@@ -111,10 +120,20 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: OutlinedButton.icon(
-                  onPressed: filtered.isEmpty ? null : () => _runBackfillLifecycle(context),
-                  icon: const Icon(Icons.refresh, size: 18),
-                  label: const Text('Backfill lifecycle'),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: filtered.isEmpty ? null : () => _runBackfillLifecycle(context),
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Backfill lifecycle'),
+                    ),
+                    const SizedBox(width: 4),
+                    InfoIcon(
+                      tooltip: 'Sync order status from the marketplace (e.g. Shipped, Delivered, Cancelled). '
+                          'Use this when you want the app to match what the marketplace shows.',
+                    ),
+                  ],
                 ),
               ),
               Expanded(
@@ -136,6 +155,16 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                               title: Row(
                                 children: [
                                   Expanded(child: Text(o.targetOrderId)),
+                                  IconButton(
+                                    icon: const Icon(Icons.copy, size: 18),
+                                    tooltip: 'Copy order ID',
+                                    onPressed: () {
+                                      Clipboard.setData(ClipboardData(text: o.targetOrderId));
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Order ID copied')),
+                                      );
+                                    },
+                                  ),
                                   _statusChip(o.status),
                                 ],
                               ),
@@ -143,10 +172,29 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
+                                    '${marketplaceDisplayName(o.targetPlatformId)} · '
                                     'Sell: ${o.sellingPrice.toStringAsFixed(2)} · '
                                     'Cost: ${o.sourceCost.toStringAsFixed(2)} · '
                                     'Profit: ${profit.toStringAsFixed(2)} PLN',
                                   ),
+                                  if (o.lifecycleState != null && o.lifecycleState!.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Text(
+                                        'Lifecycle: ${_lifecycleLabel(o.lifecycleState!)}',
+                                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                  if (o.queuedForCapital)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Chip(
+                                        label: const Text('Capital locked: YES'),
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        padding: EdgeInsets.zero,
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    ),
                                   if (snap != null)
                                     Padding(
                                       padding: const EdgeInsets.only(top: 2),
@@ -154,20 +202,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                         'Available to sell: ${snap.availableToSell}'
                                         '${snap.supplierStockUnknown || snap.marketplaceStockUnknown ? ' (partial)' : ''}',
                                         style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.tertiary),
-                                      ),
-                                    ),
-                                  if (o.queuedForCapital)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 2),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.schedule, size: 14, color: Theme.of(context).colorScheme.tertiary),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            'Queued for capital',
-                                            style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.w500),
-                                          ),
-                                        ],
                                       ),
                                     ),
                                   if (o.riskScore != null)
@@ -179,11 +213,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                     Text(
                                       'Financial: ${o.financialState!.replaceAll('_', ' ')}',
                                       style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.secondary),
-                                    ),
-                                  if (o.lifecycleState != null && o.lifecycleState!.isNotEmpty)
-                                    Text(
-                                      'Lifecycle: ${o.lifecycleState}',
-                                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.primary),
                                     ),
                                   TextButton.icon(
                                     onPressed: () => _showSetLifecycleDialog(context, o),
@@ -209,6 +238,19 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                     Text(
                                       'Delivery: ${_formatDate(o.promisedDeliveryMin)} – ${_formatDate(o.promisedDeliveryMax)}',
                                       style: const TextStyle(fontSize: 12),
+                                    ),
+                                  if (o.deliveryMethodName != null && o.deliveryMethodName!.isNotEmpty)
+                                    Text(
+                                      'Delivery method: ${o.deliveryMethodName}',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  if (o.buyerMessage != null && o.buyerMessage!.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Text(
+                                        'Buyer message: ${o.buyerMessage}',
+                                        style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.primary),
+                                      ),
                                     ),
                                   if ((o.status == OrderStatus.failed || o.status == OrderStatus.failedOutOfStock) &&
                                       o.decisionLogId != null)
@@ -271,6 +313,25 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   String _formatDate(DateTime? dt) {
     if (dt == null) return '?';
     return '${dt.day}/${dt.month}/${dt.year}';
+  }
+
+  static String _lifecycleLabel(String state) {
+    const labels = {
+      'created': 'Created',
+      'pendingApproval': 'Pending approval',
+      'approved': 'Approved',
+      'sentToSupplier': 'Sent to supplier',
+      'shipped': 'Shipped',
+      'delivered': 'Delivered',
+      'returnRequested': 'Return requested',
+      'returnApproved': 'Return approved',
+      'returned': 'Returned',
+      'complaintOpened': 'Incident opened',
+      'refunded': 'Refunded',
+      'failed': 'Failed',
+      'cancelled': 'Cancelled',
+    };
+    return labels[state] ?? state;
   }
 
   Widget _statusChip(OrderStatus status) {

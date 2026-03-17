@@ -26,6 +26,9 @@ class SupplierRepository {
       warehouseEmail: row.warehouseEmail,
       feedSource: row.feedSource,
       shopUrl: row.shopUrl,
+      regulationsUrl: row.regulationsUrl,
+      termsUrl: row.termsUrl,
+      returnPolicyUrl: row.returnPolicyUrl,
     );
   }
 
@@ -65,6 +68,9 @@ class SupplierRepository {
         warehouseEmail: Value(supplier.warehouseEmail),
         feedSource: Value(supplier.feedSource),
         shopUrl: Value(supplier.shopUrl),
+        regulationsUrl: Value(supplier.regulationsUrl),
+        termsUrl: Value(supplier.termsUrl),
+        returnPolicyUrl: Value(supplier.returnPolicyUrl),
       ));
     } else {
       await _db.into(_db.suppliers).insert(SuppliersCompanion.insert(
@@ -86,6 +92,9 @@ class SupplierRepository {
         warehouseEmail: Value(supplier.warehouseEmail),
         feedSource: Value(supplier.feedSource),
         shopUrl: Value(supplier.shopUrl),
+        regulationsUrl: Value(supplier.regulationsUrl),
+        termsUrl: Value(supplier.termsUrl),
+        returnPolicyUrl: Value(supplier.returnPolicyUrl),
       ));
     }
   }

@@ -42,6 +42,8 @@ class OrderRepository {
       queuedForCapital: row.queuedForCapital,
       riskScore: row.riskScore,
       riskFactorsJson: row.riskFactorsJson,
+      buyerMessage: row.buyerMessage,
+      deliveryMethodName: row.deliveryMethodName,
     );
   }
 
@@ -145,6 +147,8 @@ class OrderRepository {
         queuedForCapital: Value(order.queuedForCapital),
         riskScore: Value(order.riskScore),
         riskFactorsJson: Value(order.riskFactorsJson),
+        buyerMessage: Value(order.buyerMessage),
+        deliveryMethodName: Value(order.deliveryMethodName),
       ),
     );
   }

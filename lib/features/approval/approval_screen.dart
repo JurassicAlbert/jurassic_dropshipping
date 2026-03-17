@@ -4,9 +4,13 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
+import 'package:jurassic_dropshipping/features/shared/section_header.dart';
 
 class ApprovalScreen extends ConsumerWidget {
   const ApprovalScreen({super.key});
@@ -23,12 +27,23 @@ class ApprovalScreen extends ConsumerWidget {
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Pending listings', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
+            SectionHeader(
+              title: 'Approval Queue',
+              icon: Icons.pending_actions,
+              infoTooltip: 'Items waiting for your decision. Listings: Approve to publish on the marketplace, Reject to cancel or set back to draft. '
+                  'Orders: Approve to send the order to the supplier, Reject to cancel on the marketplace.',
+            ),
+            const ScreenHelpSection(
+            description: ScreenHelpTexts.approval,
+            howToUse: 'How to use: Approve to publish a listing or place an order with the supplier. Reject to cancel or set back to draft.',
+          ),
+            const SizedBox(height: AppSpacing.sectionGap),
+            const SectionHeader(title: 'Pending listings', icon: Icons.inventory_2),
+            const SizedBox(height: AppSpacing.sm),
             pendingListings.when(
               data: (listings) => listings.isEmpty
                   ? const EmptyState(
@@ -106,15 +121,21 @@ class _ListingApprovalTile extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextButton(
-              onPressed: () async {
-                await listingRepo.updateStatus(listing.id, ListingStatus.draft);
-                ref.invalidate(pendingListingsProvider);
-                ref.invalidate(listingsProvider);
-              },
-              child: const Text('Reject'),
+            Tooltip(
+              message: 'Set listing back to draft; it will not be published.',
+              child: TextButton(
+                style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+                onPressed: () async {
+                  await listingRepo.updateStatus(listing.id, ListingStatus.draft);
+                  ref.invalidate(pendingListingsProvider);
+                  ref.invalidate(listingsProvider);
+                },
+                child: const Text('Reject'),
+              ),
             ),
-            FilledButton(
+            Tooltip(
+              message: 'Publish this listing to the target marketplace.',
+              child: FilledButton(
               onPressed: targets.any((t) => t.id == listing.targetPlatformId)
                   ? () async {
                       try {
@@ -160,6 +181,7 @@ class _ListingApprovalTile extends ConsumerWidget {
                   : null,
               child: const Text('Approve'),
             ),
+            ),
           ],
         ),
       ),
@@ -185,6 +207,10 @@ class _OrderApprovalTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('${order.sellingPrice.toStringAsFixed(2)} PLN · ${order.customerAddress.name}'),
+            if (order.deliveryMethodName != null && order.deliveryMethodName!.isNotEmpty)
+              Text('Delivery: ${order.deliveryMethodName}', style: Theme.of(context).textTheme.bodySmall),
+            if (order.buyerMessage != null && order.buyerMessage!.isNotEmpty)
+              Text('Message: ${order.buyerMessage}', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)),
             stockAsync.when(
               data: (stock) => stock != null
                   ? Text(
@@ -202,35 +228,60 @@ class _OrderApprovalTile extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextButton(
-              onPressed: () async {
-                final ok = await orderCancellation.cancelOrder(order);
-                ref.invalidate(pendingOrdersProvider);
-                ref.invalidate(ordersProvider);
-                if (context.mounted && !ok) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Could not cancel on marketplace. Please cancel the order manually on the marketplace.',
+            Tooltip(
+              message: 'Cancel the order on the marketplace.',
+              child: TextButton(
+                style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Reject order?'),
+                      content: const Text(
+                        'This will cancel the order on the marketplace. The customer may be notified. This cannot be undone.',
                       ),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                        FilledButton(
+                          style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Reject & cancel'),
+                        ),
+                      ],
                     ),
                   );
-                }
-              },
-              child: const Text('Reject'),
-            ),
-            FilledButton(
-              onPressed: () async {
-                try {
-                  await fulfillment.fulfillOrder(order);
+                  if (confirmed != true || !context.mounted) return;
+                  final ok = await orderCancellation.cancelOrder(order);
                   ref.invalidate(pendingOrdersProvider);
                   ref.invalidate(ordersProvider);
-                  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order placed.')));
-                } catch (e) {
-                  if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
-                }
-              },
-              child: const Text('Approve & Fulfill'),
+                  if (context.mounted && !ok) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Could not cancel on marketplace. Please cancel the order manually on the marketplace.',
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Reject'),
+              ),
+            ),
+            Tooltip(
+              message: 'Place the order with the supplier and enqueue fulfillment.',
+              child: FilledButton(
+                onPressed: () async {
+                  try {
+                    await fulfillment.fulfillOrder(order);
+                    ref.invalidate(pendingOrdersProvider);
+                    ref.invalidate(ordersProvider);
+                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order placed.')));
+                  } catch (e) {
+                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                  }
+                },
+                child: const Text('Approve & Fulfill'),
+              ),
             ),
           ],
         ),

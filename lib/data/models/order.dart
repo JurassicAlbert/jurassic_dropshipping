@@ -79,6 +79,10 @@ class Order with _$Order {
     double? riskScore,
     /// Phase 16: JSON array of factor names.
     String? riskFactorsJson,
+    /// Buyer message / parcel comment (e.g. for warehouse). From Allegro when API provides it.
+    String? buyerMessage,
+    /// Delivery method name (e.g. InPost Locker). From Allegro when API provides it.
+    String? deliveryMethodName,
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);

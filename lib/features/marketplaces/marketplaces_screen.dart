@@ -4,6 +4,8 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 
 /// Known marketplace display names.
 const _marketplaceNames = <String, String>{
@@ -58,62 +60,78 @@ class MarketplacesScreen extends ConsumerWidget {
             );
           }
 
-          return ListView.builder(
-            itemCount: sortedIds.length,
-            itemBuilder: (_, i) {
-              final platformId = sortedIds[i];
-              final stats = byPlatform[platformId];
-              final isConnected = registeredIds.contains(platformId);
-              final displayName = _marketplaceNames[platformId] ?? platformId;
-              final platformAccounts = accountsByPlatform[platformId];
-
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: ListTile(
-                  leading: const Icon(Icons.public),
-                  title: Row(
-                    children: [
-                      Text(displayName),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: isConnected ? Colors.green.shade100 : Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          isConnected ? 'Connected' : 'Not connected',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isConnected ? Colors.green.shade800 : Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (stats != null)
-                        Text(
-                          'Orders: ${stats.count} · Revenue: ${stats.revenue.toStringAsFixed(2)} PLN · Profit: ${stats.profit.toStringAsFixed(2)} PLN',
-                        )
-                      else
-                        const Text('No orders yet'),
-                      if (platformAccounts != null && platformAccounts.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            'Accounts: ${platformAccounts.join(', ')}',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                          ),
-                        ),
-                    ],
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverToBoxAdapter(
+                  child: const ScreenHelpSection(
+                    description: ScreenHelpTexts.marketplaces,
+                    howToUse: 'How to use: Pull to refresh. Connect or manage marketplaces in Settings.',
                   ),
                 ),
-              );
-            },
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                sliver: SliverList.builder(
+                  itemCount: sortedIds.length,
+                  itemBuilder: (_, i) {
+                    final platformId = sortedIds[i];
+                    final stats = byPlatform[platformId];
+                    final isConnected = registeredIds.contains(platformId);
+                    final displayName = _marketplaceNames[platformId] ?? platformId;
+                    final platformAccounts = accountsByPlatform[platformId];
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                      child: ListTile(
+                        leading: const Icon(Icons.public),
+                        title: Row(
+                          children: [
+                            Text(displayName),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isConnected ? Colors.green.shade100 : Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                isConnected ? 'Connected' : 'Not connected',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isConnected ? Colors.green.shade800 : Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (stats != null)
+                              Text(
+                                'Orders: ${stats.count} · Revenue: ${stats.revenue.toStringAsFixed(2)} PLN · Profit: ${stats.profit.toStringAsFixed(2)} PLN',
+                              )
+                            else
+                              const Text('No orders yet'),
+                            if (platformAccounts != null && platformAccounts.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  'Accounts: ${platformAccounts.join(', ')}',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
         loading: () => const LoadingSkeleton(),

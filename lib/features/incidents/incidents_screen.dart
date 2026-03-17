@@ -8,6 +8,9 @@ import 'package:jurassic_dropshipping/domain/post_order/incident_record.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
+import 'package:jurassic_dropshipping/features/shared/search_filter_bar.dart';
 
 /// Incidents dashboard (Phase 11). Lists incident records; create new or enqueue process job.
 class IncidentsScreen extends ConsumerStatefulWidget {
@@ -21,6 +24,31 @@ class IncidentsScreen extends ConsumerStatefulWidget {
 }
 
 class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _statusFilter = 'all';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<IncidentRecord> _applyFilters(List<IncidentRecord> incidents) {
+    var list = widget.filterOrderId != null
+        ? incidents.where((r) => r.orderId == widget.filterOrderId).toList()
+        : List<IncidentRecord>.from(incidents);
+    final query = _searchController.text.toLowerCase();
+    if (query.isNotEmpty) {
+      list = list.where((r) => r.orderId.toLowerCase().contains(query)).toList();
+    }
+    if (_statusFilter != 'all') {
+      list = list.where((r) {
+        return _statusFilter == 'open' ? r.status == IncidentStatus.open : r.status == IncidentStatus.resolved;
+      }).toList();
+    }
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     final incidentsAsync = ref.watch(incidentsProvider);
@@ -32,9 +60,7 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
         onRetry: () => ref.invalidate(incidentsProvider),
       ),
       data: (incidents) {
-        final filtered = widget.filterOrderId != null
-            ? incidents.where((r) => r.orderId == widget.filterOrderId).toList()
-            : incidents;
+        final filtered = _applyFilters(incidents);
         if (filtered.isEmpty) {
           return Column(
             children: [
@@ -75,6 +101,10 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
         }
         return Column(
           children: [
+            const ScreenHelpSection(
+            description: ScreenHelpTexts.incidents,
+            howToUse: 'How to use: Filter by status or order. Tap an incident to view details and link to the order or decision log.',
+          ),
             if (widget.filterOrderId != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -92,6 +122,22 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
                   ],
                 ),
               ),
+            SearchFilterBar(
+              controller: _searchController,
+              onChanged: (_) => setState(() {}),
+              hintText: 'Search by order ID...',
+              filterChips: [
+                for (final entry in {'all': 'All', 'open': 'Open', 'resolved': 'Resolved'}.entries)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(entry.value),
+                      selected: _statusFilter == entry.key,
+                      onSelected: (_) => setState(() => _statusFilter = entry.key),
+                    ),
+                  ),
+              ],
+            ),
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),

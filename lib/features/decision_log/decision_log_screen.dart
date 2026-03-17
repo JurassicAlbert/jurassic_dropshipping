@@ -5,6 +5,8 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 
 class DecisionLogScreen extends ConsumerWidget {
   const DecisionLogScreen({super.key, this.filterEntityId});
@@ -33,6 +35,15 @@ class DecisionLogScreen extends ConsumerWidget {
           }
           return CustomScrollView(
             slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: const ScreenHelpSection(
+                    description: ScreenHelpTexts.decisionLog,
+                    howToUse: 'How to use: Each entry shows why a listing or order was accepted, rejected or paused. Filter by order from an incident or order detail.',
+                  ),
+                ),
+              ),
               if (filterEntityId != null)
                 SliverToBoxAdapter(
                   child: Padding(

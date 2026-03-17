@@ -2205,6 +2205,28 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _buyerMessageMeta = const VerificationMeta(
+    'buyerMessage',
+  );
+  @override
+  late final GeneratedColumn<String> buyerMessage = GeneratedColumn<String>(
+    'buyer_message',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deliveryMethodNameMeta =
+      const VerificationMeta('deliveryMethodName');
+  @override
+  late final GeneratedColumn<String> deliveryMethodName =
+      GeneratedColumn<String>(
+        'delivery_method_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2232,6 +2254,8 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
     queuedForCapital,
     riskScore,
     riskFactorsJson,
+    buyerMessage,
+    deliveryMethodName,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2455,6 +2479,24 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         ),
       );
     }
+    if (data.containsKey('buyer_message')) {
+      context.handle(
+        _buyerMessageMeta,
+        buyerMessage.isAcceptableOrUnknown(
+          data['buyer_message']!,
+          _buyerMessageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('delivery_method_name')) {
+      context.handle(
+        _deliveryMethodNameMeta,
+        deliveryMethodName.isAcceptableOrUnknown(
+          data['delivery_method_name']!,
+          _deliveryMethodNameMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2564,6 +2606,14 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, OrderRow> {
         DriftSqlType.string,
         data['${effectivePrefix}risk_factors_json'],
       ),
+      buyerMessage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}buyer_message'],
+      ),
+      deliveryMethodName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}delivery_method_name'],
+      ),
     );
   }
 
@@ -2609,6 +2659,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
 
   /// Phase 16: JSON array of factor names (e.g. highValue, newCustomer).
   final String? riskFactorsJson;
+
+  /// Buyer message / parcel comment (e.g. for warehouse). From Allegro when API provides it.
+  final String? buyerMessage;
+
+  /// Delivery method name (e.g. InPost Locker, to address). From Allegro when API provides it.
+  final String? deliveryMethodName;
   const OrderRow({
     required this.id,
     required this.tenantId,
@@ -2635,6 +2691,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     required this.queuedForCapital,
     this.riskScore,
     this.riskFactorsJson,
+    this.buyerMessage,
+    this.deliveryMethodName,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2687,6 +2745,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     }
     if (!nullToAbsent || riskFactorsJson != null) {
       map['risk_factors_json'] = Variable<String>(riskFactorsJson);
+    }
+    if (!nullToAbsent || buyerMessage != null) {
+      map['buyer_message'] = Variable<String>(buyerMessage);
+    }
+    if (!nullToAbsent || deliveryMethodName != null) {
+      map['delivery_method_name'] = Variable<String>(deliveryMethodName);
     }
     return map;
   }
@@ -2742,6 +2806,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       riskFactorsJson: riskFactorsJson == null && nullToAbsent
           ? const Value.absent()
           : Value(riskFactorsJson),
+      buyerMessage: buyerMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(buyerMessage),
+      deliveryMethodName: deliveryMethodName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deliveryMethodName),
     );
   }
 
@@ -2784,6 +2854,10 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       queuedForCapital: serializer.fromJson<bool>(json['queuedForCapital']),
       riskScore: serializer.fromJson<double?>(json['riskScore']),
       riskFactorsJson: serializer.fromJson<String?>(json['riskFactorsJson']),
+      buyerMessage: serializer.fromJson<String?>(json['buyerMessage']),
+      deliveryMethodName: serializer.fromJson<String?>(
+        json['deliveryMethodName'],
+      ),
     );
   }
   @override
@@ -2815,6 +2889,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       'queuedForCapital': serializer.toJson<bool>(queuedForCapital),
       'riskScore': serializer.toJson<double?>(riskScore),
       'riskFactorsJson': serializer.toJson<String?>(riskFactorsJson),
+      'buyerMessage': serializer.toJson<String?>(buyerMessage),
+      'deliveryMethodName': serializer.toJson<String?>(deliveryMethodName),
     };
   }
 
@@ -2844,6 +2920,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     bool? queuedForCapital,
     Value<double?> riskScore = const Value.absent(),
     Value<String?> riskFactorsJson = const Value.absent(),
+    Value<String?> buyerMessage = const Value.absent(),
+    Value<String?> deliveryMethodName = const Value.absent(),
   }) => OrderRow(
     id: id ?? this.id,
     tenantId: tenantId ?? this.tenantId,
@@ -2888,6 +2966,10 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     riskFactorsJson: riskFactorsJson.present
         ? riskFactorsJson.value
         : this.riskFactorsJson,
+    buyerMessage: buyerMessage.present ? buyerMessage.value : this.buyerMessage,
+    deliveryMethodName: deliveryMethodName.present
+        ? deliveryMethodName.value
+        : this.deliveryMethodName,
   );
   OrderRow copyWithCompanion(OrdersCompanion data) {
     return OrderRow(
@@ -2950,6 +3032,12 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
       riskFactorsJson: data.riskFactorsJson.present
           ? data.riskFactorsJson.value
           : this.riskFactorsJson,
+      buyerMessage: data.buyerMessage.present
+          ? data.buyerMessage.value
+          : this.buyerMessage,
+      deliveryMethodName: data.deliveryMethodName.present
+          ? data.deliveryMethodName.value
+          : this.deliveryMethodName,
     );
   }
 
@@ -2980,7 +3068,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
           ..write('financialState: $financialState, ')
           ..write('queuedForCapital: $queuedForCapital, ')
           ..write('riskScore: $riskScore, ')
-          ..write('riskFactorsJson: $riskFactorsJson')
+          ..write('riskFactorsJson: $riskFactorsJson, ')
+          ..write('buyerMessage: $buyerMessage, ')
+          ..write('deliveryMethodName: $deliveryMethodName')
           ..write(')'))
         .toString();
   }
@@ -3012,6 +3102,8 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
     queuedForCapital,
     riskScore,
     riskFactorsJson,
+    buyerMessage,
+    deliveryMethodName,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -3041,7 +3133,9 @@ class OrderRow extends DataClass implements Insertable<OrderRow> {
           other.financialState == this.financialState &&
           other.queuedForCapital == this.queuedForCapital &&
           other.riskScore == this.riskScore &&
-          other.riskFactorsJson == this.riskFactorsJson);
+          other.riskFactorsJson == this.riskFactorsJson &&
+          other.buyerMessage == this.buyerMessage &&
+          other.deliveryMethodName == this.deliveryMethodName);
 }
 
 class OrdersCompanion extends UpdateCompanion<OrderRow> {
@@ -3070,6 +3164,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
   final Value<bool> queuedForCapital;
   final Value<double?> riskScore;
   final Value<String?> riskFactorsJson;
+  final Value<String?> buyerMessage;
+  final Value<String?> deliveryMethodName;
   const OrdersCompanion({
     this.id = const Value.absent(),
     this.tenantId = const Value.absent(),
@@ -3096,6 +3192,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     this.queuedForCapital = const Value.absent(),
     this.riskScore = const Value.absent(),
     this.riskFactorsJson = const Value.absent(),
+    this.buyerMessage = const Value.absent(),
+    this.deliveryMethodName = const Value.absent(),
   });
   OrdersCompanion.insert({
     this.id = const Value.absent(),
@@ -3123,6 +3221,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     this.queuedForCapital = const Value.absent(),
     this.riskScore = const Value.absent(),
     this.riskFactorsJson = const Value.absent(),
+    this.buyerMessage = const Value.absent(),
+    this.deliveryMethodName = const Value.absent(),
   }) : localId = Value(localId),
        listingId = Value(listingId),
        targetOrderId = Value(targetOrderId),
@@ -3158,6 +3258,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     Expression<bool>? queuedForCapital,
     Expression<double>? riskScore,
     Expression<String>? riskFactorsJson,
+    Expression<String>? buyerMessage,
+    Expression<String>? deliveryMethodName,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3189,6 +3291,9 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
       if (queuedForCapital != null) 'queued_for_capital': queuedForCapital,
       if (riskScore != null) 'risk_score': riskScore,
       if (riskFactorsJson != null) 'risk_factors_json': riskFactorsJson,
+      if (buyerMessage != null) 'buyer_message': buyerMessage,
+      if (deliveryMethodName != null)
+        'delivery_method_name': deliveryMethodName,
     });
   }
 
@@ -3218,6 +3323,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     Value<bool>? queuedForCapital,
     Value<double?>? riskScore,
     Value<String?>? riskFactorsJson,
+    Value<String?>? buyerMessage,
+    Value<String?>? deliveryMethodName,
   }) {
     return OrdersCompanion(
       id: id ?? this.id,
@@ -3245,6 +3352,8 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
       queuedForCapital: queuedForCapital ?? this.queuedForCapital,
       riskScore: riskScore ?? this.riskScore,
       riskFactorsJson: riskFactorsJson ?? this.riskFactorsJson,
+      buyerMessage: buyerMessage ?? this.buyerMessage,
+      deliveryMethodName: deliveryMethodName ?? this.deliveryMethodName,
     );
   }
 
@@ -3334,6 +3443,12 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
     if (riskFactorsJson.present) {
       map['risk_factors_json'] = Variable<String>(riskFactorsJson.value);
     }
+    if (buyerMessage.present) {
+      map['buyer_message'] = Variable<String>(buyerMessage.value);
+    }
+    if (deliveryMethodName.present) {
+      map['delivery_method_name'] = Variable<String>(deliveryMethodName.value);
+    }
     return map;
   }
 
@@ -3364,7 +3479,9 @@ class OrdersCompanion extends UpdateCompanion<OrderRow> {
           ..write('financialState: $financialState, ')
           ..write('queuedForCapital: $queuedForCapital, ')
           ..write('riskScore: $riskScore, ')
-          ..write('riskFactorsJson: $riskFactorsJson')
+          ..write('riskFactorsJson: $riskFactorsJson, ')
+          ..write('buyerMessage: $buyerMessage, ')
+          ..write('deliveryMethodName: $deliveryMethodName')
           ..write(')'))
         .toString();
   }
@@ -6804,6 +6921,39 @@ class $SuppliersTable extends Suppliers
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _regulationsUrlMeta = const VerificationMeta(
+    'regulationsUrl',
+  );
+  @override
+  late final GeneratedColumn<String> regulationsUrl = GeneratedColumn<String>(
+    'regulations_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _termsUrlMeta = const VerificationMeta(
+    'termsUrl',
+  );
+  @override
+  late final GeneratedColumn<String> termsUrl = GeneratedColumn<String>(
+    'terms_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnPolicyUrlMeta = const VerificationMeta(
+    'returnPolicyUrl',
+  );
+  @override
+  late final GeneratedColumn<String> returnPolicyUrl = GeneratedColumn<String>(
+    'return_policy_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6825,6 +6975,9 @@ class $SuppliersTable extends Suppliers
     warehouseEmail,
     feedSource,
     shopUrl,
+    regulationsUrl,
+    termsUrl,
+    returnPolicyUrl,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6991,6 +7144,30 @@ class $SuppliersTable extends Suppliers
         shopUrl.isAcceptableOrUnknown(data['shop_url']!, _shopUrlMeta),
       );
     }
+    if (data.containsKey('regulations_url')) {
+      context.handle(
+        _regulationsUrlMeta,
+        regulationsUrl.isAcceptableOrUnknown(
+          data['regulations_url']!,
+          _regulationsUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('terms_url')) {
+      context.handle(
+        _termsUrlMeta,
+        termsUrl.isAcceptableOrUnknown(data['terms_url']!, _termsUrlMeta),
+      );
+    }
+    if (data.containsKey('return_policy_url')) {
+      context.handle(
+        _returnPolicyUrlMeta,
+        returnPolicyUrl.isAcceptableOrUnknown(
+          data['return_policy_url']!,
+          _returnPolicyUrlMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -7076,6 +7253,18 @@ class $SuppliersTable extends Suppliers
         DriftSqlType.string,
         data['${effectivePrefix}shop_url'],
       ),
+      regulationsUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}regulations_url'],
+      ),
+      termsUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}terms_url'],
+      ),
+      returnPolicyUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_policy_url'],
+      ),
     );
   }
 
@@ -7105,6 +7294,15 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
   final String? warehouseEmail;
   final String? feedSource;
   final String? shopUrl;
+
+  /// Regulations / T&C URL (e.g. supplier terms, country rules). Shown in supplier detail.
+  final String? regulationsUrl;
+
+  /// Terms and conditions URL.
+  final String? termsUrl;
+
+  /// Return policy document URL.
+  final String? returnPolicyUrl;
   const SupplierRow({
     required this.id,
     required this.tenantId,
@@ -7125,6 +7323,9 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
     this.warehouseEmail,
     this.feedSource,
     this.shopUrl,
+    this.regulationsUrl,
+    this.termsUrl,
+    this.returnPolicyUrl,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -7173,6 +7374,15 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
     }
     if (!nullToAbsent || shopUrl != null) {
       map['shop_url'] = Variable<String>(shopUrl);
+    }
+    if (!nullToAbsent || regulationsUrl != null) {
+      map['regulations_url'] = Variable<String>(regulationsUrl);
+    }
+    if (!nullToAbsent || termsUrl != null) {
+      map['terms_url'] = Variable<String>(termsUrl);
+    }
+    if (!nullToAbsent || returnPolicyUrl != null) {
+      map['return_policy_url'] = Variable<String>(returnPolicyUrl);
     }
     return map;
   }
@@ -7224,6 +7434,15 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
       shopUrl: shopUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(shopUrl),
+      regulationsUrl: regulationsUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(regulationsUrl),
+      termsUrl: termsUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(termsUrl),
+      returnPolicyUrl: returnPolicyUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnPolicyUrl),
     );
   }
 
@@ -7258,6 +7477,9 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
       warehouseEmail: serializer.fromJson<String?>(json['warehouseEmail']),
       feedSource: serializer.fromJson<String?>(json['feedSource']),
       shopUrl: serializer.fromJson<String?>(json['shopUrl']),
+      regulationsUrl: serializer.fromJson<String?>(json['regulationsUrl']),
+      termsUrl: serializer.fromJson<String?>(json['termsUrl']),
+      returnPolicyUrl: serializer.fromJson<String?>(json['returnPolicyUrl']),
     );
   }
   @override
@@ -7283,6 +7505,9 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
       'warehouseEmail': serializer.toJson<String?>(warehouseEmail),
       'feedSource': serializer.toJson<String?>(feedSource),
       'shopUrl': serializer.toJson<String?>(shopUrl),
+      'regulationsUrl': serializer.toJson<String?>(regulationsUrl),
+      'termsUrl': serializer.toJson<String?>(termsUrl),
+      'returnPolicyUrl': serializer.toJson<String?>(returnPolicyUrl),
     };
   }
 
@@ -7306,6 +7531,9 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
     Value<String?> warehouseEmail = const Value.absent(),
     Value<String?> feedSource = const Value.absent(),
     Value<String?> shopUrl = const Value.absent(),
+    Value<String?> regulationsUrl = const Value.absent(),
+    Value<String?> termsUrl = const Value.absent(),
+    Value<String?> returnPolicyUrl = const Value.absent(),
   }) => SupplierRow(
     id: id ?? this.id,
     tenantId: tenantId ?? this.tenantId,
@@ -7343,6 +7571,13 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
         : this.warehouseEmail,
     feedSource: feedSource.present ? feedSource.value : this.feedSource,
     shopUrl: shopUrl.present ? shopUrl.value : this.shopUrl,
+    regulationsUrl: regulationsUrl.present
+        ? regulationsUrl.value
+        : this.regulationsUrl,
+    termsUrl: termsUrl.present ? termsUrl.value : this.termsUrl,
+    returnPolicyUrl: returnPolicyUrl.present
+        ? returnPolicyUrl.value
+        : this.returnPolicyUrl,
   );
   SupplierRow copyWithCompanion(SuppliersCompanion data) {
     return SupplierRow(
@@ -7393,6 +7628,13 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
           ? data.feedSource.value
           : this.feedSource,
       shopUrl: data.shopUrl.present ? data.shopUrl.value : this.shopUrl,
+      regulationsUrl: data.regulationsUrl.present
+          ? data.regulationsUrl.value
+          : this.regulationsUrl,
+      termsUrl: data.termsUrl.present ? data.termsUrl.value : this.termsUrl,
+      returnPolicyUrl: data.returnPolicyUrl.present
+          ? data.returnPolicyUrl.value
+          : this.returnPolicyUrl,
     );
   }
 
@@ -7417,13 +7659,16 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
           ..write('warehousePhone: $warehousePhone, ')
           ..write('warehouseEmail: $warehouseEmail, ')
           ..write('feedSource: $feedSource, ')
-          ..write('shopUrl: $shopUrl')
+          ..write('shopUrl: $shopUrl, ')
+          ..write('regulationsUrl: $regulationsUrl, ')
+          ..write('termsUrl: $termsUrl, ')
+          ..write('returnPolicyUrl: $returnPolicyUrl')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     tenantId,
     supplierId,
@@ -7443,7 +7688,10 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
     warehouseEmail,
     feedSource,
     shopUrl,
-  );
+    regulationsUrl,
+    termsUrl,
+    returnPolicyUrl,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7466,7 +7714,10 @@ class SupplierRow extends DataClass implements Insertable<SupplierRow> {
           other.warehousePhone == this.warehousePhone &&
           other.warehouseEmail == this.warehouseEmail &&
           other.feedSource == this.feedSource &&
-          other.shopUrl == this.shopUrl);
+          other.shopUrl == this.shopUrl &&
+          other.regulationsUrl == this.regulationsUrl &&
+          other.termsUrl == this.termsUrl &&
+          other.returnPolicyUrl == this.returnPolicyUrl);
 }
 
 class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
@@ -7489,6 +7740,9 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
   final Value<String?> warehouseEmail;
   final Value<String?> feedSource;
   final Value<String?> shopUrl;
+  final Value<String?> regulationsUrl;
+  final Value<String?> termsUrl;
+  final Value<String?> returnPolicyUrl;
   const SuppliersCompanion({
     this.id = const Value.absent(),
     this.tenantId = const Value.absent(),
@@ -7509,6 +7763,9 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     this.warehouseEmail = const Value.absent(),
     this.feedSource = const Value.absent(),
     this.shopUrl = const Value.absent(),
+    this.regulationsUrl = const Value.absent(),
+    this.termsUrl = const Value.absent(),
+    this.returnPolicyUrl = const Value.absent(),
   });
   SuppliersCompanion.insert({
     this.id = const Value.absent(),
@@ -7530,6 +7787,9 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     this.warehouseEmail = const Value.absent(),
     this.feedSource = const Value.absent(),
     this.shopUrl = const Value.absent(),
+    this.regulationsUrl = const Value.absent(),
+    this.termsUrl = const Value.absent(),
+    this.returnPolicyUrl = const Value.absent(),
   }) : supplierId = Value(supplierId),
        name = Value(name),
        platformType = Value(platformType);
@@ -7553,6 +7813,9 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     Expression<String>? warehouseEmail,
     Expression<String>? feedSource,
     Expression<String>? shopUrl,
+    Expression<String>? regulationsUrl,
+    Expression<String>? termsUrl,
+    Expression<String>? returnPolicyUrl,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -7577,6 +7840,9 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
       if (warehouseEmail != null) 'warehouse_email': warehouseEmail,
       if (feedSource != null) 'feed_source': feedSource,
       if (shopUrl != null) 'shop_url': shopUrl,
+      if (regulationsUrl != null) 'regulations_url': regulationsUrl,
+      if (termsUrl != null) 'terms_url': termsUrl,
+      if (returnPolicyUrl != null) 'return_policy_url': returnPolicyUrl,
     });
   }
 
@@ -7600,6 +7866,9 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     Value<String?>? warehouseEmail,
     Value<String?>? feedSource,
     Value<String?>? shopUrl,
+    Value<String?>? regulationsUrl,
+    Value<String?>? termsUrl,
+    Value<String?>? returnPolicyUrl,
   }) {
     return SuppliersCompanion(
       id: id ?? this.id,
@@ -7622,6 +7891,9 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
       warehouseEmail: warehouseEmail ?? this.warehouseEmail,
       feedSource: feedSource ?? this.feedSource,
       shopUrl: shopUrl ?? this.shopUrl,
+      regulationsUrl: regulationsUrl ?? this.regulationsUrl,
+      termsUrl: termsUrl ?? this.termsUrl,
+      returnPolicyUrl: returnPolicyUrl ?? this.returnPolicyUrl,
     );
   }
 
@@ -7689,6 +7961,15 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
     if (shopUrl.present) {
       map['shop_url'] = Variable<String>(shopUrl.value);
     }
+    if (regulationsUrl.present) {
+      map['regulations_url'] = Variable<String>(regulationsUrl.value);
+    }
+    if (termsUrl.present) {
+      map['terms_url'] = Variable<String>(termsUrl.value);
+    }
+    if (returnPolicyUrl.present) {
+      map['return_policy_url'] = Variable<String>(returnPolicyUrl.value);
+    }
     return map;
   }
 
@@ -7713,7 +7994,10 @@ class SuppliersCompanion extends UpdateCompanion<SupplierRow> {
           ..write('warehousePhone: $warehousePhone, ')
           ..write('warehouseEmail: $warehouseEmail, ')
           ..write('feedSource: $feedSource, ')
-          ..write('shopUrl: $shopUrl')
+          ..write('shopUrl: $shopUrl, ')
+          ..write('regulationsUrl: $regulationsUrl, ')
+          ..write('termsUrl: $termsUrl, ')
+          ..write('returnPolicyUrl: $returnPolicyUrl')
           ..write(')'))
         .toString();
   }
@@ -18198,6 +18482,3041 @@ class StockStateCompanion extends UpdateCompanion<StockStateRow> {
   }
 }
 
+class $ProductGroupsTable extends ProductGroups
+    with TableInfo<$ProductGroupsTable, ProductGroupRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProductGroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _tenantIdMeta = const VerificationMeta(
+    'tenantId',
+  );
+  @override
+  late final GeneratedColumn<int> tenantId = GeneratedColumn<int>(
+    'tenant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _canonicalProductIdMeta =
+      const VerificationMeta('canonicalProductId');
+  @override
+  late final GeneratedColumn<String> canonicalProductId =
+      GeneratedColumn<String>(
+        'canonical_product_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _eanMeta = const VerificationMeta('ean');
+  @override
+  late final GeneratedColumn<String> ean = GeneratedColumn<String>(
+    'ean',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _skuMeta = const VerificationMeta('sku');
+  @override
+  late final GeneratedColumn<String> sku = GeneratedColumn<String>(
+    'sku',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _titleNormalizedMeta = const VerificationMeta(
+    'titleNormalized',
+  );
+  @override
+  late final GeneratedColumn<String> titleNormalized = GeneratedColumn<String>(
+    'title_normalized',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _attributesHashMeta = const VerificationMeta(
+    'attributesHash',
+  );
+  @override
+  late final GeneratedColumn<String> attributesHash = GeneratedColumn<String>(
+    'attributes_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imageHashMeta = const VerificationMeta(
+    'imageHash',
+  );
+  @override
+  late final GeneratedColumn<String> imageHash = GeneratedColumn<String>(
+    'image_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _matchVersionMeta = const VerificationMeta(
+    'matchVersion',
+  );
+  @override
+  late final GeneratedColumn<int> matchVersion = GeneratedColumn<int>(
+    'match_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tenantId,
+    groupId,
+    canonicalProductId,
+    ean,
+    sku,
+    titleNormalized,
+    attributesHash,
+    imageHash,
+    matchVersion,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'product_groups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProductGroupRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(
+        _tenantIdMeta,
+        tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta),
+      );
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('canonical_product_id')) {
+      context.handle(
+        _canonicalProductIdMeta,
+        canonicalProductId.isAcceptableOrUnknown(
+          data['canonical_product_id']!,
+          _canonicalProductIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_canonicalProductIdMeta);
+    }
+    if (data.containsKey('ean')) {
+      context.handle(
+        _eanMeta,
+        ean.isAcceptableOrUnknown(data['ean']!, _eanMeta),
+      );
+    }
+    if (data.containsKey('sku')) {
+      context.handle(
+        _skuMeta,
+        sku.isAcceptableOrUnknown(data['sku']!, _skuMeta),
+      );
+    }
+    if (data.containsKey('title_normalized')) {
+      context.handle(
+        _titleNormalizedMeta,
+        titleNormalized.isAcceptableOrUnknown(
+          data['title_normalized']!,
+          _titleNormalizedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('attributes_hash')) {
+      context.handle(
+        _attributesHashMeta,
+        attributesHash.isAcceptableOrUnknown(
+          data['attributes_hash']!,
+          _attributesHashMeta,
+        ),
+      );
+    }
+    if (data.containsKey('image_hash')) {
+      context.handle(
+        _imageHashMeta,
+        imageHash.isAcceptableOrUnknown(data['image_hash']!, _imageHashMeta),
+      );
+    }
+    if (data.containsKey('match_version')) {
+      context.handle(
+        _matchVersionMeta,
+        matchVersion.isAcceptableOrUnknown(
+          data['match_version']!,
+          _matchVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProductGroupRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProductGroupRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      tenantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tenant_id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      canonicalProductId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_product_id'],
+      )!,
+      ean: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ean'],
+      ),
+      sku: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sku'],
+      ),
+      titleNormalized: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title_normalized'],
+      ),
+      attributesHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}attributes_hash'],
+      ),
+      imageHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_hash'],
+      ),
+      matchVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}match_version'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProductGroupsTable createAlias(String alias) {
+    return $ProductGroupsTable(attachedDatabase, alias);
+  }
+}
+
+class ProductGroupRow extends DataClass implements Insertable<ProductGroupRow> {
+  final int id;
+  final int tenantId;
+
+  /// Stable group id (hash-like string) used across runs.
+  final String groupId;
+
+  /// Canonical product (local product id) representing the group.
+  final String canonicalProductId;
+
+  /// EAN/GTIN if known (normalized).
+  final String? ean;
+
+  /// Supplier SKU / model if known (normalized).
+  final String? sku;
+
+  /// Normalized title for search/debug.
+  final String? titleNormalized;
+
+  /// Hash of canonical attributes used for change detection.
+  final String? attributesHash;
+
+  /// Hash of canonical images (placeholder-friendly; may be null until implemented).
+  final String? imageHash;
+
+  /// Matcher version so we can recompute groups deterministically.
+  final int matchVersion;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const ProductGroupRow({
+    required this.id,
+    required this.tenantId,
+    required this.groupId,
+    required this.canonicalProductId,
+    this.ean,
+    this.sku,
+    this.titleNormalized,
+    this.attributesHash,
+    this.imageHash,
+    required this.matchVersion,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['tenant_id'] = Variable<int>(tenantId);
+    map['group_id'] = Variable<String>(groupId);
+    map['canonical_product_id'] = Variable<String>(canonicalProductId);
+    if (!nullToAbsent || ean != null) {
+      map['ean'] = Variable<String>(ean);
+    }
+    if (!nullToAbsent || sku != null) {
+      map['sku'] = Variable<String>(sku);
+    }
+    if (!nullToAbsent || titleNormalized != null) {
+      map['title_normalized'] = Variable<String>(titleNormalized);
+    }
+    if (!nullToAbsent || attributesHash != null) {
+      map['attributes_hash'] = Variable<String>(attributesHash);
+    }
+    if (!nullToAbsent || imageHash != null) {
+      map['image_hash'] = Variable<String>(imageHash);
+    }
+    map['match_version'] = Variable<int>(matchVersion);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ProductGroupsCompanion toCompanion(bool nullToAbsent) {
+    return ProductGroupsCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      groupId: Value(groupId),
+      canonicalProductId: Value(canonicalProductId),
+      ean: ean == null && nullToAbsent ? const Value.absent() : Value(ean),
+      sku: sku == null && nullToAbsent ? const Value.absent() : Value(sku),
+      titleNormalized: titleNormalized == null && nullToAbsent
+          ? const Value.absent()
+          : Value(titleNormalized),
+      attributesHash: attributesHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attributesHash),
+      imageHash: imageHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageHash),
+      matchVersion: Value(matchVersion),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ProductGroupRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProductGroupRow(
+      id: serializer.fromJson<int>(json['id']),
+      tenantId: serializer.fromJson<int>(json['tenantId']),
+      groupId: serializer.fromJson<String>(json['groupId']),
+      canonicalProductId: serializer.fromJson<String>(
+        json['canonicalProductId'],
+      ),
+      ean: serializer.fromJson<String?>(json['ean']),
+      sku: serializer.fromJson<String?>(json['sku']),
+      titleNormalized: serializer.fromJson<String?>(json['titleNormalized']),
+      attributesHash: serializer.fromJson<String?>(json['attributesHash']),
+      imageHash: serializer.fromJson<String?>(json['imageHash']),
+      matchVersion: serializer.fromJson<int>(json['matchVersion']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'tenantId': serializer.toJson<int>(tenantId),
+      'groupId': serializer.toJson<String>(groupId),
+      'canonicalProductId': serializer.toJson<String>(canonicalProductId),
+      'ean': serializer.toJson<String?>(ean),
+      'sku': serializer.toJson<String?>(sku),
+      'titleNormalized': serializer.toJson<String?>(titleNormalized),
+      'attributesHash': serializer.toJson<String?>(attributesHash),
+      'imageHash': serializer.toJson<String?>(imageHash),
+      'matchVersion': serializer.toJson<int>(matchVersion),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ProductGroupRow copyWith({
+    int? id,
+    int? tenantId,
+    String? groupId,
+    String? canonicalProductId,
+    Value<String?> ean = const Value.absent(),
+    Value<String?> sku = const Value.absent(),
+    Value<String?> titleNormalized = const Value.absent(),
+    Value<String?> attributesHash = const Value.absent(),
+    Value<String?> imageHash = const Value.absent(),
+    int? matchVersion,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => ProductGroupRow(
+    id: id ?? this.id,
+    tenantId: tenantId ?? this.tenantId,
+    groupId: groupId ?? this.groupId,
+    canonicalProductId: canonicalProductId ?? this.canonicalProductId,
+    ean: ean.present ? ean.value : this.ean,
+    sku: sku.present ? sku.value : this.sku,
+    titleNormalized: titleNormalized.present
+        ? titleNormalized.value
+        : this.titleNormalized,
+    attributesHash: attributesHash.present
+        ? attributesHash.value
+        : this.attributesHash,
+    imageHash: imageHash.present ? imageHash.value : this.imageHash,
+    matchVersion: matchVersion ?? this.matchVersion,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ProductGroupRow copyWithCompanion(ProductGroupsCompanion data) {
+    return ProductGroupRow(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      canonicalProductId: data.canonicalProductId.present
+          ? data.canonicalProductId.value
+          : this.canonicalProductId,
+      ean: data.ean.present ? data.ean.value : this.ean,
+      sku: data.sku.present ? data.sku.value : this.sku,
+      titleNormalized: data.titleNormalized.present
+          ? data.titleNormalized.value
+          : this.titleNormalized,
+      attributesHash: data.attributesHash.present
+          ? data.attributesHash.value
+          : this.attributesHash,
+      imageHash: data.imageHash.present ? data.imageHash.value : this.imageHash,
+      matchVersion: data.matchVersion.present
+          ? data.matchVersion.value
+          : this.matchVersion,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductGroupRow(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('groupId: $groupId, ')
+          ..write('canonicalProductId: $canonicalProductId, ')
+          ..write('ean: $ean, ')
+          ..write('sku: $sku, ')
+          ..write('titleNormalized: $titleNormalized, ')
+          ..write('attributesHash: $attributesHash, ')
+          ..write('imageHash: $imageHash, ')
+          ..write('matchVersion: $matchVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tenantId,
+    groupId,
+    canonicalProductId,
+    ean,
+    sku,
+    titleNormalized,
+    attributesHash,
+    imageHash,
+    matchVersion,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProductGroupRow &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.groupId == this.groupId &&
+          other.canonicalProductId == this.canonicalProductId &&
+          other.ean == this.ean &&
+          other.sku == this.sku &&
+          other.titleNormalized == this.titleNormalized &&
+          other.attributesHash == this.attributesHash &&
+          other.imageHash == this.imageHash &&
+          other.matchVersion == this.matchVersion &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ProductGroupsCompanion extends UpdateCompanion<ProductGroupRow> {
+  final Value<int> id;
+  final Value<int> tenantId;
+  final Value<String> groupId;
+  final Value<String> canonicalProductId;
+  final Value<String?> ean;
+  final Value<String?> sku;
+  final Value<String?> titleNormalized;
+  final Value<String?> attributesHash;
+  final Value<String?> imageHash;
+  final Value<int> matchVersion;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const ProductGroupsCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.canonicalProductId = const Value.absent(),
+    this.ean = const Value.absent(),
+    this.sku = const Value.absent(),
+    this.titleNormalized = const Value.absent(),
+    this.attributesHash = const Value.absent(),
+    this.imageHash = const Value.absent(),
+    this.matchVersion = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  ProductGroupsCompanion.insert({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    required String groupId,
+    required String canonicalProductId,
+    this.ean = const Value.absent(),
+    this.sku = const Value.absent(),
+    this.titleNormalized = const Value.absent(),
+    this.attributesHash = const Value.absent(),
+    this.imageHash = const Value.absent(),
+    this.matchVersion = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+  }) : groupId = Value(groupId),
+       canonicalProductId = Value(canonicalProductId),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<ProductGroupRow> custom({
+    Expression<int>? id,
+    Expression<int>? tenantId,
+    Expression<String>? groupId,
+    Expression<String>? canonicalProductId,
+    Expression<String>? ean,
+    Expression<String>? sku,
+    Expression<String>? titleNormalized,
+    Expression<String>? attributesHash,
+    Expression<String>? imageHash,
+    Expression<int>? matchVersion,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (groupId != null) 'group_id': groupId,
+      if (canonicalProductId != null)
+        'canonical_product_id': canonicalProductId,
+      if (ean != null) 'ean': ean,
+      if (sku != null) 'sku': sku,
+      if (titleNormalized != null) 'title_normalized': titleNormalized,
+      if (attributesHash != null) 'attributes_hash': attributesHash,
+      if (imageHash != null) 'image_hash': imageHash,
+      if (matchVersion != null) 'match_version': matchVersion,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  ProductGroupsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? tenantId,
+    Value<String>? groupId,
+    Value<String>? canonicalProductId,
+    Value<String?>? ean,
+    Value<String?>? sku,
+    Value<String?>? titleNormalized,
+    Value<String?>? attributesHash,
+    Value<String?>? imageHash,
+    Value<int>? matchVersion,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return ProductGroupsCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      groupId: groupId ?? this.groupId,
+      canonicalProductId: canonicalProductId ?? this.canonicalProductId,
+      ean: ean ?? this.ean,
+      sku: sku ?? this.sku,
+      titleNormalized: titleNormalized ?? this.titleNormalized,
+      attributesHash: attributesHash ?? this.attributesHash,
+      imageHash: imageHash ?? this.imageHash,
+      matchVersion: matchVersion ?? this.matchVersion,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<int>(tenantId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (canonicalProductId.present) {
+      map['canonical_product_id'] = Variable<String>(canonicalProductId.value);
+    }
+    if (ean.present) {
+      map['ean'] = Variable<String>(ean.value);
+    }
+    if (sku.present) {
+      map['sku'] = Variable<String>(sku.value);
+    }
+    if (titleNormalized.present) {
+      map['title_normalized'] = Variable<String>(titleNormalized.value);
+    }
+    if (attributesHash.present) {
+      map['attributes_hash'] = Variable<String>(attributesHash.value);
+    }
+    if (imageHash.present) {
+      map['image_hash'] = Variable<String>(imageHash.value);
+    }
+    if (matchVersion.present) {
+      map['match_version'] = Variable<int>(matchVersion.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductGroupsCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('groupId: $groupId, ')
+          ..write('canonicalProductId: $canonicalProductId, ')
+          ..write('ean: $ean, ')
+          ..write('sku: $sku, ')
+          ..write('titleNormalized: $titleNormalized, ')
+          ..write('attributesHash: $attributesHash, ')
+          ..write('imageHash: $imageHash, ')
+          ..write('matchVersion: $matchVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProductGroupMembersTable extends ProductGroupMembers
+    with TableInfo<$ProductGroupMembersTable, ProductGroupMemberRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProductGroupMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _tenantIdMeta = const VerificationMeta(
+    'tenantId',
+  );
+  @override
+  late final GeneratedColumn<int> tenantId = GeneratedColumn<int>(
+    'tenant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<double> confidence = GeneratedColumn<double>(
+    'confidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _matchedByMeta = const VerificationMeta(
+    'matchedBy',
+  );
+  @override
+  late final GeneratedColumn<String> matchedBy = GeneratedColumn<String>(
+    'matched_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('unknown'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tenantId,
+    groupId,
+    productId,
+    confidence,
+    matchedBy,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'product_group_members';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProductGroupMemberRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(
+        _tenantIdMeta,
+        tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta),
+      );
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
+    if (data.containsKey('matched_by')) {
+      context.handle(
+        _matchedByMeta,
+        matchedBy.isAcceptableOrUnknown(data['matched_by']!, _matchedByMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProductGroupMemberRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProductGroupMemberRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      tenantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tenant_id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}confidence'],
+      )!,
+      matchedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}matched_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProductGroupMembersTable createAlias(String alias) {
+    return $ProductGroupMembersTable(attachedDatabase, alias);
+  }
+}
+
+class ProductGroupMemberRow extends DataClass
+    implements Insertable<ProductGroupMemberRow> {
+  final int id;
+  final int tenantId;
+  final String groupId;
+
+  /// Local product id that belongs to this group.
+  final String productId;
+
+  /// Match confidence 0..1
+  final double confidence;
+
+  /// Deterministic reason (ean|sku|title|attributes|image|mixed).
+  final String matchedBy;
+  final DateTime createdAt;
+  const ProductGroupMemberRow({
+    required this.id,
+    required this.tenantId,
+    required this.groupId,
+    required this.productId,
+    required this.confidence,
+    required this.matchedBy,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['tenant_id'] = Variable<int>(tenantId);
+    map['group_id'] = Variable<String>(groupId);
+    map['product_id'] = Variable<String>(productId);
+    map['confidence'] = Variable<double>(confidence);
+    map['matched_by'] = Variable<String>(matchedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ProductGroupMembersCompanion toCompanion(bool nullToAbsent) {
+    return ProductGroupMembersCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      groupId: Value(groupId),
+      productId: Value(productId),
+      confidence: Value(confidence),
+      matchedBy: Value(matchedBy),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ProductGroupMemberRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProductGroupMemberRow(
+      id: serializer.fromJson<int>(json['id']),
+      tenantId: serializer.fromJson<int>(json['tenantId']),
+      groupId: serializer.fromJson<String>(json['groupId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      confidence: serializer.fromJson<double>(json['confidence']),
+      matchedBy: serializer.fromJson<String>(json['matchedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'tenantId': serializer.toJson<int>(tenantId),
+      'groupId': serializer.toJson<String>(groupId),
+      'productId': serializer.toJson<String>(productId),
+      'confidence': serializer.toJson<double>(confidence),
+      'matchedBy': serializer.toJson<String>(matchedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ProductGroupMemberRow copyWith({
+    int? id,
+    int? tenantId,
+    String? groupId,
+    String? productId,
+    double? confidence,
+    String? matchedBy,
+    DateTime? createdAt,
+  }) => ProductGroupMemberRow(
+    id: id ?? this.id,
+    tenantId: tenantId ?? this.tenantId,
+    groupId: groupId ?? this.groupId,
+    productId: productId ?? this.productId,
+    confidence: confidence ?? this.confidence,
+    matchedBy: matchedBy ?? this.matchedBy,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ProductGroupMemberRow copyWithCompanion(ProductGroupMembersCompanion data) {
+    return ProductGroupMemberRow(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+      matchedBy: data.matchedBy.present ? data.matchedBy.value : this.matchedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductGroupMemberRow(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('groupId: $groupId, ')
+          ..write('productId: $productId, ')
+          ..write('confidence: $confidence, ')
+          ..write('matchedBy: $matchedBy, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tenantId,
+    groupId,
+    productId,
+    confidence,
+    matchedBy,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProductGroupMemberRow &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.groupId == this.groupId &&
+          other.productId == this.productId &&
+          other.confidence == this.confidence &&
+          other.matchedBy == this.matchedBy &&
+          other.createdAt == this.createdAt);
+}
+
+class ProductGroupMembersCompanion
+    extends UpdateCompanion<ProductGroupMemberRow> {
+  final Value<int> id;
+  final Value<int> tenantId;
+  final Value<String> groupId;
+  final Value<String> productId;
+  final Value<double> confidence;
+  final Value<String> matchedBy;
+  final Value<DateTime> createdAt;
+  const ProductGroupMembersCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.matchedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  ProductGroupMembersCompanion.insert({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    required String groupId,
+    required String productId,
+    this.confidence = const Value.absent(),
+    this.matchedBy = const Value.absent(),
+    required DateTime createdAt,
+  }) : groupId = Value(groupId),
+       productId = Value(productId),
+       createdAt = Value(createdAt);
+  static Insertable<ProductGroupMemberRow> custom({
+    Expression<int>? id,
+    Expression<int>? tenantId,
+    Expression<String>? groupId,
+    Expression<String>? productId,
+    Expression<double>? confidence,
+    Expression<String>? matchedBy,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (groupId != null) 'group_id': groupId,
+      if (productId != null) 'product_id': productId,
+      if (confidence != null) 'confidence': confidence,
+      if (matchedBy != null) 'matched_by': matchedBy,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  ProductGroupMembersCompanion copyWith({
+    Value<int>? id,
+    Value<int>? tenantId,
+    Value<String>? groupId,
+    Value<String>? productId,
+    Value<double>? confidence,
+    Value<String>? matchedBy,
+    Value<DateTime>? createdAt,
+  }) {
+    return ProductGroupMembersCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      groupId: groupId ?? this.groupId,
+      productId: productId ?? this.productId,
+      confidence: confidence ?? this.confidence,
+      matchedBy: matchedBy ?? this.matchedBy,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<int>(tenantId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<double>(confidence.value);
+    }
+    if (matchedBy.present) {
+      map['matched_by'] = Variable<String>(matchedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductGroupMembersCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('groupId: $groupId, ')
+          ..write('productId: $productId, ')
+          ..write('confidence: $confidence, ')
+          ..write('matchedBy: $matchedBy, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProductIntelligenceStatesTable extends ProductIntelligenceStates
+    with
+        TableInfo<
+          $ProductIntelligenceStatesTable,
+          ProductIntelligenceStateRow
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProductIntelligenceStatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _tenantIdMeta = const VerificationMeta(
+    'tenantId',
+  );
+  @override
+  late final GeneratedColumn<int> tenantId = GeneratedColumn<int>(
+    'tenant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contentHashMeta = const VerificationMeta(
+    'contentHash',
+  );
+  @override
+  late final GeneratedColumn<String> contentHash = GeneratedColumn<String>(
+    'content_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _qualityScoreMeta = const VerificationMeta(
+    'qualityScore',
+  );
+  @override
+  late final GeneratedColumn<double> qualityScore = GeneratedColumn<double>(
+    'quality_score',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnRiskScoreMeta = const VerificationMeta(
+    'returnRiskScore',
+  );
+  @override
+  late final GeneratedColumn<double> returnRiskScore = GeneratedColumn<double>(
+    'return_risk_score',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _competitionLevelMeta = const VerificationMeta(
+    'competitionLevel',
+  );
+  @override
+  late final GeneratedColumn<String> competitionLevel = GeneratedColumn<String>(
+    'competition_level',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _debugJsonMeta = const VerificationMeta(
+    'debugJson',
+  );
+  @override
+  late final GeneratedColumn<String> debugJson = GeneratedColumn<String>(
+    'debug_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastProcessedAtMeta = const VerificationMeta(
+    'lastProcessedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastProcessedAt =
+      GeneratedColumn<DateTime>(
+        'last_processed_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tenantId,
+    productId,
+    contentHash,
+    groupId,
+    qualityScore,
+    returnRiskScore,
+    competitionLevel,
+    debugJson,
+    lastProcessedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'product_intelligence_states';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProductIntelligenceStateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(
+        _tenantIdMeta,
+        tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta),
+      );
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('content_hash')) {
+      context.handle(
+        _contentHashMeta,
+        contentHash.isAcceptableOrUnknown(
+          data['content_hash']!,
+          _contentHashMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contentHashMeta);
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    }
+    if (data.containsKey('quality_score')) {
+      context.handle(
+        _qualityScoreMeta,
+        qualityScore.isAcceptableOrUnknown(
+          data['quality_score']!,
+          _qualityScoreMeta,
+        ),
+      );
+    }
+    if (data.containsKey('return_risk_score')) {
+      context.handle(
+        _returnRiskScoreMeta,
+        returnRiskScore.isAcceptableOrUnknown(
+          data['return_risk_score']!,
+          _returnRiskScoreMeta,
+        ),
+      );
+    }
+    if (data.containsKey('competition_level')) {
+      context.handle(
+        _competitionLevelMeta,
+        competitionLevel.isAcceptableOrUnknown(
+          data['competition_level']!,
+          _competitionLevelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('debug_json')) {
+      context.handle(
+        _debugJsonMeta,
+        debugJson.isAcceptableOrUnknown(data['debug_json']!, _debugJsonMeta),
+      );
+    }
+    if (data.containsKey('last_processed_at')) {
+      context.handle(
+        _lastProcessedAtMeta,
+        lastProcessedAt.isAcceptableOrUnknown(
+          data['last_processed_at']!,
+          _lastProcessedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastProcessedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProductIntelligenceStateRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProductIntelligenceStateRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      tenantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tenant_id'],
+      )!,
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      contentHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_hash'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      ),
+      qualityScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quality_score'],
+      ),
+      returnRiskScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}return_risk_score'],
+      ),
+      competitionLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}competition_level'],
+      ),
+      debugJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}debug_json'],
+      ),
+      lastProcessedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_processed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProductIntelligenceStatesTable createAlias(String alias) {
+    return $ProductIntelligenceStatesTable(attachedDatabase, alias);
+  }
+}
+
+class ProductIntelligenceStateRow extends DataClass
+    implements Insertable<ProductIntelligenceStateRow> {
+  final int id;
+  final int tenantId;
+  final String productId;
+
+  /// Deterministic content hash for skip-unchanged (based on normalized title/desc/attrs/images/variants).
+  final String contentHash;
+
+  /// Last computed group id (if matched).
+  final String? groupId;
+  final double? qualityScore;
+  final double? returnRiskScore;
+
+  /// Competition level (low|medium|high) based on group supplier count + price variance.
+  final String? competitionLevel;
+  final String? debugJson;
+  final DateTime lastProcessedAt;
+  const ProductIntelligenceStateRow({
+    required this.id,
+    required this.tenantId,
+    required this.productId,
+    required this.contentHash,
+    this.groupId,
+    this.qualityScore,
+    this.returnRiskScore,
+    this.competitionLevel,
+    this.debugJson,
+    required this.lastProcessedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['tenant_id'] = Variable<int>(tenantId);
+    map['product_id'] = Variable<String>(productId);
+    map['content_hash'] = Variable<String>(contentHash);
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<String>(groupId);
+    }
+    if (!nullToAbsent || qualityScore != null) {
+      map['quality_score'] = Variable<double>(qualityScore);
+    }
+    if (!nullToAbsent || returnRiskScore != null) {
+      map['return_risk_score'] = Variable<double>(returnRiskScore);
+    }
+    if (!nullToAbsent || competitionLevel != null) {
+      map['competition_level'] = Variable<String>(competitionLevel);
+    }
+    if (!nullToAbsent || debugJson != null) {
+      map['debug_json'] = Variable<String>(debugJson);
+    }
+    map['last_processed_at'] = Variable<DateTime>(lastProcessedAt);
+    return map;
+  }
+
+  ProductIntelligenceStatesCompanion toCompanion(bool nullToAbsent) {
+    return ProductIntelligenceStatesCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      productId: Value(productId),
+      contentHash: Value(contentHash),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      qualityScore: qualityScore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(qualityScore),
+      returnRiskScore: returnRiskScore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnRiskScore),
+      competitionLevel: competitionLevel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(competitionLevel),
+      debugJson: debugJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(debugJson),
+      lastProcessedAt: Value(lastProcessedAt),
+    );
+  }
+
+  factory ProductIntelligenceStateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProductIntelligenceStateRow(
+      id: serializer.fromJson<int>(json['id']),
+      tenantId: serializer.fromJson<int>(json['tenantId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      contentHash: serializer.fromJson<String>(json['contentHash']),
+      groupId: serializer.fromJson<String?>(json['groupId']),
+      qualityScore: serializer.fromJson<double?>(json['qualityScore']),
+      returnRiskScore: serializer.fromJson<double?>(json['returnRiskScore']),
+      competitionLevel: serializer.fromJson<String?>(json['competitionLevel']),
+      debugJson: serializer.fromJson<String?>(json['debugJson']),
+      lastProcessedAt: serializer.fromJson<DateTime>(json['lastProcessedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'tenantId': serializer.toJson<int>(tenantId),
+      'productId': serializer.toJson<String>(productId),
+      'contentHash': serializer.toJson<String>(contentHash),
+      'groupId': serializer.toJson<String?>(groupId),
+      'qualityScore': serializer.toJson<double?>(qualityScore),
+      'returnRiskScore': serializer.toJson<double?>(returnRiskScore),
+      'competitionLevel': serializer.toJson<String?>(competitionLevel),
+      'debugJson': serializer.toJson<String?>(debugJson),
+      'lastProcessedAt': serializer.toJson<DateTime>(lastProcessedAt),
+    };
+  }
+
+  ProductIntelligenceStateRow copyWith({
+    int? id,
+    int? tenantId,
+    String? productId,
+    String? contentHash,
+    Value<String?> groupId = const Value.absent(),
+    Value<double?> qualityScore = const Value.absent(),
+    Value<double?> returnRiskScore = const Value.absent(),
+    Value<String?> competitionLevel = const Value.absent(),
+    Value<String?> debugJson = const Value.absent(),
+    DateTime? lastProcessedAt,
+  }) => ProductIntelligenceStateRow(
+    id: id ?? this.id,
+    tenantId: tenantId ?? this.tenantId,
+    productId: productId ?? this.productId,
+    contentHash: contentHash ?? this.contentHash,
+    groupId: groupId.present ? groupId.value : this.groupId,
+    qualityScore: qualityScore.present ? qualityScore.value : this.qualityScore,
+    returnRiskScore: returnRiskScore.present
+        ? returnRiskScore.value
+        : this.returnRiskScore,
+    competitionLevel: competitionLevel.present
+        ? competitionLevel.value
+        : this.competitionLevel,
+    debugJson: debugJson.present ? debugJson.value : this.debugJson,
+    lastProcessedAt: lastProcessedAt ?? this.lastProcessedAt,
+  );
+  ProductIntelligenceStateRow copyWithCompanion(
+    ProductIntelligenceStatesCompanion data,
+  ) {
+    return ProductIntelligenceStateRow(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      contentHash: data.contentHash.present
+          ? data.contentHash.value
+          : this.contentHash,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      qualityScore: data.qualityScore.present
+          ? data.qualityScore.value
+          : this.qualityScore,
+      returnRiskScore: data.returnRiskScore.present
+          ? data.returnRiskScore.value
+          : this.returnRiskScore,
+      competitionLevel: data.competitionLevel.present
+          ? data.competitionLevel.value
+          : this.competitionLevel,
+      debugJson: data.debugJson.present ? data.debugJson.value : this.debugJson,
+      lastProcessedAt: data.lastProcessedAt.present
+          ? data.lastProcessedAt.value
+          : this.lastProcessedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductIntelligenceStateRow(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('productId: $productId, ')
+          ..write('contentHash: $contentHash, ')
+          ..write('groupId: $groupId, ')
+          ..write('qualityScore: $qualityScore, ')
+          ..write('returnRiskScore: $returnRiskScore, ')
+          ..write('competitionLevel: $competitionLevel, ')
+          ..write('debugJson: $debugJson, ')
+          ..write('lastProcessedAt: $lastProcessedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tenantId,
+    productId,
+    contentHash,
+    groupId,
+    qualityScore,
+    returnRiskScore,
+    competitionLevel,
+    debugJson,
+    lastProcessedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProductIntelligenceStateRow &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.productId == this.productId &&
+          other.contentHash == this.contentHash &&
+          other.groupId == this.groupId &&
+          other.qualityScore == this.qualityScore &&
+          other.returnRiskScore == this.returnRiskScore &&
+          other.competitionLevel == this.competitionLevel &&
+          other.debugJson == this.debugJson &&
+          other.lastProcessedAt == this.lastProcessedAt);
+}
+
+class ProductIntelligenceStatesCompanion
+    extends UpdateCompanion<ProductIntelligenceStateRow> {
+  final Value<int> id;
+  final Value<int> tenantId;
+  final Value<String> productId;
+  final Value<String> contentHash;
+  final Value<String?> groupId;
+  final Value<double?> qualityScore;
+  final Value<double?> returnRiskScore;
+  final Value<String?> competitionLevel;
+  final Value<String?> debugJson;
+  final Value<DateTime> lastProcessedAt;
+  const ProductIntelligenceStatesCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.contentHash = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.qualityScore = const Value.absent(),
+    this.returnRiskScore = const Value.absent(),
+    this.competitionLevel = const Value.absent(),
+    this.debugJson = const Value.absent(),
+    this.lastProcessedAt = const Value.absent(),
+  });
+  ProductIntelligenceStatesCompanion.insert({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    required String productId,
+    required String contentHash,
+    this.groupId = const Value.absent(),
+    this.qualityScore = const Value.absent(),
+    this.returnRiskScore = const Value.absent(),
+    this.competitionLevel = const Value.absent(),
+    this.debugJson = const Value.absent(),
+    required DateTime lastProcessedAt,
+  }) : productId = Value(productId),
+       contentHash = Value(contentHash),
+       lastProcessedAt = Value(lastProcessedAt);
+  static Insertable<ProductIntelligenceStateRow> custom({
+    Expression<int>? id,
+    Expression<int>? tenantId,
+    Expression<String>? productId,
+    Expression<String>? contentHash,
+    Expression<String>? groupId,
+    Expression<double>? qualityScore,
+    Expression<double>? returnRiskScore,
+    Expression<String>? competitionLevel,
+    Expression<String>? debugJson,
+    Expression<DateTime>? lastProcessedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (productId != null) 'product_id': productId,
+      if (contentHash != null) 'content_hash': contentHash,
+      if (groupId != null) 'group_id': groupId,
+      if (qualityScore != null) 'quality_score': qualityScore,
+      if (returnRiskScore != null) 'return_risk_score': returnRiskScore,
+      if (competitionLevel != null) 'competition_level': competitionLevel,
+      if (debugJson != null) 'debug_json': debugJson,
+      if (lastProcessedAt != null) 'last_processed_at': lastProcessedAt,
+    });
+  }
+
+  ProductIntelligenceStatesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? tenantId,
+    Value<String>? productId,
+    Value<String>? contentHash,
+    Value<String?>? groupId,
+    Value<double?>? qualityScore,
+    Value<double?>? returnRiskScore,
+    Value<String?>? competitionLevel,
+    Value<String?>? debugJson,
+    Value<DateTime>? lastProcessedAt,
+  }) {
+    return ProductIntelligenceStatesCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      productId: productId ?? this.productId,
+      contentHash: contentHash ?? this.contentHash,
+      groupId: groupId ?? this.groupId,
+      qualityScore: qualityScore ?? this.qualityScore,
+      returnRiskScore: returnRiskScore ?? this.returnRiskScore,
+      competitionLevel: competitionLevel ?? this.competitionLevel,
+      debugJson: debugJson ?? this.debugJson,
+      lastProcessedAt: lastProcessedAt ?? this.lastProcessedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<int>(tenantId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (contentHash.present) {
+      map['content_hash'] = Variable<String>(contentHash.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (qualityScore.present) {
+      map['quality_score'] = Variable<double>(qualityScore.value);
+    }
+    if (returnRiskScore.present) {
+      map['return_risk_score'] = Variable<double>(returnRiskScore.value);
+    }
+    if (competitionLevel.present) {
+      map['competition_level'] = Variable<String>(competitionLevel.value);
+    }
+    if (debugJson.present) {
+      map['debug_json'] = Variable<String>(debugJson.value);
+    }
+    if (lastProcessedAt.present) {
+      map['last_processed_at'] = Variable<DateTime>(lastProcessedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductIntelligenceStatesCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('productId: $productId, ')
+          ..write('contentHash: $contentHash, ')
+          ..write('groupId: $groupId, ')
+          ..write('qualityScore: $qualityScore, ')
+          ..write('returnRiskScore: $returnRiskScore, ')
+          ..write('competitionLevel: $competitionLevel, ')
+          ..write('debugJson: $debugJson, ')
+          ..write('lastProcessedAt: $lastProcessedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SupplierSwitchEventsTable extends SupplierSwitchEvents
+    with TableInfo<$SupplierSwitchEventsTable, SupplierSwitchEventRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SupplierSwitchEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _tenantIdMeta = const VerificationMeta(
+    'tenantId',
+  );
+  @override
+  late final GeneratedColumn<int> tenantId = GeneratedColumn<int>(
+    'tenant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fromSupplierIdMeta = const VerificationMeta(
+    'fromSupplierId',
+  );
+  @override
+  late final GeneratedColumn<String> fromSupplierId = GeneratedColumn<String>(
+    'from_supplier_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _toSupplierIdMeta = const VerificationMeta(
+    'toSupplierId',
+  );
+  @override
+  late final GeneratedColumn<String> toSupplierId = GeneratedColumn<String>(
+    'to_supplier_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _marginBeforePercentMeta =
+      const VerificationMeta('marginBeforePercent');
+  @override
+  late final GeneratedColumn<double> marginBeforePercent =
+      GeneratedColumn<double>(
+        'margin_before_percent',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _marginAfterPercentMeta =
+      const VerificationMeta('marginAfterPercent');
+  @override
+  late final GeneratedColumn<double> marginAfterPercent =
+      GeneratedColumn<double>(
+        'margin_after_percent',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _listingIdMeta = const VerificationMeta(
+    'listingId',
+  );
+  @override
+  late final GeneratedColumn<String> listingId = GeneratedColumn<String>(
+    'listing_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _orderIdMeta = const VerificationMeta(
+    'orderId',
+  );
+  @override
+  late final GeneratedColumn<String> orderId = GeneratedColumn<String>(
+    'order_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tenantId,
+    groupId,
+    fromSupplierId,
+    toSupplierId,
+    reason,
+    marginBeforePercent,
+    marginAfterPercent,
+    listingId,
+    orderId,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'supplier_switch_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SupplierSwitchEventRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(
+        _tenantIdMeta,
+        tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta),
+      );
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('from_supplier_id')) {
+      context.handle(
+        _fromSupplierIdMeta,
+        fromSupplierId.isAcceptableOrUnknown(
+          data['from_supplier_id']!,
+          _fromSupplierIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('to_supplier_id')) {
+      context.handle(
+        _toSupplierIdMeta,
+        toSupplierId.isAcceptableOrUnknown(
+          data['to_supplier_id']!,
+          _toSupplierIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_toSupplierIdMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('margin_before_percent')) {
+      context.handle(
+        _marginBeforePercentMeta,
+        marginBeforePercent.isAcceptableOrUnknown(
+          data['margin_before_percent']!,
+          _marginBeforePercentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('margin_after_percent')) {
+      context.handle(
+        _marginAfterPercentMeta,
+        marginAfterPercent.isAcceptableOrUnknown(
+          data['margin_after_percent']!,
+          _marginAfterPercentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('listing_id')) {
+      context.handle(
+        _listingIdMeta,
+        listingId.isAcceptableOrUnknown(data['listing_id']!, _listingIdMeta),
+      );
+    }
+    if (data.containsKey('order_id')) {
+      context.handle(
+        _orderIdMeta,
+        orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SupplierSwitchEventRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SupplierSwitchEventRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      tenantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tenant_id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      fromSupplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}from_supplier_id'],
+      ),
+      toSupplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}to_supplier_id'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      marginBeforePercent: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}margin_before_percent'],
+      ),
+      marginAfterPercent: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}margin_after_percent'],
+      ),
+      listingId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}listing_id'],
+      ),
+      orderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SupplierSwitchEventsTable createAlias(String alias) {
+    return $SupplierSwitchEventsTable(attachedDatabase, alias);
+  }
+}
+
+class SupplierSwitchEventRow extends DataClass
+    implements Insertable<SupplierSwitchEventRow> {
+  final int id;
+  final int tenantId;
+  final String groupId;
+  final String? fromSupplierId;
+  final String toSupplierId;
+  final String reason;
+  final double? marginBeforePercent;
+  final double? marginAfterPercent;
+  final String? listingId;
+  final String? orderId;
+  final DateTime createdAt;
+  const SupplierSwitchEventRow({
+    required this.id,
+    required this.tenantId,
+    required this.groupId,
+    this.fromSupplierId,
+    required this.toSupplierId,
+    required this.reason,
+    this.marginBeforePercent,
+    this.marginAfterPercent,
+    this.listingId,
+    this.orderId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['tenant_id'] = Variable<int>(tenantId);
+    map['group_id'] = Variable<String>(groupId);
+    if (!nullToAbsent || fromSupplierId != null) {
+      map['from_supplier_id'] = Variable<String>(fromSupplierId);
+    }
+    map['to_supplier_id'] = Variable<String>(toSupplierId);
+    map['reason'] = Variable<String>(reason);
+    if (!nullToAbsent || marginBeforePercent != null) {
+      map['margin_before_percent'] = Variable<double>(marginBeforePercent);
+    }
+    if (!nullToAbsent || marginAfterPercent != null) {
+      map['margin_after_percent'] = Variable<double>(marginAfterPercent);
+    }
+    if (!nullToAbsent || listingId != null) {
+      map['listing_id'] = Variable<String>(listingId);
+    }
+    if (!nullToAbsent || orderId != null) {
+      map['order_id'] = Variable<String>(orderId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SupplierSwitchEventsCompanion toCompanion(bool nullToAbsent) {
+    return SupplierSwitchEventsCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      groupId: Value(groupId),
+      fromSupplierId: fromSupplierId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fromSupplierId),
+      toSupplierId: Value(toSupplierId),
+      reason: Value(reason),
+      marginBeforePercent: marginBeforePercent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(marginBeforePercent),
+      marginAfterPercent: marginAfterPercent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(marginAfterPercent),
+      listingId: listingId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(listingId),
+      orderId: orderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SupplierSwitchEventRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SupplierSwitchEventRow(
+      id: serializer.fromJson<int>(json['id']),
+      tenantId: serializer.fromJson<int>(json['tenantId']),
+      groupId: serializer.fromJson<String>(json['groupId']),
+      fromSupplierId: serializer.fromJson<String?>(json['fromSupplierId']),
+      toSupplierId: serializer.fromJson<String>(json['toSupplierId']),
+      reason: serializer.fromJson<String>(json['reason']),
+      marginBeforePercent: serializer.fromJson<double?>(
+        json['marginBeforePercent'],
+      ),
+      marginAfterPercent: serializer.fromJson<double?>(
+        json['marginAfterPercent'],
+      ),
+      listingId: serializer.fromJson<String?>(json['listingId']),
+      orderId: serializer.fromJson<String?>(json['orderId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'tenantId': serializer.toJson<int>(tenantId),
+      'groupId': serializer.toJson<String>(groupId),
+      'fromSupplierId': serializer.toJson<String?>(fromSupplierId),
+      'toSupplierId': serializer.toJson<String>(toSupplierId),
+      'reason': serializer.toJson<String>(reason),
+      'marginBeforePercent': serializer.toJson<double?>(marginBeforePercent),
+      'marginAfterPercent': serializer.toJson<double?>(marginAfterPercent),
+      'listingId': serializer.toJson<String?>(listingId),
+      'orderId': serializer.toJson<String?>(orderId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SupplierSwitchEventRow copyWith({
+    int? id,
+    int? tenantId,
+    String? groupId,
+    Value<String?> fromSupplierId = const Value.absent(),
+    String? toSupplierId,
+    String? reason,
+    Value<double?> marginBeforePercent = const Value.absent(),
+    Value<double?> marginAfterPercent = const Value.absent(),
+    Value<String?> listingId = const Value.absent(),
+    Value<String?> orderId = const Value.absent(),
+    DateTime? createdAt,
+  }) => SupplierSwitchEventRow(
+    id: id ?? this.id,
+    tenantId: tenantId ?? this.tenantId,
+    groupId: groupId ?? this.groupId,
+    fromSupplierId: fromSupplierId.present
+        ? fromSupplierId.value
+        : this.fromSupplierId,
+    toSupplierId: toSupplierId ?? this.toSupplierId,
+    reason: reason ?? this.reason,
+    marginBeforePercent: marginBeforePercent.present
+        ? marginBeforePercent.value
+        : this.marginBeforePercent,
+    marginAfterPercent: marginAfterPercent.present
+        ? marginAfterPercent.value
+        : this.marginAfterPercent,
+    listingId: listingId.present ? listingId.value : this.listingId,
+    orderId: orderId.present ? orderId.value : this.orderId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SupplierSwitchEventRow copyWithCompanion(SupplierSwitchEventsCompanion data) {
+    return SupplierSwitchEventRow(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      fromSupplierId: data.fromSupplierId.present
+          ? data.fromSupplierId.value
+          : this.fromSupplierId,
+      toSupplierId: data.toSupplierId.present
+          ? data.toSupplierId.value
+          : this.toSupplierId,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      marginBeforePercent: data.marginBeforePercent.present
+          ? data.marginBeforePercent.value
+          : this.marginBeforePercent,
+      marginAfterPercent: data.marginAfterPercent.present
+          ? data.marginAfterPercent.value
+          : this.marginAfterPercent,
+      listingId: data.listingId.present ? data.listingId.value : this.listingId,
+      orderId: data.orderId.present ? data.orderId.value : this.orderId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SupplierSwitchEventRow(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('groupId: $groupId, ')
+          ..write('fromSupplierId: $fromSupplierId, ')
+          ..write('toSupplierId: $toSupplierId, ')
+          ..write('reason: $reason, ')
+          ..write('marginBeforePercent: $marginBeforePercent, ')
+          ..write('marginAfterPercent: $marginAfterPercent, ')
+          ..write('listingId: $listingId, ')
+          ..write('orderId: $orderId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tenantId,
+    groupId,
+    fromSupplierId,
+    toSupplierId,
+    reason,
+    marginBeforePercent,
+    marginAfterPercent,
+    listingId,
+    orderId,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SupplierSwitchEventRow &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.groupId == this.groupId &&
+          other.fromSupplierId == this.fromSupplierId &&
+          other.toSupplierId == this.toSupplierId &&
+          other.reason == this.reason &&
+          other.marginBeforePercent == this.marginBeforePercent &&
+          other.marginAfterPercent == this.marginAfterPercent &&
+          other.listingId == this.listingId &&
+          other.orderId == this.orderId &&
+          other.createdAt == this.createdAt);
+}
+
+class SupplierSwitchEventsCompanion
+    extends UpdateCompanion<SupplierSwitchEventRow> {
+  final Value<int> id;
+  final Value<int> tenantId;
+  final Value<String> groupId;
+  final Value<String?> fromSupplierId;
+  final Value<String> toSupplierId;
+  final Value<String> reason;
+  final Value<double?> marginBeforePercent;
+  final Value<double?> marginAfterPercent;
+  final Value<String?> listingId;
+  final Value<String?> orderId;
+  final Value<DateTime> createdAt;
+  const SupplierSwitchEventsCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.fromSupplierId = const Value.absent(),
+    this.toSupplierId = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.marginBeforePercent = const Value.absent(),
+    this.marginAfterPercent = const Value.absent(),
+    this.listingId = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SupplierSwitchEventsCompanion.insert({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    required String groupId,
+    this.fromSupplierId = const Value.absent(),
+    required String toSupplierId,
+    required String reason,
+    this.marginBeforePercent = const Value.absent(),
+    this.marginAfterPercent = const Value.absent(),
+    this.listingId = const Value.absent(),
+    this.orderId = const Value.absent(),
+    required DateTime createdAt,
+  }) : groupId = Value(groupId),
+       toSupplierId = Value(toSupplierId),
+       reason = Value(reason),
+       createdAt = Value(createdAt);
+  static Insertable<SupplierSwitchEventRow> custom({
+    Expression<int>? id,
+    Expression<int>? tenantId,
+    Expression<String>? groupId,
+    Expression<String>? fromSupplierId,
+    Expression<String>? toSupplierId,
+    Expression<String>? reason,
+    Expression<double>? marginBeforePercent,
+    Expression<double>? marginAfterPercent,
+    Expression<String>? listingId,
+    Expression<String>? orderId,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (groupId != null) 'group_id': groupId,
+      if (fromSupplierId != null) 'from_supplier_id': fromSupplierId,
+      if (toSupplierId != null) 'to_supplier_id': toSupplierId,
+      if (reason != null) 'reason': reason,
+      if (marginBeforePercent != null)
+        'margin_before_percent': marginBeforePercent,
+      if (marginAfterPercent != null)
+        'margin_after_percent': marginAfterPercent,
+      if (listingId != null) 'listing_id': listingId,
+      if (orderId != null) 'order_id': orderId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SupplierSwitchEventsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? tenantId,
+    Value<String>? groupId,
+    Value<String?>? fromSupplierId,
+    Value<String>? toSupplierId,
+    Value<String>? reason,
+    Value<double?>? marginBeforePercent,
+    Value<double?>? marginAfterPercent,
+    Value<String?>? listingId,
+    Value<String?>? orderId,
+    Value<DateTime>? createdAt,
+  }) {
+    return SupplierSwitchEventsCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      groupId: groupId ?? this.groupId,
+      fromSupplierId: fromSupplierId ?? this.fromSupplierId,
+      toSupplierId: toSupplierId ?? this.toSupplierId,
+      reason: reason ?? this.reason,
+      marginBeforePercent: marginBeforePercent ?? this.marginBeforePercent,
+      marginAfterPercent: marginAfterPercent ?? this.marginAfterPercent,
+      listingId: listingId ?? this.listingId,
+      orderId: orderId ?? this.orderId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<int>(tenantId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (fromSupplierId.present) {
+      map['from_supplier_id'] = Variable<String>(fromSupplierId.value);
+    }
+    if (toSupplierId.present) {
+      map['to_supplier_id'] = Variable<String>(toSupplierId.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (marginBeforePercent.present) {
+      map['margin_before_percent'] = Variable<double>(
+        marginBeforePercent.value,
+      );
+    }
+    if (marginAfterPercent.present) {
+      map['margin_after_percent'] = Variable<double>(marginAfterPercent.value);
+    }
+    if (listingId.present) {
+      map['listing_id'] = Variable<String>(listingId.value);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<String>(orderId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SupplierSwitchEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('groupId: $groupId, ')
+          ..write('fromSupplierId: $fromSupplierId, ')
+          ..write('toSupplierId: $toSupplierId, ')
+          ..write('reason: $reason, ')
+          ..write('marginBeforePercent: $marginBeforePercent, ')
+          ..write('marginAfterPercent: $marginAfterPercent, ')
+          ..write('listingId: $listingId, ')
+          ..write('orderId: $orderId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ListingPauseEventsTable extends ListingPauseEvents
+    with TableInfo<$ListingPauseEventsTable, ListingPauseEventRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ListingPauseEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _tenantIdMeta = const VerificationMeta(
+    'tenantId',
+  );
+  @override
+  late final GeneratedColumn<int> tenantId = GeneratedColumn<int>(
+    'tenant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _listingIdMeta = const VerificationMeta(
+    'listingId',
+  );
+  @override
+  late final GeneratedColumn<String> listingId = GeneratedColumn<String>(
+    'listing_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pauseLevelMeta = const VerificationMeta(
+    'pauseLevel',
+  );
+  @override
+  late final GeneratedColumn<String> pauseLevel = GeneratedColumn<String>(
+    'pause_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _metricsJsonMeta = const VerificationMeta(
+    'metricsJson',
+  );
+  @override
+  late final GeneratedColumn<String> metricsJson = GeneratedColumn<String>(
+    'metrics_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recoveredAtMeta = const VerificationMeta(
+    'recoveredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> recoveredAt = GeneratedColumn<DateTime>(
+    'recovered_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tenantId,
+    listingId,
+    pauseLevel,
+    reason,
+    metricsJson,
+    createdAt,
+    recoveredAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'listing_pause_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ListingPauseEventRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(
+        _tenantIdMeta,
+        tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta),
+      );
+    }
+    if (data.containsKey('listing_id')) {
+      context.handle(
+        _listingIdMeta,
+        listingId.isAcceptableOrUnknown(data['listing_id']!, _listingIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_listingIdMeta);
+    }
+    if (data.containsKey('pause_level')) {
+      context.handle(
+        _pauseLevelMeta,
+        pauseLevel.isAcceptableOrUnknown(data['pause_level']!, _pauseLevelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pauseLevelMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('metrics_json')) {
+      context.handle(
+        _metricsJsonMeta,
+        metricsJson.isAcceptableOrUnknown(
+          data['metrics_json']!,
+          _metricsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('recovered_at')) {
+      context.handle(
+        _recoveredAtMeta,
+        recoveredAt.isAcceptableOrUnknown(
+          data['recovered_at']!,
+          _recoveredAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ListingPauseEventRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ListingPauseEventRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      tenantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tenant_id'],
+      )!,
+      listingId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}listing_id'],
+      )!,
+      pauseLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pause_level'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      metricsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metrics_json'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      recoveredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}recovered_at'],
+      ),
+    );
+  }
+
+  @override
+  $ListingPauseEventsTable createAlias(String alias) {
+    return $ListingPauseEventsTable(attachedDatabase, alias);
+  }
+}
+
+class ListingPauseEventRow extends DataClass
+    implements Insertable<ListingPauseEventRow> {
+  final int id;
+  final int tenantId;
+  final String listingId;
+
+  /// soft|hard
+  final String pauseLevel;
+  final String reason;
+  final String? metricsJson;
+  final DateTime createdAt;
+  final DateTime? recoveredAt;
+  const ListingPauseEventRow({
+    required this.id,
+    required this.tenantId,
+    required this.listingId,
+    required this.pauseLevel,
+    required this.reason,
+    this.metricsJson,
+    required this.createdAt,
+    this.recoveredAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['tenant_id'] = Variable<int>(tenantId);
+    map['listing_id'] = Variable<String>(listingId);
+    map['pause_level'] = Variable<String>(pauseLevel);
+    map['reason'] = Variable<String>(reason);
+    if (!nullToAbsent || metricsJson != null) {
+      map['metrics_json'] = Variable<String>(metricsJson);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || recoveredAt != null) {
+      map['recovered_at'] = Variable<DateTime>(recoveredAt);
+    }
+    return map;
+  }
+
+  ListingPauseEventsCompanion toCompanion(bool nullToAbsent) {
+    return ListingPauseEventsCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      listingId: Value(listingId),
+      pauseLevel: Value(pauseLevel),
+      reason: Value(reason),
+      metricsJson: metricsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metricsJson),
+      createdAt: Value(createdAt),
+      recoveredAt: recoveredAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recoveredAt),
+    );
+  }
+
+  factory ListingPauseEventRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ListingPauseEventRow(
+      id: serializer.fromJson<int>(json['id']),
+      tenantId: serializer.fromJson<int>(json['tenantId']),
+      listingId: serializer.fromJson<String>(json['listingId']),
+      pauseLevel: serializer.fromJson<String>(json['pauseLevel']),
+      reason: serializer.fromJson<String>(json['reason']),
+      metricsJson: serializer.fromJson<String?>(json['metricsJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      recoveredAt: serializer.fromJson<DateTime?>(json['recoveredAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'tenantId': serializer.toJson<int>(tenantId),
+      'listingId': serializer.toJson<String>(listingId),
+      'pauseLevel': serializer.toJson<String>(pauseLevel),
+      'reason': serializer.toJson<String>(reason),
+      'metricsJson': serializer.toJson<String?>(metricsJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'recoveredAt': serializer.toJson<DateTime?>(recoveredAt),
+    };
+  }
+
+  ListingPauseEventRow copyWith({
+    int? id,
+    int? tenantId,
+    String? listingId,
+    String? pauseLevel,
+    String? reason,
+    Value<String?> metricsJson = const Value.absent(),
+    DateTime? createdAt,
+    Value<DateTime?> recoveredAt = const Value.absent(),
+  }) => ListingPauseEventRow(
+    id: id ?? this.id,
+    tenantId: tenantId ?? this.tenantId,
+    listingId: listingId ?? this.listingId,
+    pauseLevel: pauseLevel ?? this.pauseLevel,
+    reason: reason ?? this.reason,
+    metricsJson: metricsJson.present ? metricsJson.value : this.metricsJson,
+    createdAt: createdAt ?? this.createdAt,
+    recoveredAt: recoveredAt.present ? recoveredAt.value : this.recoveredAt,
+  );
+  ListingPauseEventRow copyWithCompanion(ListingPauseEventsCompanion data) {
+    return ListingPauseEventRow(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      listingId: data.listingId.present ? data.listingId.value : this.listingId,
+      pauseLevel: data.pauseLevel.present
+          ? data.pauseLevel.value
+          : this.pauseLevel,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      metricsJson: data.metricsJson.present
+          ? data.metricsJson.value
+          : this.metricsJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      recoveredAt: data.recoveredAt.present
+          ? data.recoveredAt.value
+          : this.recoveredAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ListingPauseEventRow(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('listingId: $listingId, ')
+          ..write('pauseLevel: $pauseLevel, ')
+          ..write('reason: $reason, ')
+          ..write('metricsJson: $metricsJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('recoveredAt: $recoveredAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tenantId,
+    listingId,
+    pauseLevel,
+    reason,
+    metricsJson,
+    createdAt,
+    recoveredAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ListingPauseEventRow &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.listingId == this.listingId &&
+          other.pauseLevel == this.pauseLevel &&
+          other.reason == this.reason &&
+          other.metricsJson == this.metricsJson &&
+          other.createdAt == this.createdAt &&
+          other.recoveredAt == this.recoveredAt);
+}
+
+class ListingPauseEventsCompanion
+    extends UpdateCompanion<ListingPauseEventRow> {
+  final Value<int> id;
+  final Value<int> tenantId;
+  final Value<String> listingId;
+  final Value<String> pauseLevel;
+  final Value<String> reason;
+  final Value<String?> metricsJson;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> recoveredAt;
+  const ListingPauseEventsCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.listingId = const Value.absent(),
+    this.pauseLevel = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.metricsJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.recoveredAt = const Value.absent(),
+  });
+  ListingPauseEventsCompanion.insert({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    required String listingId,
+    required String pauseLevel,
+    required String reason,
+    this.metricsJson = const Value.absent(),
+    required DateTime createdAt,
+    this.recoveredAt = const Value.absent(),
+  }) : listingId = Value(listingId),
+       pauseLevel = Value(pauseLevel),
+       reason = Value(reason),
+       createdAt = Value(createdAt);
+  static Insertable<ListingPauseEventRow> custom({
+    Expression<int>? id,
+    Expression<int>? tenantId,
+    Expression<String>? listingId,
+    Expression<String>? pauseLevel,
+    Expression<String>? reason,
+    Expression<String>? metricsJson,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? recoveredAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (listingId != null) 'listing_id': listingId,
+      if (pauseLevel != null) 'pause_level': pauseLevel,
+      if (reason != null) 'reason': reason,
+      if (metricsJson != null) 'metrics_json': metricsJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (recoveredAt != null) 'recovered_at': recoveredAt,
+    });
+  }
+
+  ListingPauseEventsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? tenantId,
+    Value<String>? listingId,
+    Value<String>? pauseLevel,
+    Value<String>? reason,
+    Value<String?>? metricsJson,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? recoveredAt,
+  }) {
+    return ListingPauseEventsCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      listingId: listingId ?? this.listingId,
+      pauseLevel: pauseLevel ?? this.pauseLevel,
+      reason: reason ?? this.reason,
+      metricsJson: metricsJson ?? this.metricsJson,
+      createdAt: createdAt ?? this.createdAt,
+      recoveredAt: recoveredAt ?? this.recoveredAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<int>(tenantId.value);
+    }
+    if (listingId.present) {
+      map['listing_id'] = Variable<String>(listingId.value);
+    }
+    if (pauseLevel.present) {
+      map['pause_level'] = Variable<String>(pauseLevel.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (metricsJson.present) {
+      map['metrics_json'] = Variable<String>(metricsJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (recoveredAt.present) {
+      map['recovered_at'] = Variable<DateTime>(recoveredAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ListingPauseEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('listingId: $listingId, ')
+          ..write('pauseLevel: $pauseLevel, ')
+          ..write('reason: $reason, ')
+          ..write('metricsJson: $metricsJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('recoveredAt: $recoveredAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -18237,6 +21556,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $StockStateTable stockState = $StockStateTable(this);
+  late final $ProductGroupsTable productGroups = $ProductGroupsTable(this);
+  late final $ProductGroupMembersTable productGroupMembers =
+      $ProductGroupMembersTable(this);
+  late final $ProductIntelligenceStatesTable productIntelligenceStates =
+      $ProductIntelligenceStatesTable(this);
+  late final $SupplierSwitchEventsTable supplierSwitchEvents =
+      $SupplierSwitchEventsTable(this);
+  late final $ListingPauseEventsTable listingPauseEvents =
+      $ListingPauseEventsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -18266,6 +21594,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     listingHealthMetrics,
     customerMetrics,
     stockState,
+    productGroups,
+    productGroupMembers,
+    productIntelligenceStates,
+    supplierSwitchEvents,
+    listingPauseEvents,
   ];
 }
 
@@ -19147,6 +22480,8 @@ typedef $$OrdersTableCreateCompanionBuilder =
       Value<bool> queuedForCapital,
       Value<double?> riskScore,
       Value<String?> riskFactorsJson,
+      Value<String?> buyerMessage,
+      Value<String?> deliveryMethodName,
     });
 typedef $$OrdersTableUpdateCompanionBuilder =
     OrdersCompanion Function({
@@ -19175,6 +22510,8 @@ typedef $$OrdersTableUpdateCompanionBuilder =
       Value<bool> queuedForCapital,
       Value<double?> riskScore,
       Value<String?> riskFactorsJson,
+      Value<String?> buyerMessage,
+      Value<String?> deliveryMethodName,
     });
 
 class $$OrdersTableFilterComposer
@@ -19308,6 +22645,16 @@ class $$OrdersTableFilterComposer
 
   ColumnFilters<String> get riskFactorsJson => $composableBuilder(
     column: $table.riskFactorsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get buyerMessage => $composableBuilder(
+    column: $table.buyerMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deliveryMethodName => $composableBuilder(
+    column: $table.deliveryMethodName,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -19445,6 +22792,16 @@ class $$OrdersTableOrderingComposer
     column: $table.riskFactorsJson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get buyerMessage => $composableBuilder(
+    column: $table.buyerMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deliveryMethodName => $composableBuilder(
+    column: $table.deliveryMethodName,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OrdersTableAnnotationComposer
@@ -19564,6 +22921,16 @@ class $$OrdersTableAnnotationComposer
     column: $table.riskFactorsJson,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get buyerMessage => $composableBuilder(
+    column: $table.buyerMessage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get deliveryMethodName => $composableBuilder(
+    column: $table.deliveryMethodName,
+    builder: (column) => column,
+  );
 }
 
 class $$OrdersTableTableManager
@@ -19619,6 +22986,8 @@ class $$OrdersTableTableManager
                 Value<bool> queuedForCapital = const Value.absent(),
                 Value<double?> riskScore = const Value.absent(),
                 Value<String?> riskFactorsJson = const Value.absent(),
+                Value<String?> buyerMessage = const Value.absent(),
+                Value<String?> deliveryMethodName = const Value.absent(),
               }) => OrdersCompanion(
                 id: id,
                 tenantId: tenantId,
@@ -19645,6 +23014,8 @@ class $$OrdersTableTableManager
                 queuedForCapital: queuedForCapital,
                 riskScore: riskScore,
                 riskFactorsJson: riskFactorsJson,
+                buyerMessage: buyerMessage,
+                deliveryMethodName: deliveryMethodName,
               ),
           createCompanionCallback:
               ({
@@ -19673,6 +23044,8 @@ class $$OrdersTableTableManager
                 Value<bool> queuedForCapital = const Value.absent(),
                 Value<double?> riskScore = const Value.absent(),
                 Value<String?> riskFactorsJson = const Value.absent(),
+                Value<String?> buyerMessage = const Value.absent(),
+                Value<String?> deliveryMethodName = const Value.absent(),
               }) => OrdersCompanion.insert(
                 id: id,
                 tenantId: tenantId,
@@ -19699,6 +23072,8 @@ class $$OrdersTableTableManager
                 queuedForCapital: queuedForCapital,
                 riskScore: riskScore,
                 riskFactorsJson: riskFactorsJson,
+                buyerMessage: buyerMessage,
+                deliveryMethodName: deliveryMethodName,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -21027,6 +24402,9 @@ typedef $$SuppliersTableCreateCompanionBuilder =
       Value<String?> warehouseEmail,
       Value<String?> feedSource,
       Value<String?> shopUrl,
+      Value<String?> regulationsUrl,
+      Value<String?> termsUrl,
+      Value<String?> returnPolicyUrl,
     });
 typedef $$SuppliersTableUpdateCompanionBuilder =
     SuppliersCompanion Function({
@@ -21049,6 +24427,9 @@ typedef $$SuppliersTableUpdateCompanionBuilder =
       Value<String?> warehouseEmail,
       Value<String?> feedSource,
       Value<String?> shopUrl,
+      Value<String?> regulationsUrl,
+      Value<String?> termsUrl,
+      Value<String?> returnPolicyUrl,
     });
 
 class $$SuppliersTableFilterComposer
@@ -21152,6 +24533,21 @@ class $$SuppliersTableFilterComposer
 
   ColumnFilters<String> get shopUrl => $composableBuilder(
     column: $table.shopUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get regulationsUrl => $composableBuilder(
+    column: $table.regulationsUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get termsUrl => $composableBuilder(
+    column: $table.termsUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnPolicyUrl => $composableBuilder(
+    column: $table.returnPolicyUrl,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -21259,6 +24655,21 @@ class $$SuppliersTableOrderingComposer
     column: $table.shopUrl,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get regulationsUrl => $composableBuilder(
+    column: $table.regulationsUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get termsUrl => $composableBuilder(
+    column: $table.termsUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get returnPolicyUrl => $composableBuilder(
+    column: $table.returnPolicyUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SuppliersTableAnnotationComposer
@@ -21354,6 +24765,19 @@ class $$SuppliersTableAnnotationComposer
 
   GeneratedColumn<String> get shopUrl =>
       $composableBuilder(column: $table.shopUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get regulationsUrl => $composableBuilder(
+    column: $table.regulationsUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get termsUrl =>
+      $composableBuilder(column: $table.termsUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get returnPolicyUrl => $composableBuilder(
+    column: $table.returnPolicyUrl,
+    builder: (column) => column,
+  );
 }
 
 class $$SuppliersTableTableManager
@@ -21406,6 +24830,9 @@ class $$SuppliersTableTableManager
                 Value<String?> warehouseEmail = const Value.absent(),
                 Value<String?> feedSource = const Value.absent(),
                 Value<String?> shopUrl = const Value.absent(),
+                Value<String?> regulationsUrl = const Value.absent(),
+                Value<String?> termsUrl = const Value.absent(),
+                Value<String?> returnPolicyUrl = const Value.absent(),
               }) => SuppliersCompanion(
                 id: id,
                 tenantId: tenantId,
@@ -21426,6 +24853,9 @@ class $$SuppliersTableTableManager
                 warehouseEmail: warehouseEmail,
                 feedSource: feedSource,
                 shopUrl: shopUrl,
+                regulationsUrl: regulationsUrl,
+                termsUrl: termsUrl,
+                returnPolicyUrl: returnPolicyUrl,
               ),
           createCompanionCallback:
               ({
@@ -21448,6 +24878,9 @@ class $$SuppliersTableTableManager
                 Value<String?> warehouseEmail = const Value.absent(),
                 Value<String?> feedSource = const Value.absent(),
                 Value<String?> shopUrl = const Value.absent(),
+                Value<String?> regulationsUrl = const Value.absent(),
+                Value<String?> termsUrl = const Value.absent(),
+                Value<String?> returnPolicyUrl = const Value.absent(),
               }) => SuppliersCompanion.insert(
                 id: id,
                 tenantId: tenantId,
@@ -21468,6 +24901,9 @@ class $$SuppliersTableTableManager
                 warehouseEmail: warehouseEmail,
                 feedSource: feedSource,
                 shopUrl: shopUrl,
+                regulationsUrl: regulationsUrl,
+                termsUrl: termsUrl,
+                returnPolicyUrl: returnPolicyUrl,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -26657,6 +30093,1511 @@ typedef $$StockStateTableProcessedTableManager =
       StockStateRow,
       PrefetchHooks Function()
     >;
+typedef $$ProductGroupsTableCreateCompanionBuilder =
+    ProductGroupsCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      required String groupId,
+      required String canonicalProductId,
+      Value<String?> ean,
+      Value<String?> sku,
+      Value<String?> titleNormalized,
+      Value<String?> attributesHash,
+      Value<String?> imageHash,
+      Value<int> matchVersion,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+    });
+typedef $$ProductGroupsTableUpdateCompanionBuilder =
+    ProductGroupsCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      Value<String> groupId,
+      Value<String> canonicalProductId,
+      Value<String?> ean,
+      Value<String?> sku,
+      Value<String?> titleNormalized,
+      Value<String?> attributesHash,
+      Value<String?> imageHash,
+      Value<int> matchVersion,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+class $$ProductGroupsTableFilterComposer
+    extends Composer<_$AppDatabase, $ProductGroupsTable> {
+  $$ProductGroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalProductId => $composableBuilder(
+    column: $table.canonicalProductId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sku => $composableBuilder(
+    column: $table.sku,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get titleNormalized => $composableBuilder(
+    column: $table.titleNormalized,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get attributesHash => $composableBuilder(
+    column: $table.attributesHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imageHash => $composableBuilder(
+    column: $table.imageHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get matchVersion => $composableBuilder(
+    column: $table.matchVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProductGroupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProductGroupsTable> {
+  $$ProductGroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get canonicalProductId => $composableBuilder(
+    column: $table.canonicalProductId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sku => $composableBuilder(
+    column: $table.sku,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get titleNormalized => $composableBuilder(
+    column: $table.titleNormalized,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get attributesHash => $composableBuilder(
+    column: $table.attributesHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imageHash => $composableBuilder(
+    column: $table.imageHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get matchVersion => $composableBuilder(
+    column: $table.matchVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProductGroupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProductGroupsTable> {
+  $$ProductGroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get canonicalProductId => $composableBuilder(
+    column: $table.canonicalProductId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ean =>
+      $composableBuilder(column: $table.ean, builder: (column) => column);
+
+  GeneratedColumn<String> get sku =>
+      $composableBuilder(column: $table.sku, builder: (column) => column);
+
+  GeneratedColumn<String> get titleNormalized => $composableBuilder(
+    column: $table.titleNormalized,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get attributesHash => $composableBuilder(
+    column: $table.attributesHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get imageHash =>
+      $composableBuilder(column: $table.imageHash, builder: (column) => column);
+
+  GeneratedColumn<int> get matchVersion => $composableBuilder(
+    column: $table.matchVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ProductGroupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProductGroupsTable,
+          ProductGroupRow,
+          $$ProductGroupsTableFilterComposer,
+          $$ProductGroupsTableOrderingComposer,
+          $$ProductGroupsTableAnnotationComposer,
+          $$ProductGroupsTableCreateCompanionBuilder,
+          $$ProductGroupsTableUpdateCompanionBuilder,
+          (
+            ProductGroupRow,
+            BaseReferences<_$AppDatabase, $ProductGroupsTable, ProductGroupRow>,
+          ),
+          ProductGroupRow,
+          PrefetchHooks Function()
+        > {
+  $$ProductGroupsTableTableManager(_$AppDatabase db, $ProductGroupsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProductGroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProductGroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProductGroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                Value<String> groupId = const Value.absent(),
+                Value<String> canonicalProductId = const Value.absent(),
+                Value<String?> ean = const Value.absent(),
+                Value<String?> sku = const Value.absent(),
+                Value<String?> titleNormalized = const Value.absent(),
+                Value<String?> attributesHash = const Value.absent(),
+                Value<String?> imageHash = const Value.absent(),
+                Value<int> matchVersion = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => ProductGroupsCompanion(
+                id: id,
+                tenantId: tenantId,
+                groupId: groupId,
+                canonicalProductId: canonicalProductId,
+                ean: ean,
+                sku: sku,
+                titleNormalized: titleNormalized,
+                attributesHash: attributesHash,
+                imageHash: imageHash,
+                matchVersion: matchVersion,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                required String groupId,
+                required String canonicalProductId,
+                Value<String?> ean = const Value.absent(),
+                Value<String?> sku = const Value.absent(),
+                Value<String?> titleNormalized = const Value.absent(),
+                Value<String?> attributesHash = const Value.absent(),
+                Value<String?> imageHash = const Value.absent(),
+                Value<int> matchVersion = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+              }) => ProductGroupsCompanion.insert(
+                id: id,
+                tenantId: tenantId,
+                groupId: groupId,
+                canonicalProductId: canonicalProductId,
+                ean: ean,
+                sku: sku,
+                titleNormalized: titleNormalized,
+                attributesHash: attributesHash,
+                imageHash: imageHash,
+                matchVersion: matchVersion,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProductGroupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProductGroupsTable,
+      ProductGroupRow,
+      $$ProductGroupsTableFilterComposer,
+      $$ProductGroupsTableOrderingComposer,
+      $$ProductGroupsTableAnnotationComposer,
+      $$ProductGroupsTableCreateCompanionBuilder,
+      $$ProductGroupsTableUpdateCompanionBuilder,
+      (
+        ProductGroupRow,
+        BaseReferences<_$AppDatabase, $ProductGroupsTable, ProductGroupRow>,
+      ),
+      ProductGroupRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ProductGroupMembersTableCreateCompanionBuilder =
+    ProductGroupMembersCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      required String groupId,
+      required String productId,
+      Value<double> confidence,
+      Value<String> matchedBy,
+      required DateTime createdAt,
+    });
+typedef $$ProductGroupMembersTableUpdateCompanionBuilder =
+    ProductGroupMembersCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      Value<String> groupId,
+      Value<String> productId,
+      Value<double> confidence,
+      Value<String> matchedBy,
+      Value<DateTime> createdAt,
+    });
+
+class $$ProductGroupMembersTableFilterComposer
+    extends Composer<_$AppDatabase, $ProductGroupMembersTable> {
+  $$ProductGroupMembersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get matchedBy => $composableBuilder(
+    column: $table.matchedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProductGroupMembersTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProductGroupMembersTable> {
+  $$ProductGroupMembersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get matchedBy => $composableBuilder(
+    column: $table.matchedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProductGroupMembersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProductGroupMembersTable> {
+  $$ProductGroupMembersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get matchedBy =>
+      $composableBuilder(column: $table.matchedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ProductGroupMembersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProductGroupMembersTable,
+          ProductGroupMemberRow,
+          $$ProductGroupMembersTableFilterComposer,
+          $$ProductGroupMembersTableOrderingComposer,
+          $$ProductGroupMembersTableAnnotationComposer,
+          $$ProductGroupMembersTableCreateCompanionBuilder,
+          $$ProductGroupMembersTableUpdateCompanionBuilder,
+          (
+            ProductGroupMemberRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ProductGroupMembersTable,
+              ProductGroupMemberRow
+            >,
+          ),
+          ProductGroupMemberRow,
+          PrefetchHooks Function()
+        > {
+  $$ProductGroupMembersTableTableManager(
+    _$AppDatabase db,
+    $ProductGroupMembersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProductGroupMembersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProductGroupMembersTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ProductGroupMembersTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                Value<String> groupId = const Value.absent(),
+                Value<String> productId = const Value.absent(),
+                Value<double> confidence = const Value.absent(),
+                Value<String> matchedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => ProductGroupMembersCompanion(
+                id: id,
+                tenantId: tenantId,
+                groupId: groupId,
+                productId: productId,
+                confidence: confidence,
+                matchedBy: matchedBy,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                required String groupId,
+                required String productId,
+                Value<double> confidence = const Value.absent(),
+                Value<String> matchedBy = const Value.absent(),
+                required DateTime createdAt,
+              }) => ProductGroupMembersCompanion.insert(
+                id: id,
+                tenantId: tenantId,
+                groupId: groupId,
+                productId: productId,
+                confidence: confidence,
+                matchedBy: matchedBy,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProductGroupMembersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProductGroupMembersTable,
+      ProductGroupMemberRow,
+      $$ProductGroupMembersTableFilterComposer,
+      $$ProductGroupMembersTableOrderingComposer,
+      $$ProductGroupMembersTableAnnotationComposer,
+      $$ProductGroupMembersTableCreateCompanionBuilder,
+      $$ProductGroupMembersTableUpdateCompanionBuilder,
+      (
+        ProductGroupMemberRow,
+        BaseReferences<
+          _$AppDatabase,
+          $ProductGroupMembersTable,
+          ProductGroupMemberRow
+        >,
+      ),
+      ProductGroupMemberRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ProductIntelligenceStatesTableCreateCompanionBuilder =
+    ProductIntelligenceStatesCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      required String productId,
+      required String contentHash,
+      Value<String?> groupId,
+      Value<double?> qualityScore,
+      Value<double?> returnRiskScore,
+      Value<String?> competitionLevel,
+      Value<String?> debugJson,
+      required DateTime lastProcessedAt,
+    });
+typedef $$ProductIntelligenceStatesTableUpdateCompanionBuilder =
+    ProductIntelligenceStatesCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      Value<String> productId,
+      Value<String> contentHash,
+      Value<String?> groupId,
+      Value<double?> qualityScore,
+      Value<double?> returnRiskScore,
+      Value<String?> competitionLevel,
+      Value<String?> debugJson,
+      Value<DateTime> lastProcessedAt,
+    });
+
+class $$ProductIntelligenceStatesTableFilterComposer
+    extends Composer<_$AppDatabase, $ProductIntelligenceStatesTable> {
+  $$ProductIntelligenceStatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get qualityScore => $composableBuilder(
+    column: $table.qualityScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get returnRiskScore => $composableBuilder(
+    column: $table.returnRiskScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get competitionLevel => $composableBuilder(
+    column: $table.competitionLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get debugJson => $composableBuilder(
+    column: $table.debugJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastProcessedAt => $composableBuilder(
+    column: $table.lastProcessedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProductIntelligenceStatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProductIntelligenceStatesTable> {
+  $$ProductIntelligenceStatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get qualityScore => $composableBuilder(
+    column: $table.qualityScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get returnRiskScore => $composableBuilder(
+    column: $table.returnRiskScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get competitionLevel => $composableBuilder(
+    column: $table.competitionLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get debugJson => $composableBuilder(
+    column: $table.debugJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastProcessedAt => $composableBuilder(
+    column: $table.lastProcessedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProductIntelligenceStatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProductIntelligenceStatesTable> {
+  $$ProductIntelligenceStatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<double> get qualityScore => $composableBuilder(
+    column: $table.qualityScore,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get returnRiskScore => $composableBuilder(
+    column: $table.returnRiskScore,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get competitionLevel => $composableBuilder(
+    column: $table.competitionLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get debugJson =>
+      $composableBuilder(column: $table.debugJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastProcessedAt => $composableBuilder(
+    column: $table.lastProcessedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$ProductIntelligenceStatesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProductIntelligenceStatesTable,
+          ProductIntelligenceStateRow,
+          $$ProductIntelligenceStatesTableFilterComposer,
+          $$ProductIntelligenceStatesTableOrderingComposer,
+          $$ProductIntelligenceStatesTableAnnotationComposer,
+          $$ProductIntelligenceStatesTableCreateCompanionBuilder,
+          $$ProductIntelligenceStatesTableUpdateCompanionBuilder,
+          (
+            ProductIntelligenceStateRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ProductIntelligenceStatesTable,
+              ProductIntelligenceStateRow
+            >,
+          ),
+          ProductIntelligenceStateRow,
+          PrefetchHooks Function()
+        > {
+  $$ProductIntelligenceStatesTableTableManager(
+    _$AppDatabase db,
+    $ProductIntelligenceStatesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProductIntelligenceStatesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ProductIntelligenceStatesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ProductIntelligenceStatesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                Value<String> productId = const Value.absent(),
+                Value<String> contentHash = const Value.absent(),
+                Value<String?> groupId = const Value.absent(),
+                Value<double?> qualityScore = const Value.absent(),
+                Value<double?> returnRiskScore = const Value.absent(),
+                Value<String?> competitionLevel = const Value.absent(),
+                Value<String?> debugJson = const Value.absent(),
+                Value<DateTime> lastProcessedAt = const Value.absent(),
+              }) => ProductIntelligenceStatesCompanion(
+                id: id,
+                tenantId: tenantId,
+                productId: productId,
+                contentHash: contentHash,
+                groupId: groupId,
+                qualityScore: qualityScore,
+                returnRiskScore: returnRiskScore,
+                competitionLevel: competitionLevel,
+                debugJson: debugJson,
+                lastProcessedAt: lastProcessedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                required String productId,
+                required String contentHash,
+                Value<String?> groupId = const Value.absent(),
+                Value<double?> qualityScore = const Value.absent(),
+                Value<double?> returnRiskScore = const Value.absent(),
+                Value<String?> competitionLevel = const Value.absent(),
+                Value<String?> debugJson = const Value.absent(),
+                required DateTime lastProcessedAt,
+              }) => ProductIntelligenceStatesCompanion.insert(
+                id: id,
+                tenantId: tenantId,
+                productId: productId,
+                contentHash: contentHash,
+                groupId: groupId,
+                qualityScore: qualityScore,
+                returnRiskScore: returnRiskScore,
+                competitionLevel: competitionLevel,
+                debugJson: debugJson,
+                lastProcessedAt: lastProcessedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProductIntelligenceStatesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProductIntelligenceStatesTable,
+      ProductIntelligenceStateRow,
+      $$ProductIntelligenceStatesTableFilterComposer,
+      $$ProductIntelligenceStatesTableOrderingComposer,
+      $$ProductIntelligenceStatesTableAnnotationComposer,
+      $$ProductIntelligenceStatesTableCreateCompanionBuilder,
+      $$ProductIntelligenceStatesTableUpdateCompanionBuilder,
+      (
+        ProductIntelligenceStateRow,
+        BaseReferences<
+          _$AppDatabase,
+          $ProductIntelligenceStatesTable,
+          ProductIntelligenceStateRow
+        >,
+      ),
+      ProductIntelligenceStateRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SupplierSwitchEventsTableCreateCompanionBuilder =
+    SupplierSwitchEventsCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      required String groupId,
+      Value<String?> fromSupplierId,
+      required String toSupplierId,
+      required String reason,
+      Value<double?> marginBeforePercent,
+      Value<double?> marginAfterPercent,
+      Value<String?> listingId,
+      Value<String?> orderId,
+      required DateTime createdAt,
+    });
+typedef $$SupplierSwitchEventsTableUpdateCompanionBuilder =
+    SupplierSwitchEventsCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      Value<String> groupId,
+      Value<String?> fromSupplierId,
+      Value<String> toSupplierId,
+      Value<String> reason,
+      Value<double?> marginBeforePercent,
+      Value<double?> marginAfterPercent,
+      Value<String?> listingId,
+      Value<String?> orderId,
+      Value<DateTime> createdAt,
+    });
+
+class $$SupplierSwitchEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $SupplierSwitchEventsTable> {
+  $$SupplierSwitchEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fromSupplierId => $composableBuilder(
+    column: $table.fromSupplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toSupplierId => $composableBuilder(
+    column: $table.toSupplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get marginBeforePercent => $composableBuilder(
+    column: $table.marginBeforePercent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get marginAfterPercent => $composableBuilder(
+    column: $table.marginAfterPercent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get listingId => $composableBuilder(
+    column: $table.listingId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SupplierSwitchEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SupplierSwitchEventsTable> {
+  $$SupplierSwitchEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupId => $composableBuilder(
+    column: $table.groupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fromSupplierId => $composableBuilder(
+    column: $table.fromSupplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toSupplierId => $composableBuilder(
+    column: $table.toSupplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get marginBeforePercent => $composableBuilder(
+    column: $table.marginBeforePercent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get marginAfterPercent => $composableBuilder(
+    column: $table.marginAfterPercent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get listingId => $composableBuilder(
+    column: $table.listingId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SupplierSwitchEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SupplierSwitchEventsTable> {
+  $$SupplierSwitchEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get fromSupplierId => $composableBuilder(
+    column: $table.fromSupplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get toSupplierId => $composableBuilder(
+    column: $table.toSupplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<double> get marginBeforePercent => $composableBuilder(
+    column: $table.marginBeforePercent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get marginAfterPercent => $composableBuilder(
+    column: $table.marginAfterPercent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get listingId =>
+      $composableBuilder(column: $table.listingId, builder: (column) => column);
+
+  GeneratedColumn<String> get orderId =>
+      $composableBuilder(column: $table.orderId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SupplierSwitchEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SupplierSwitchEventsTable,
+          SupplierSwitchEventRow,
+          $$SupplierSwitchEventsTableFilterComposer,
+          $$SupplierSwitchEventsTableOrderingComposer,
+          $$SupplierSwitchEventsTableAnnotationComposer,
+          $$SupplierSwitchEventsTableCreateCompanionBuilder,
+          $$SupplierSwitchEventsTableUpdateCompanionBuilder,
+          (
+            SupplierSwitchEventRow,
+            BaseReferences<
+              _$AppDatabase,
+              $SupplierSwitchEventsTable,
+              SupplierSwitchEventRow
+            >,
+          ),
+          SupplierSwitchEventRow,
+          PrefetchHooks Function()
+        > {
+  $$SupplierSwitchEventsTableTableManager(
+    _$AppDatabase db,
+    $SupplierSwitchEventsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SupplierSwitchEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SupplierSwitchEventsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SupplierSwitchEventsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                Value<String> groupId = const Value.absent(),
+                Value<String?> fromSupplierId = const Value.absent(),
+                Value<String> toSupplierId = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<double?> marginBeforePercent = const Value.absent(),
+                Value<double?> marginAfterPercent = const Value.absent(),
+                Value<String?> listingId = const Value.absent(),
+                Value<String?> orderId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => SupplierSwitchEventsCompanion(
+                id: id,
+                tenantId: tenantId,
+                groupId: groupId,
+                fromSupplierId: fromSupplierId,
+                toSupplierId: toSupplierId,
+                reason: reason,
+                marginBeforePercent: marginBeforePercent,
+                marginAfterPercent: marginAfterPercent,
+                listingId: listingId,
+                orderId: orderId,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                required String groupId,
+                Value<String?> fromSupplierId = const Value.absent(),
+                required String toSupplierId,
+                required String reason,
+                Value<double?> marginBeforePercent = const Value.absent(),
+                Value<double?> marginAfterPercent = const Value.absent(),
+                Value<String?> listingId = const Value.absent(),
+                Value<String?> orderId = const Value.absent(),
+                required DateTime createdAt,
+              }) => SupplierSwitchEventsCompanion.insert(
+                id: id,
+                tenantId: tenantId,
+                groupId: groupId,
+                fromSupplierId: fromSupplierId,
+                toSupplierId: toSupplierId,
+                reason: reason,
+                marginBeforePercent: marginBeforePercent,
+                marginAfterPercent: marginAfterPercent,
+                listingId: listingId,
+                orderId: orderId,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SupplierSwitchEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SupplierSwitchEventsTable,
+      SupplierSwitchEventRow,
+      $$SupplierSwitchEventsTableFilterComposer,
+      $$SupplierSwitchEventsTableOrderingComposer,
+      $$SupplierSwitchEventsTableAnnotationComposer,
+      $$SupplierSwitchEventsTableCreateCompanionBuilder,
+      $$SupplierSwitchEventsTableUpdateCompanionBuilder,
+      (
+        SupplierSwitchEventRow,
+        BaseReferences<
+          _$AppDatabase,
+          $SupplierSwitchEventsTable,
+          SupplierSwitchEventRow
+        >,
+      ),
+      SupplierSwitchEventRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ListingPauseEventsTableCreateCompanionBuilder =
+    ListingPauseEventsCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      required String listingId,
+      required String pauseLevel,
+      required String reason,
+      Value<String?> metricsJson,
+      required DateTime createdAt,
+      Value<DateTime?> recoveredAt,
+    });
+typedef $$ListingPauseEventsTableUpdateCompanionBuilder =
+    ListingPauseEventsCompanion Function({
+      Value<int> id,
+      Value<int> tenantId,
+      Value<String> listingId,
+      Value<String> pauseLevel,
+      Value<String> reason,
+      Value<String?> metricsJson,
+      Value<DateTime> createdAt,
+      Value<DateTime?> recoveredAt,
+    });
+
+class $$ListingPauseEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $ListingPauseEventsTable> {
+  $$ListingPauseEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get listingId => $composableBuilder(
+    column: $table.listingId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pauseLevel => $composableBuilder(
+    column: $table.pauseLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metricsJson => $composableBuilder(
+    column: $table.metricsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get recoveredAt => $composableBuilder(
+    column: $table.recoveredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ListingPauseEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ListingPauseEventsTable> {
+  $$ListingPauseEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tenantId => $composableBuilder(
+    column: $table.tenantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get listingId => $composableBuilder(
+    column: $table.listingId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pauseLevel => $composableBuilder(
+    column: $table.pauseLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metricsJson => $composableBuilder(
+    column: $table.metricsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get recoveredAt => $composableBuilder(
+    column: $table.recoveredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ListingPauseEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ListingPauseEventsTable> {
+  $$ListingPauseEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get listingId =>
+      $composableBuilder(column: $table.listingId, builder: (column) => column);
+
+  GeneratedColumn<String> get pauseLevel => $composableBuilder(
+    column: $table.pauseLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get metricsJson => $composableBuilder(
+    column: $table.metricsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get recoveredAt => $composableBuilder(
+    column: $table.recoveredAt,
+    builder: (column) => column,
+  );
+}
+
+class $$ListingPauseEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ListingPauseEventsTable,
+          ListingPauseEventRow,
+          $$ListingPauseEventsTableFilterComposer,
+          $$ListingPauseEventsTableOrderingComposer,
+          $$ListingPauseEventsTableAnnotationComposer,
+          $$ListingPauseEventsTableCreateCompanionBuilder,
+          $$ListingPauseEventsTableUpdateCompanionBuilder,
+          (
+            ListingPauseEventRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ListingPauseEventsTable,
+              ListingPauseEventRow
+            >,
+          ),
+          ListingPauseEventRow,
+          PrefetchHooks Function()
+        > {
+  $$ListingPauseEventsTableTableManager(
+    _$AppDatabase db,
+    $ListingPauseEventsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ListingPauseEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ListingPauseEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ListingPauseEventsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                Value<String> listingId = const Value.absent(),
+                Value<String> pauseLevel = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String?> metricsJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> recoveredAt = const Value.absent(),
+              }) => ListingPauseEventsCompanion(
+                id: id,
+                tenantId: tenantId,
+                listingId: listingId,
+                pauseLevel: pauseLevel,
+                reason: reason,
+                metricsJson: metricsJson,
+                createdAt: createdAt,
+                recoveredAt: recoveredAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> tenantId = const Value.absent(),
+                required String listingId,
+                required String pauseLevel,
+                required String reason,
+                Value<String?> metricsJson = const Value.absent(),
+                required DateTime createdAt,
+                Value<DateTime?> recoveredAt = const Value.absent(),
+              }) => ListingPauseEventsCompanion.insert(
+                id: id,
+                tenantId: tenantId,
+                listingId: listingId,
+                pauseLevel: pauseLevel,
+                reason: reason,
+                metricsJson: metricsJson,
+                createdAt: createdAt,
+                recoveredAt: recoveredAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ListingPauseEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ListingPauseEventsTable,
+      ListingPauseEventRow,
+      $$ListingPauseEventsTableFilterComposer,
+      $$ListingPauseEventsTableOrderingComposer,
+      $$ListingPauseEventsTableAnnotationComposer,
+      $$ListingPauseEventsTableCreateCompanionBuilder,
+      $$ListingPauseEventsTableUpdateCompanionBuilder,
+      (
+        ListingPauseEventRow,
+        BaseReferences<
+          _$AppDatabase,
+          $ListingPauseEventsTable,
+          ListingPauseEventRow
+        >,
+      ),
+      ListingPauseEventRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -26715,4 +31656,17 @@ class $AppDatabaseManager {
       $$CustomerMetricsTableTableManager(_db, _db.customerMetrics);
   $$StockStateTableTableManager get stockState =>
       $$StockStateTableTableManager(_db, _db.stockState);
+  $$ProductGroupsTableTableManager get productGroups =>
+      $$ProductGroupsTableTableManager(_db, _db.productGroups);
+  $$ProductGroupMembersTableTableManager get productGroupMembers =>
+      $$ProductGroupMembersTableTableManager(_db, _db.productGroupMembers);
+  $$ProductIntelligenceStatesTableTableManager get productIntelligenceStates =>
+      $$ProductIntelligenceStatesTableTableManager(
+        _db,
+        _db.productIntelligenceStates,
+      );
+  $$SupplierSwitchEventsTableTableManager get supplierSwitchEvents =>
+      $$SupplierSwitchEventsTableTableManager(_db, _db.supplierSwitchEvents);
+  $$ListingPauseEventsTableTableManager get listingPauseEvents =>
+      $$ListingPauseEventsTableTableManager(_db, _db.listingPauseEvents);
 }

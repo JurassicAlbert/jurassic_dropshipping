@@ -57,6 +57,15 @@ mixin _$Supplier {
   /// External shop URL or identifier
   String? get shopUrl => throw _privateConstructorUsedError;
 
+  /// Regulations / T&C URL (e.g. supplier terms, country rules).
+  String? get regulationsUrl => throw _privateConstructorUsedError;
+
+  /// Terms and conditions URL.
+  String? get termsUrl => throw _privateConstructorUsedError;
+
+  /// Return policy document URL.
+  String? get returnPolicyUrl => throw _privateConstructorUsedError;
+
   /// Serializes this Supplier to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -90,6 +99,9 @@ abstract class $SupplierCopyWith<$Res> {
     String? warehouseEmail,
     String? feedSource,
     String? shopUrl,
+    String? regulationsUrl,
+    String? termsUrl,
+    String? returnPolicyUrl,
   });
 }
 
@@ -125,6 +137,9 @@ class _$SupplierCopyWithImpl<$Res, $Val extends Supplier>
     Object? warehouseEmail = freezed,
     Object? feedSource = freezed,
     Object? shopUrl = freezed,
+    Object? regulationsUrl = freezed,
+    Object? termsUrl = freezed,
+    Object? returnPolicyUrl = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -196,6 +211,18 @@ class _$SupplierCopyWithImpl<$Res, $Val extends Supplier>
                 ? _value.shopUrl
                 : shopUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
+            regulationsUrl: freezed == regulationsUrl
+                ? _value.regulationsUrl
+                : regulationsUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            termsUrl: freezed == termsUrl
+                ? _value.termsUrl
+                : termsUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            returnPolicyUrl: freezed == returnPolicyUrl
+                ? _value.returnPolicyUrl
+                : returnPolicyUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -229,6 +256,9 @@ abstract class _$$SupplierImplCopyWith<$Res>
     String? warehouseEmail,
     String? feedSource,
     String? shopUrl,
+    String? regulationsUrl,
+    String? termsUrl,
+    String? returnPolicyUrl,
   });
 }
 
@@ -263,6 +293,9 @@ class __$$SupplierImplCopyWithImpl<$Res>
     Object? warehouseEmail = freezed,
     Object? feedSource = freezed,
     Object? shopUrl = freezed,
+    Object? regulationsUrl = freezed,
+    Object? termsUrl = freezed,
+    Object? returnPolicyUrl = freezed,
   }) {
     return _then(
       _$SupplierImpl(
@@ -334,6 +367,18 @@ class __$$SupplierImplCopyWithImpl<$Res>
             ? _value.shopUrl
             : shopUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        regulationsUrl: freezed == regulationsUrl
+            ? _value.regulationsUrl
+            : regulationsUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        termsUrl: freezed == termsUrl
+            ? _value.termsUrl
+            : termsUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        returnPolicyUrl: freezed == returnPolicyUrl
+            ? _value.returnPolicyUrl
+            : returnPolicyUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -360,6 +405,9 @@ class _$SupplierImpl implements _Supplier {
     this.warehouseEmail,
     this.feedSource,
     this.shopUrl,
+    this.regulationsUrl,
+    this.termsUrl,
+    this.returnPolicyUrl,
   });
 
   factory _$SupplierImpl.fromJson(Map<String, dynamic> json) =>
@@ -419,9 +467,21 @@ class _$SupplierImpl implements _Supplier {
   @override
   final String? shopUrl;
 
+  /// Regulations / T&C URL (e.g. supplier terms, country rules).
+  @override
+  final String? regulationsUrl;
+
+  /// Terms and conditions URL.
+  @override
+  final String? termsUrl;
+
+  /// Return policy document URL.
+  @override
+  final String? returnPolicyUrl;
+
   @override
   String toString() {
-    return 'Supplier(id: $id, name: $name, platformType: $platformType, countryCode: $countryCode, rating: $rating, returnWindowDays: $returnWindowDays, returnShippingCost: $returnShippingCost, restockingFeePercent: $restockingFeePercent, acceptsNoReasonReturns: $acceptsNoReasonReturns, warehouseAddress: $warehouseAddress, warehouseCity: $warehouseCity, warehouseZip: $warehouseZip, warehouseCountry: $warehouseCountry, warehousePhone: $warehousePhone, warehouseEmail: $warehouseEmail, feedSource: $feedSource, shopUrl: $shopUrl)';
+    return 'Supplier(id: $id, name: $name, platformType: $platformType, countryCode: $countryCode, rating: $rating, returnWindowDays: $returnWindowDays, returnShippingCost: $returnShippingCost, restockingFeePercent: $restockingFeePercent, acceptsNoReasonReturns: $acceptsNoReasonReturns, warehouseAddress: $warehouseAddress, warehouseCity: $warehouseCity, warehouseZip: $warehouseZip, warehouseCountry: $warehouseCountry, warehousePhone: $warehousePhone, warehouseEmail: $warehouseEmail, feedSource: $feedSource, shopUrl: $shopUrl, regulationsUrl: $regulationsUrl, termsUrl: $termsUrl, returnPolicyUrl: $returnPolicyUrl)';
   }
 
   @override
@@ -458,12 +518,18 @@ class _$SupplierImpl implements _Supplier {
                 other.warehouseEmail == warehouseEmail) &&
             (identical(other.feedSource, feedSource) ||
                 other.feedSource == feedSource) &&
-            (identical(other.shopUrl, shopUrl) || other.shopUrl == shopUrl));
+            (identical(other.shopUrl, shopUrl) || other.shopUrl == shopUrl) &&
+            (identical(other.regulationsUrl, regulationsUrl) ||
+                other.regulationsUrl == regulationsUrl) &&
+            (identical(other.termsUrl, termsUrl) ||
+                other.termsUrl == termsUrl) &&
+            (identical(other.returnPolicyUrl, returnPolicyUrl) ||
+                other.returnPolicyUrl == returnPolicyUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     name,
@@ -482,7 +548,10 @@ class _$SupplierImpl implements _Supplier {
     warehouseEmail,
     feedSource,
     shopUrl,
-  );
+    regulationsUrl,
+    termsUrl,
+    returnPolicyUrl,
+  ]);
 
   /// Create a copy of Supplier
   /// with the given fields replaced by the non-null parameter values.
@@ -517,6 +586,9 @@ abstract class _Supplier implements Supplier {
     final String? warehouseEmail,
     final String? feedSource,
     final String? shopUrl,
+    final String? regulationsUrl,
+    final String? termsUrl,
+    final String? returnPolicyUrl,
   }) = _$SupplierImpl;
 
   factory _Supplier.fromJson(Map<String, dynamic> json) =
@@ -574,6 +646,18 @@ abstract class _Supplier implements Supplier {
   /// External shop URL or identifier
   @override
   String? get shopUrl;
+
+  /// Regulations / T&C URL (e.g. supplier terms, country rules).
+  @override
+  String? get regulationsUrl;
+
+  /// Terms and conditions URL.
+  @override
+  String? get termsUrl;
+
+  /// Return policy document URL.
+  @override
+  String? get returnPolicyUrl;
 
   /// Create a copy of Supplier
   /// with the given fields replaced by the non-null parameter values.

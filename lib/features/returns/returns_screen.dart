@@ -8,6 +8,9 @@ import 'package:jurassic_dropshipping/domain/post_order/returned_stock.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
+import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 import 'package:jurassic_dropshipping/features/shared/search_filter_bar.dart';
 
 class ReturnsScreen extends ConsumerStatefulWidget {
@@ -65,6 +68,10 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
         final filtered = _applyFilters(returns);
         return Column(
           children: [
+            const ScreenHelpSection(
+            description: ScreenHelpTexts.returns,
+            howToUse: 'How to use: Tap a return to edit. Update status, refund amount and routing. Use "Compute routing" in the edit dialog to determine where the return goes.',
+          ),
             SearchFilterBar(
               controller: _searchController,
               onChanged: (_) => setState(() {}),
@@ -247,6 +254,11 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
                       icon: const Icon(Icons.route, size: 18),
                       label: const Text('Compute routing'),
                     ),
+                    const SizedBox(width: 6),
+                    InfoIcon(
+                      tooltip: 'Uses return policies and supplier data to suggest where this return should go: '
+                          'seller address, supplier warehouse, return center, or disposal.',
+                    ),
                   ],
                 ),
               ),
@@ -391,7 +403,23 @@ class _ReturnCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text('Order: ${r.orderId}'),
-            Text('Reason: ${_reasonLabel(r.reason)}'),
+            if (r.reason == ReturnReason.noReason && (r.notes == null || r.notes!.isEmpty))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  'Buyer sent parcel back (no reason or message provided)',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            Text('Reason: ${_reasonLabel(r.reason)}${r.reason == ReturnReason.noReason ? ' (parcel return only)' : ''}'),
+            if (r.returnTrackingNumber != null && r.returnTrackingNumber!.isNotEmpty)
+              Text(
+                'Return tracking: ${r.returnTrackingNumber}${r.returnCarrier != null && r.returnCarrier!.isNotEmpty ? ' (${r.returnCarrier})' : ''}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
             if (r.returnDestination != null)
               Text(
                 'Return to: ${r.returnDestination == ReturnDestination.toSeller ? "Seller (you)" : "Supplier"}',
@@ -399,13 +427,18 @@ class _ReturnCard extends StatelessWidget {
               ),
             if (r.returnRoutingDestination != null)
               Text(
-                'Routing: ${switch (r.returnRoutingDestination!) {
-                  ReturnRoutingDestination.sellerAddress => 'Seller address',
-                  ReturnRoutingDestination.supplierWarehouse => 'Supplier warehouse',
+                'Destination: ${switch (r.returnRoutingDestination!) {
+                  ReturnRoutingDestination.sellerAddress => 'Seller',
+                  ReturnRoutingDestination.supplierWarehouse => 'Supplier',
                   ReturnRoutingDestination.returnCenter => 'Return center',
                   ReturnRoutingDestination.disposal => 'Disposal',
                 }}',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            if (r.status == ReturnStatus.received)
+              Text(
+                'Restock: eligible (add in edit dialog)',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.tertiary),
               ),
             if (r.refundAmount != null)
               Text('Refund: \$${r.refundAmount!.toStringAsFixed(2)}'),

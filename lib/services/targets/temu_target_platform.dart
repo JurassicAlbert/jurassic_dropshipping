@@ -94,4 +94,24 @@ class TemuTargetPlatform implements TargetPlatform {
   Future<Map<String, dynamic>?> getListingDetails(String listingId) async {
     return null;
   }
+
+  @override
+  Future<List<CustomerReturnSummary>> getCustomerReturns({DateTime? since}) async {
+    throw UnsupportedError('getCustomerReturns not supported on Temu');
+  }
+
+  @override
+  Future<CustomerReturnDetails?> getCustomerReturn(String returnId) async {
+    throw UnsupportedError('getCustomerReturn not supported on Temu');
+  }
+
+  @override
+  Future<void> rejectReturn(String returnId, String reason) async {
+    throw UnsupportedError('rejectReturn not supported on Temu');
+  }
+
+  @override
+  Future<void> issueRefund(String targetOrderId, double amount, String reason) async {
+    throw UnsupportedError('issueRefund not supported on Temu');
+  }
 }

@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
+import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
+import 'package:jurassic_dropshipping/features/shared/section_header.dart';
 import 'package:jurassic_dropshipping/services/secure_storage_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -213,15 +216,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const ScreenHelpSection(
+            description: ScreenHelpTexts.settings,
+            howToUse: 'How to use: Edit rules and save. Connect marketplaces in Integrations. Use Developer tools for demo data.',
+          ),
             if (_showSaveBanner)
               MaterialBanner(
-                content: const Text('Rules saved successfully!'),
+                content: Text(ref.watch(appLocalizationsProvider).rulesSaved),
                 leading: Icon(Icons.check_circle, color: cs.primary),
                 backgroundColor: cs.primaryContainer,
                 actions: [
                   TextButton(
                     onPressed: () => setState(() => _showSaveBanner = false),
-                    child: const Text('Dismiss'),
+                    child: Text(ref.watch(appLocalizationsProvider).dismiss),
                   ),
                 ],
               ),
@@ -283,9 +290,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // ─── Rules Section ───
+            // ─── Business rules & automation ───
+            SectionHeader(
+              title: 'Business rules & automation',
+              subtitle: 'Pricing, margins, fees and automation thresholds.',
+              icon: Icons.tune,
+              infoTooltip: 'These rules control how the system decides prices, which listings to create, '
+                  'and when to pause or reject. Min profit % is required for every listing. Save after editing.',
+            ),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -314,7 +328,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _minProfitController,
-                      decoration: const InputDecoration(labelText: 'Min profit %', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Min profit %',
+                        helperText: 'Minimum profit margin required for listings; below this, listings can be auto-paused.',
+                        border: OutlineInputBorder(),
+                      ),
                       keyboardType: TextInputType.number,
                       validator: (v) => _validatePositiveNumber(v, 'Min profit %'),
                     ),
@@ -328,7 +346,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: _pricingStrategy,
-                      decoration: const InputDecoration(labelText: 'Pricing strategy', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Pricing strategy',
+                        helperText: 'How selling price is set relative to competitors and cost.',
+                        border: OutlineInputBorder(),
+                      ),
                       items: const [
                         DropdownMenuItem(
                           value: PricingStrategyId.alwaysBelowLowest,
@@ -457,6 +479,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       controller: _incidentRulesController,
                       decoration: const InputDecoration(
                         labelText: 'Incident rules JSON',
+                        helperText: 'Optional. Conditions: return_shipping_gt_source_cost, defect_no_returns, default. Actions: auto_refund_without_return, process_return, request_rma, pending_manual.',
                         border: OutlineInputBorder(),
                         hintText: '[{"condition":"return_shipping_gt_source_cost","action":"auto_refund_without_return"}]',
                       ),
@@ -780,16 +803,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 24),
 
-            // ─── Integrations Header ───
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Icon(Icons.extension, color: cs.primary),
-                  const SizedBox(width: 8),
-                  Text('Integrations', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-                ],
-              ),
+            // ─── Marketplace integrations ───
+            const SectionHeader(
+              title: 'Marketplace integrations',
+              subtitle: 'Connect Allegro, CJ, API2Cart and Temu. Configure credentials and OAuth.',
+              icon: Icons.extension,
             ),
             Card(
               child: Padding(
@@ -1110,15 +1128,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       children: [
                         Icon(Icons.palette, color: cs.tertiary),
                         const SizedBox(width: 8),
-                        Text('Appearance', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                        Text(ref.watch(appLocalizationsProvider).appearance, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: 12),
+                    // Language: Polish (default) / English
+                    Row(
+                      children: [
+                        Icon(Icons.language, size: 20, color: cs.onSurfaceVariant),
+                        const SizedBox(width: 8),
+                        Text(ref.watch(appLocalizationsProvider).language, style: Theme.of(context).textTheme.bodyMedium),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: DropdownButtonFormField<Locale>(
+                            key: ValueKey(ref.watch(localeProvider).valueOrNull?.languageCode ?? 'pl'),
+                            initialValue: ref.watch(localeProvider).valueOrNull ?? const Locale('pl'),
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            items: const [
+                              DropdownMenuItem(value: Locale('pl'), child: Text('Polski')),
+                              DropdownMenuItem(value: Locale('en'), child: Text('English')),
+                            ],
+                            onChanged: (Locale? value) async {
+                              if (value != null) {
+                                await ref.read(localeProvider.notifier).setLocale(value);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                     SegmentedButton<ThemeMode>(
-                      segments: const [
-                        ButtonSegment(value: ThemeMode.system, label: Text('System')),
-                        ButtonSegment(value: ThemeMode.light, label: Text('Light')),
-                        ButtonSegment(value: ThemeMode.dark, label: Text('Dark')),
+                      segments: [
+                        ButtonSegment(value: ThemeMode.system, label: Text(ref.watch(appLocalizationsProvider).themeSystem)),
+                        ButtonSegment(value: ThemeMode.light, label: Text(ref.watch(appLocalizationsProvider).themeLight)),
+                        ButtonSegment(value: ThemeMode.dark, label: Text(ref.watch(appLocalizationsProvider).themeDark)),
                       ],
                       selected: {ref.watch(themeModeProvider)},
                       onSelectionChanged: (modes) {
@@ -1204,8 +1251,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
-                      icon: const Icon(Icons.delete_forever, color: Colors.red),
-                      label: const Text('Drop all data', style: TextStyle(color: Colors.red)),
+                      icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                      label: Text('Drop all data', style: TextStyle(color: Theme.of(context).colorScheme.error)),
                       onPressed: () async {
                         final confirmed = await showDialog<bool>(
                           context: context,
@@ -1215,7 +1262,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             actions: [
                               TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                               FilledButton(
-                                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                                style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
                                 onPressed: () => Navigator.pop(ctx, true),
                                 child: const Text('Delete everything'),
                               ),
