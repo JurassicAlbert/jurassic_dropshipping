@@ -6,6 +6,7 @@ import 'package:jurassic_dropshipping/domain/catalog/catalog_cache.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/scanner.dart';
 import 'package:jurassic_dropshipping/domain/observability/observability_metrics.dart';
 import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/product_intelligence_service.dart';
 import 'package:jurassic_dropshipping/services/marketplace_listing_sync_service.dart';
 import 'package:jurassic_dropshipping/services/price_refresh_service.dart';
 import 'package:jurassic_dropshipping/services/process_incident_job_handler.dart';
@@ -18,6 +19,7 @@ class BackgroundJobProcessorService {
     required this.scanner,
     required this.fulfillmentService,
     required this.priceRefreshService,
+    required this.productIntelligenceService,
     required this.processIncidentJobHandler,
     required this.marketplaceListingSyncService,
     this.listingUpdateDelay = const Duration(seconds: 2),
@@ -29,6 +31,7 @@ class BackgroundJobProcessorService {
   final Scanner scanner;
   final FulfillmentService fulfillmentService;
   final PriceRefreshService priceRefreshService;
+  final ProductIntelligenceService productIntelligenceService;
   final ProcessIncidentJobHandler processIncidentJobHandler;
   final MarketplaceListingSyncService marketplaceListingSyncService;
   /// Delay after each update_listing job to respect marketplace rate limits (Phase 23).
@@ -48,6 +51,13 @@ class BackgroundJobProcessorService {
       switch (job.jobType) {
         case BackgroundJobType.scan:
           await scanner.run();
+          break;
+        case BackgroundJobType.catalogIntelligence:
+          final limitRaw = payload['limit'];
+          final limit = limitRaw is int ? limitRaw : 200;
+          final sinceRaw = payload['since'] as String?;
+          final since = sinceRaw != null ? DateTime.tryParse(sinceRaw) : null;
+          await productIntelligenceService.processBatch(limit: limit, since: since);
           break;
         case BackgroundJobType.fulfillOrder:
           final orderId = payload['orderId'] as String?;

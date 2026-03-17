@@ -7,6 +7,7 @@ import 'package:jurassic_dropshipping/data/repositories/product_repository.dart'
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/auto_pausing_service.dart';
 import 'package:uuid/uuid.dart';
 
 /// After price refresh or marketplace sync, checks active listings for margin drops
@@ -19,6 +20,7 @@ class ProfitGuardService {
     required this.supplierOfferRepository,
     required this.decisionLogRepository,
     required this.pricingCalculator,
+    this.autoPausingService,
   });
 
   final RulesRepository rulesRepository;
@@ -27,6 +29,7 @@ class ProfitGuardService {
   final SupplierOfferRepository supplierOfferRepository;
   final DecisionLogRepository decisionLogRepository;
   final PricingCalculator pricingCalculator;
+  final AutoPausingService? autoPausingService;
 
   static const double _minAbsoluteProfitPln = 5.0;
 
@@ -89,7 +92,15 @@ class ProfitGuardService {
         // Phase 20: optionally auto-pause listing when margin below threshold (price drift protection).
         if (rules.autoPauseListingWhenMarginBelowThreshold) {
           try {
-            await listingRepository.updateStatus(listing.id, ListingStatus.paused);
+            if (autoPausingService != null) {
+              await autoPausingService!.applyHardPause(
+                listingId: listing.id,
+                reason: 'negative_margin',
+                metrics: snapshot,
+              );
+            } else {
+              await listingRepository.updateStatus(listing.id, ListingStatus.paused);
+            }
             appLogger.i('ProfitGuard: paused listing ${listing.id} (margin ${margin.toStringAsFixed(1)}% < ${rules.minProfitPercent}%)');
           } catch (e, st) {
             appLogger.e('ProfitGuard: failed to pause listing ${listing.id}', error: e, stackTrace: st);
@@ -97,6 +108,36 @@ class ProfitGuardService {
         }
       } catch (e, st) {
         appLogger.e('ProfitGuard: failed to write alert for listing ${listing.id}', error: e, stackTrace: st);
+      }
+    }
+
+    // Auto-recovery (safe): if listing is paused and is now above thresholds, resume.
+    if (rules.autoPauseListingWhenMarginBelowThreshold && autoPausingService != null) {
+      final paused = await listingRepository.getByStatus(ListingStatus.paused);
+      for (final listing in paused) {
+        final product = await productRepository.getByLocalId(listing.productId);
+        if (product == null) continue;
+        final offers = await supplierOfferRepository.getByProductId(listing.productId);
+        final bestOffer = offers.isEmpty
+            ? null
+            : offers.reduce((a, b) => (a.cost + (a.shippingCost ?? 0)) <= (b.cost + (b.shippingCost ?? 0)) ? a : b);
+        final currentCost = bestOffer != null
+            ? (bestOffer.cost + (bestOffer.shippingCost ?? 0))
+            : product.basePrice + (product.shippingCost ?? 0);
+        final margin = pricingCalculator.profitMarginPercent(
+          listing.sellingPrice,
+          currentCost,
+          listing.targetPlatformId,
+          rules,
+        );
+        final absoluteProfit = listing.sellingPrice - currentCost;
+        final ok = margin >= rules.minProfitPercent && absoluteProfit >= _minAbsoluteProfitPln;
+        if (ok) {
+          await autoPausingService!.tryRecoverHardPause(
+            listingId: listing.id,
+            reason: 'margin_recovered',
+          );
+        }
       }
     }
 

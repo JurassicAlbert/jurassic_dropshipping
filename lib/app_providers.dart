@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' show Locale, ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/services/auth_service.dart';
 import 'package:jurassic_dropshipping/data/models/decision_log.dart';
@@ -16,6 +17,7 @@ import 'package:jurassic_dropshipping/data/repositories/marketplace_account_repo
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/product_group_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/return_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/returned_stock_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/financial_ledger_repository.dart';
@@ -85,10 +87,15 @@ import 'package:jurassic_dropshipping/services/targets/temu_seller_client.dart';
 import 'package:jurassic_dropshipping/services/targets/temu_target_platform.dart';
 import 'package:jurassic_dropshipping/services/locale_service.dart';
 import 'package:jurassic_dropshipping/l10n/app_localizations.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/product_intelligence_service.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/supplier_switching_engine.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/auto_pausing_service.dart';
 
 /// Feature flag keys (stored in DB; when missing, default is false).
 const String kFeatureFlagTemuTarget = 'temu_target';
 const String kFeatureFlagMessages = 'messages';
+/// Phase 37: enable product intelligence pipeline (matching + scoring + pricing inputs). Off by default.
+const String kFeatureFlagProductIntelligence = 'product_intelligence';
 
 /// Current tenant id for multi-tenant isolation. Single-tenant defaults to 1.
 final currentTenantIdProvider = Provider<int>((ref) => 1);
@@ -131,6 +138,7 @@ final dbProvider = Provider<AppDatabase>((ref) => AppDatabase());
 final secureStorageProvider = Provider<SecureStorageService>((ref) => SecureStorageService());
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) => ProductRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
+final productGroupRepositoryProvider = Provider<ProductGroupRepository>((ref) => ProductGroupRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final listingRepositoryProvider = Provider<ListingRepository>((ref) => ListingRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final orderRepositoryProvider = Provider<OrderRepository>((ref) => OrderRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final decisionLogRepositoryProvider = Provider<DecisionLogRepository>((ref) => DecisionLogRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
@@ -138,10 +146,10 @@ final featureFlagRepositoryProvider = Provider<FeatureFlagRepository>((ref) => F
 final rulesRepositoryProvider = Provider<RulesRepository>((ref) => RulesRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final supplierRepositoryProvider = Provider<SupplierRepository>((ref) => SupplierRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final supplierOfferRepositoryProvider = Provider<SupplierOfferRepository>((ref) => SupplierOfferRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
+final supplierReliabilityScoreRepositoryProvider = Provider<SupplierReliabilityScoreRepository>((ref) => SupplierReliabilityScoreRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final returnRepositoryProvider = Provider<ReturnRepository>((ref) => ReturnRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final supplierReturnPolicyRepositoryProvider = Provider<SupplierReturnPolicyRepository>((ref) => SupplierReturnPolicyRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final incidentRecordRepositoryProvider = Provider<IncidentRecordRepository>((ref) => IncidentRecordRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
-final supplierReliabilityScoreRepositoryProvider = Provider<SupplierReliabilityScoreRepository>((ref) => SupplierReliabilityScoreRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final listingHealthMetricsRepositoryProvider = Provider<ListingHealthMetricsRepository>((ref) => ListingHealthMetricsRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final customerMetricsRepositoryProvider = Provider<CustomerMetricsRepository>((ref) => CustomerMetricsRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final stockStateRepositoryProvider = Provider<StockStateRepository>((ref) => StockStateRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
@@ -172,6 +180,7 @@ final listingHealthScoringServiceProvider = Provider<ListingHealthScoringService
   returnRepository: ref.watch(returnRepositoryProvider),
   metricsRepository: ref.watch(listingHealthMetricsRepositoryProvider),
   rulesRepository: ref.watch(rulesRepositoryProvider),
+  autoPausingService: ref.watch(autoPausingServiceProvider),
 ));
 final customerAbuseScoringServiceProvider = Provider<CustomerAbuseScoringService>((ref) => CustomerAbuseScoringService(
   orderRepository: ref.watch(orderRepositoryProvider),
@@ -329,6 +338,23 @@ final observabilityMetricsProvider = Provider<ObservabilityMetrics>((ref) => Obs
 /// Phase 30: optional in-memory catalog cache (product/listing/offer). Reduces DB reads; invalidated on catalog_event.
 final catalogCacheProvider = Provider<CatalogCache>((ref) => CatalogCache());
 
+/// Phase 37: product intelligence pipeline core (hash-based skip + batch processing).
+final productIntelligenceServiceProvider = Provider<ProductIntelligenceService>((ref) => ProductIntelligenceService(
+  db: ref.watch(dbProvider),
+  productRepository: ref.watch(productRepositoryProvider),
+  productGroupRepository: ref.watch(productGroupRepositoryProvider),
+  tenantId: ref.watch(currentTenantIdProvider),
+));
+
+final supplierSwitchingEngineProvider = Provider<SupplierSwitchingEngine>((ref) => SupplierSwitchingEngine(
+  db: ref.watch(dbProvider),
+  productGroupRepository: ref.watch(productGroupRepositoryProvider),
+  productRepository: ref.watch(productRepositoryProvider),
+  supplierOfferRepository: ref.watch(supplierOfferRepositoryProvider),
+  supplierReliabilityScoreRepository: ref.watch(supplierReliabilityScoreRepositoryProvider),
+  tenantId: ref.watch(currentTenantIdProvider),
+));
+
 /// Pending background job count for dashboard system status.
 final pendingJobCountProvider = FutureProvider<int>((ref) async {
   return ref.read(backgroundJobRepositoryProvider).countPending();
@@ -364,6 +390,8 @@ final fulfillmentServiceProvider = Provider<FulfillmentService>((ref) => Fulfill
   capitalManagementService: ref.watch(capitalManagementServiceProvider),
   inventoryService: ref.watch(inventoryServiceProvider),
   rulesRepository: ref.watch(rulesRepositoryProvider),
+  supplierSwitchingEngine: ref.watch(supplierSwitchingEngineProvider),
+  featureFlagRepository: ref.watch(featureFlagRepositoryProvider),
 ));
 
 final allegroOAuthProvider = Provider<AllegroOAuthService>((ref) => AllegroOAuthService(
@@ -377,6 +405,13 @@ final profitGuardServiceProvider = Provider<ProfitGuardService>((ref) => ProfitG
   supplierOfferRepository: ref.watch(supplierOfferRepositoryProvider),
   decisionLogRepository: ref.watch(decisionLogRepositoryProvider),
   pricingCalculator: ref.watch(pricingCalculatorProvider),
+  autoPausingService: ref.watch(autoPausingServiceProvider),
+));
+
+final autoPausingServiceProvider = Provider<AutoPausingService>((ref) => AutoPausingService(
+  db: ref.watch(dbProvider),
+  listingRepository: ref.watch(listingRepositoryProvider),
+  tenantId: ref.watch(currentTenantIdProvider),
 ));
 
 final processIncidentJobHandlerProvider = Provider<ProcessIncidentJobHandler>((ref) => ProcessIncidentJobHandler(
@@ -397,6 +432,7 @@ final backgroundJobProcessorServiceProvider = Provider<BackgroundJobProcessorSer
   scanner: ref.watch(scannerProvider),
   fulfillmentService: ref.watch(fulfillmentServiceProvider),
   priceRefreshService: ref.watch(priceRefreshServiceProvider),
+  productIntelligenceService: ref.watch(productIntelligenceServiceProvider),
   processIncidentJobHandler: ref.watch(processIncidentJobHandlerProvider),
   marketplaceListingSyncService: ref.watch(marketplaceListingSyncServiceProvider),
   observabilityMetrics: ref.watch(observabilityMetricsProvider),
@@ -426,6 +462,7 @@ final automationSchedulerProvider = Provider<AutomationScheduler>((ref) => Autom
   rulesRepository: ref.watch(rulesRepositoryProvider),
   priceRefreshService: ref.watch(priceRefreshServiceProvider),
   marketplaceListingSyncService: ref.watch(marketplaceListingSyncServiceProvider),
+  featureFlagRepository: ref.watch(featureFlagRepositoryProvider),
   jobRepository: ref.watch(backgroundJobRepositoryProvider),
   jobProcessor: ref.watch(backgroundJobProcessorServiceProvider),
   observabilityMetrics: ref.watch(observabilityMetricsProvider),
@@ -508,6 +545,28 @@ final listingHealthMetricsListProvider = FutureProvider<List<ListingHealthRecord
 final customerMetricsListProvider = FutureProvider<List<CustomerMetricsRecord>>((ref) => ref.watch(customerMetricsRepositoryProvider).getAll());
 
 final returnedStockListProvider = FutureProvider<List<ReturnedStock>>((ref) => ref.watch(returnedStockRepositoryProvider).getAll());
+
+/// Phase 37: recent supplier switch events (for UI).
+final recentSupplierSwitchEventsProvider = FutureProvider<List<SupplierSwitchEventRow>>((ref) async {
+  final db = ref.watch(dbProvider);
+  final tenantId = ref.watch(currentTenantIdProvider);
+  return await (db.select(db.supplierSwitchEvents)
+        ..where((t) => t.tenantId.equals(tenantId))
+        ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+        ..limit(50))
+      .get();
+});
+
+/// Phase 37: recent listing pause events (for UI).
+final recentListingPauseEventsProvider = FutureProvider<List<ListingPauseEventRow>>((ref) async {
+  final db = ref.watch(dbProvider);
+  final tenantId = ref.watch(currentTenantIdProvider);
+  return await (db.select(db.listingPauseEvents)
+        ..where((t) => t.tenantId.equals(tenantId))
+        ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+        ..limit(100))
+      .get();
+});
 
 /// Inventory snapshots for orders (first 30 by key). Key = comma-separated order ids.
 /// Used on Orders screen to show "Available to sell" per order.

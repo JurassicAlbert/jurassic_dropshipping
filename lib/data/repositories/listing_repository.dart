@@ -114,4 +114,14 @@ class ListingRepository {
       ),
     );
   }
+
+  /// Phase 37: supplier switching — repoint a listing to a different product (same marketplace listing).
+  Future<void> updateProduct(String localId, String productId, {String? variantId}) async {
+    await (_db.update(_db.listings)..where((t) => t.tenantId.equals(tenantId) & t.localId.equals(localId))).write(
+      ListingsCompanion(
+        productId: Value(productId),
+        variantId: variantId != null ? Value(variantId) : const Value.absent(),
+      ),
+    );
+  }
 }

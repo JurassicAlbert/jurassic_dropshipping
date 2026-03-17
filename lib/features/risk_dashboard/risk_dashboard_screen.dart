@@ -10,6 +10,7 @@ import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 import 'package:jurassic_dropshipping/features/shared/section_header.dart';
+import 'package:jurassic_dropshipping/data/database/app_database.dart';
 
 class RiskDashboardScreen extends ConsumerWidget {
   const RiskDashboardScreen({super.key});
@@ -20,6 +21,8 @@ class RiskDashboardScreen extends ConsumerWidget {
     final healthAsync = ref.watch(listingHealthMetricsListProvider);
     final suppliersAsync = ref.watch(supplierReliabilityScoresProvider);
     final ordersAsync = ref.watch(ordersProvider);
+    final pausesAsync = ref.watch(recentListingPauseEventsProvider);
+    final switchesAsync = ref.watch(recentSupplierSwitchEventsProvider);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -54,6 +57,10 @@ class RiskDashboardScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 _NegativeMarginSection(listings: listings),
+                                const SizedBox(height: AppSpacing.sectionGap),
+                                _PausedListingsSection(listings: listings, pausesAsync: pausesAsync),
+                                const SizedBox(height: AppSpacing.sectionGap),
+                                _RecentSupplierSwitchesSection(switchesAsync: switchesAsync),
                                 const SizedBox(height: AppSpacing.sectionGap),
                                 _HighReturnRateSection(
                                   healthList: healthList,
@@ -130,6 +137,114 @@ class _NegativeMarginSection extends StatelessWidget {
                 );
               },
             ),
+    );
+  }
+}
+
+class _PausedListingsSection extends StatelessWidget {
+  const _PausedListingsSection({
+    required this.listings,
+    required this.pausesAsync,
+  });
+
+  final List<Listing> listings;
+  final AsyncValue<List<ListingPauseEventRow>> pausesAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    final paused = listings.where((l) => l.status == ListingStatus.paused).toList();
+    return _RiskSectionCard(
+      title: 'Paused listings (auto-protection)',
+      subtitle: 'Hard pauses are applied by ProfitGuard / Health scoring. Soft pauses are warnings only.',
+      count: paused.length,
+      severity: paused.isEmpty ? null : (paused.length > 5 ? 'High' : 'Medium'),
+      recommendedAction: 'Open Products to review paused items and reasons',
+      child: pausesAsync.when(
+        data: (events) {
+          final top = events.take(10).toList();
+          if (top.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Text('No pause events recorded yet.'),
+            );
+          }
+          return ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: top.length,
+            separatorBuilder: (_, _) => const Divider(height: 1),
+            itemBuilder: (_, i) {
+              final e = top[i];
+              final recovered = e.recoveredAt != null;
+              return ListTile(
+                title: Text('Listing ${e.listingId}'),
+                subtitle: Text('${e.pauseLevel.toUpperCase()} · ${e.reason}${recovered ? ' · recovered' : ''}'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                onTap: () => context.go('/products'),
+              );
+            },
+          );
+        },
+        loading: () => const Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: CircularProgressIndicator(),
+        ),
+        error: (_, _) => const Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Text('Could not load pause events.'),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentSupplierSwitchesSection extends StatelessWidget {
+  const _RecentSupplierSwitchesSection({required this.switchesAsync});
+
+  final AsyncValue<List<SupplierSwitchEventRow>> switchesAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return _RiskSectionCard(
+      title: 'Recent supplier switches',
+      subtitle: 'Automatic switches to protect fulfillment (loop-protected)',
+      count: switchesAsync.valueOrNull?.length ?? 0,
+      severity: null,
+      recommendedAction: 'Review if switches affect margin or quality',
+      child: switchesAsync.when(
+        data: (events) {
+          final top = events.take(10).toList();
+          if (top.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Text('No supplier switches recorded yet.'),
+            );
+          }
+          return ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: top.length,
+            separatorBuilder: (_, _) => const Divider(height: 1),
+            itemBuilder: (_, i) {
+              final e = top[i];
+              return ListTile(
+                title: Text('Group ${e.groupId}'),
+                subtitle: Text('${e.fromSupplierId ?? '—'} → ${e.toSupplierId} · ${e.reason}'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                onTap: () => context.go('/suppliers'),
+              );
+            },
+          );
+        },
+        loading: () => const Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: CircularProgressIndicator(),
+        ),
+        error: (_, _) => const Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Text('Could not load switch events.'),
+        ),
+      ),
     );
   }
 }

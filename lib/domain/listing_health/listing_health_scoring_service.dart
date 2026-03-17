@@ -7,6 +7,7 @@ import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart'
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/return_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/auto_pausing_service.dart';
 
 /// Phase 26: Computes per-listing health metrics and optionally pauses listings when thresholds exceeded.
 class ListingHealthScoringService {
@@ -17,6 +18,7 @@ class ListingHealthScoringService {
     required this.returnRepository,
     required this.metricsRepository,
     required this.rulesRepository,
+    this.autoPausingService,
   });
 
   final OrderRepository orderRepository;
@@ -25,6 +27,7 @@ class ListingHealthScoringService {
   final ReturnRepository returnRepository;
   final ListingHealthMetricsRepository metricsRepository;
   final RulesRepository rulesRepository;
+  final AutoPausingService? autoPausingService;
 
   /// Evaluates all listings that have orders since [window] and upserts metrics.
   /// If rules enable auto-pause and return/late rate exceed thresholds, pauses listing.
@@ -89,7 +92,20 @@ class ListingHealthScoringService {
           if (overReturn || overLate) {
             final listing = await listingRepository.getByLocalId(listingId);
             if (listing != null && listing.status == ListingStatus.active) {
-              await listingRepository.updateStatus(listingId, ListingStatus.paused);
+              if (autoPausingService != null) {
+                await autoPausingService!.applyHardPause(
+                  listingId: listingId,
+                  reason: 'health_threshold_exceeded',
+                  metrics: {
+                    'returnRatePercent': returnRatePercent,
+                    'lateRatePercent': lateRatePercent,
+                    'maxReturnRatePercent': rules.listingHealthMaxReturnRatePercent,
+                    'maxLateRatePercent': rules.listingHealthMaxLateRatePercent,
+                  },
+                );
+              } else {
+                await listingRepository.updateStatus(listingId, ListingStatus.paused);
+              }
               appLogger.i(
                 'ListingHealthScoring: paused listing $listingId (return ${returnRatePercent.toStringAsFixed(1)}%, late ${lateRatePercent.toStringAsFixed(1)}%)',
               );
@@ -102,6 +118,27 @@ class ListingHealthScoringService {
     }
     if (updated > 0) {
       appLogger.i('ListingHealthScoring: updated $updated listing health metric(s)');
+    }
+
+    // Auto-recovery: when thresholds are no longer exceeded, resume hard-paused listings.
+    if (rules.autoPauseListingWhenHealthPoor && autoPausingService != null) {
+      final paused = await listingRepository.getByStatus(ListingStatus.paused);
+      for (final listing in paused) {
+        final c = listingCounts[listing.id];
+        if (c == null || c.total == 0) continue;
+        final returnRatePercent = (c.returnOrIncident / c.total * 100);
+        final lateRatePercent = (c.late / c.total * 100);
+        final overReturn = rules.listingHealthMaxReturnRatePercent != null &&
+            returnRatePercent > rules.listingHealthMaxReturnRatePercent!;
+        final overLate = rules.listingHealthMaxLateRatePercent != null &&
+            lateRatePercent > rules.listingHealthMaxLateRatePercent!;
+        if (!overReturn && !overLate) {
+          await autoPausingService!.tryRecoverHardPause(
+            listingId: listing.id,
+            reason: 'health_recovered',
+          );
+        }
+      }
     }
     return updated;
   }

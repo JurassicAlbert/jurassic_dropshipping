@@ -16,6 +16,9 @@ import 'package:jurassic_dropshipping/domain/platforms.dart';
 import 'package:jurassic_dropshipping/services/distributed_lock_service.dart';
 import 'package:jurassic_dropshipping/services/order_cancellation_service.dart';
 import 'package:jurassic_dropshipping/services/resilient_source_platform.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/supplier_switching_engine.dart';
+import 'package:jurassic_dropshipping/data/repositories/feature_flag_repository.dart';
+import 'package:jurassic_dropshipping/app_providers.dart' show kFeatureFlagProductIntelligence;
 
 /// Sentinel sourceOrderId when order was fulfilled from returned stock (Phase 5).
 const String kSourceOrderIdFromReturnedStock = 'returned_stock';
@@ -36,6 +39,8 @@ class FulfillmentService {
     this.inventoryService,
     this.rulesRepository,
     this.observabilityMetrics,
+    this.supplierSwitchingEngine,
+    this.featureFlagRepository,
   });
 
   final OrderRepository orderRepository;
@@ -57,6 +62,9 @@ class FulfillmentService {
   final RulesRepository? rulesRepository;
   /// Phase 32: when set, records fulfillment success/failure for observability.
   final ObservabilityMetrics? observabilityMetrics;
+  /// Phase 37: optional supplier switching engine (feature-flagged).
+  final SupplierSwitchingEngine? supplierSwitchingEngine;
+  final FeatureFlagRepository? featureFlagRepository;
 
   /// CJ Dropshipping API error codes that indicate out-of-stock / inventory (CJ docs Appendix 1).
   /// 1602002 = Product removed from shelves, 1602003 = Variant removed from shelves,
@@ -132,7 +140,7 @@ class FulfillmentService {
     await _fulfillOrderImpl(order);
   }
 
-  Future<void> _fulfillOrderImpl(Order order) async {
+  Future<void> _fulfillOrderImpl(Order order, {bool didSwitch = false}) async {
     final listing = await listingRepository.getByLocalId(order.listingId) ??
         await listingRepository.getByTargetListingId(order.targetPlatformId, order.listingId);
     if (listing == null) {
@@ -275,6 +283,19 @@ class FulfillmentService {
             ?? freshProduct.variants.first;
         if (variant.stock < quantity) {
           appLogger.w('Fulfillment: pre-check failed - variant $variantId out of stock (${variant.stock})');
+          // Phase 37: attempt supplier switch once (feature-flagged) before failing.
+          final switched = await _trySwitchSupplierIfEnabled(
+            order: order,
+            listingId: listing.id,
+            currentProductId: product.id,
+            quantity: quantity,
+            didSwitch: didSwitch,
+          );
+          if (switched) {
+            await _fulfillOrderImpl(order, didSwitch: true);
+            return;
+          }
+
           await orderRepository.updateStatus(order.id, OrderStatus.failedOutOfStock);
           await _logMappingFailure(
             order: order,
@@ -334,6 +355,18 @@ class FulfillmentService {
       appLogger.e('Fulfillment: placeOrder failed', error: e, stackTrace: st);
       final outOfStock = isLikelyOutOfStock(e, st);
       if (outOfStock) {
+        final switched = await _trySwitchSupplierIfEnabled(
+          order: order,
+          listingId: listing.id,
+          currentProductId: product.id,
+          quantity: quantity,
+          didSwitch: didSwitch,
+        );
+        if (switched) {
+          await _fulfillOrderImpl(order, didSwitch: true);
+          return;
+        }
+
         await orderRepository.updateStatus(order.id, OrderStatus.failedOutOfStock);
         try {
           await orderCancellationService.cancelOrder(order, updateLocalStatus: false);
@@ -355,6 +388,49 @@ class FulfillmentService {
           },
         );
       }
+    }
+  }
+
+  Future<bool> _trySwitchSupplierIfEnabled({
+    required Order order,
+    required String listingId,
+    required String currentProductId,
+    required int quantity,
+    required bool didSwitch,
+  }) async {
+    if (didSwitch) return false;
+    if (supplierSwitchingEngine == null || featureFlagRepository == null) return false;
+    final enabled = await featureFlagRepository!.get(kFeatureFlagProductIntelligence);
+    if (!enabled) return false;
+
+    try {
+      final decision = await supplierSwitchingEngine!.chooseAlternativeForOutOfStock(
+        currentProductId: currentProductId,
+        listingId: listingId,
+        quantity: quantity,
+      );
+      if (decision == null) return false;
+
+      // Repoint listing to the alternative product. Reset variantId so we pick the first available variant.
+      await listingRepository.updateProduct(listingId, decision.toProductId, variantId: null);
+      await _logMappingFailure(
+        order: order,
+        reason: 'Supplier switch applied for OOS (group ${decision.groupId})',
+        details: {
+          'orderId': order.id,
+          'listingId': listingId,
+          'fromProductId': currentProductId,
+          'toProductId': decision.toProductId,
+          'fromSupplierId': decision.fromSupplierId,
+          'toSupplierId': decision.toSupplierId,
+          'reason': decision.reason,
+          'failureType': 'supplier_switch',
+        },
+      );
+      return true;
+    } catch (e, st) {
+      appLogger.e('Fulfillment: supplier switch attempt failed (proceeding with OOS fail)', error: e, stackTrace: st);
+      return false;
     }
   }
 

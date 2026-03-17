@@ -12,6 +12,8 @@ import 'package:jurassic_dropshipping/services/fulfillment_service.dart';
 import 'package:jurassic_dropshipping/services/marketplace_listing_sync_service.dart';
 import 'package:jurassic_dropshipping/services/order_sync_service.dart';
 import 'package:jurassic_dropshipping/services/price_refresh_service.dart';
+import 'package:jurassic_dropshipping/data/repositories/feature_flag_repository.dart';
+import 'package:jurassic_dropshipping/app_providers.dart' show kFeatureFlagProductIntelligence;
 
 class AutomationScheduler {
   AutomationScheduler({
@@ -21,6 +23,7 @@ class AutomationScheduler {
     required this.rulesRepository,
     required this.priceRefreshService,
     required this.marketplaceListingSyncService,
+    required this.featureFlagRepository,
     this.jobRepository,
     this.jobProcessor,
     this.observabilityMetrics,
@@ -32,6 +35,7 @@ class AutomationScheduler {
   final RulesRepository rulesRepository;
   final PriceRefreshService priceRefreshService;
   final MarketplaceListingSyncService marketplaceListingSyncService;
+  final FeatureFlagRepository featureFlagRepository;
   /// When set, scan/fulfill/price_refresh are enqueued and processed asynchronously (Phase B).
   final BackgroundJobRepository? jobRepository;
   final BackgroundJobProcessorService? jobProcessor;
@@ -252,6 +256,11 @@ class AutomationScheduler {
   Future<void> _runScan() async {
     if (jobRepository != null) {
       await jobRepository!.enqueue(BackgroundJobType.scan, {});
+      // Phase 37: optionally enqueue intelligence pipeline after scan.
+      final intelEnabled = await featureFlagRepository.get(kFeatureFlagProductIntelligence);
+      if (intelEnabled) {
+        await jobRepository!.enqueue(BackgroundJobType.catalogIntelligence, {'limit': 200});
+      }
       lastScanTime = DateTime.now();
       await _saveState();
       appLogger.i('AutomationScheduler: scan job enqueued');

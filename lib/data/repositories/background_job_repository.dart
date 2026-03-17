@@ -8,6 +8,8 @@ abstract final class BackgroundJobType {
   static const String scan = 'scan';
   static const String fulfillOrder = 'fulfill_order';
   static const String priceRefresh = 'price_refresh';
+  /// Phase 37: product intelligence pipeline (matching, quality/risk, pricing inputs). Payload: { limit?: int, since?: iso8601 }.
+  static const String catalogIntelligence = 'catalog_intelligence';
   /// Post-order: process one incident (suggest + apply decision). Payload: { incidentId: int }.
   static const String processIncident = 'process_incident';
   /// Phase 23: update one listing on marketplace (stock/title/description). Payload: { listingId: string }. Worker throttles rate.
