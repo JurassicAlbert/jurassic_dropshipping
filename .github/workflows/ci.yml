@@ -80,3 +80,46 @@ jobs:
 
       - name: Build Linux
         run: flutter build linux
+
+  admin-next-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: admin_next/package-lock.json
+
+      - name: Install admin dependencies
+        run: npm ci
+        working-directory: admin_next
+
+      - name: Lint admin
+        run: npm run lint
+        working-directory: admin_next
+
+      - name: Unit/component/API tests
+        run: npm run test
+        working-directory: admin_next
+
+      - name: Build admin
+        run: npm run build
+        working-directory: admin_next
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: admin_next
+
+      - name: Start admin server
+        run: |
+          npx next start -p 3001 &
+          npx wait-on http://127.0.0.1:3001
+        working-directory: admin_next
+
+      - name: E2E smoke
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
+        run: npm run test:e2e
+        working-directory: admin_next

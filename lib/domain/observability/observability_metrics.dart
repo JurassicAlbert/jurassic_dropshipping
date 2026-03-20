@@ -19,6 +19,13 @@ class ObservabilityMetrics {
   int _jobsProcessedTotal = 0;
   int _jobsFailedTotal = 0;
 
+  // Phase 37: product intelligence pipeline
+  int _intelProductsProcessedTotal = 0;
+  int _intelProductsSkippedTotal = 0;
+  int _supplierSwitchesTotal = 0;
+  int _autoPausesHardTotal = 0;
+  int _autoPausesSoftTotal = 0;
+
   void recordOrdersSynced(int count) {
     if (count <= 0) return;
     _ordersSyncedTotal += count;
@@ -64,6 +71,23 @@ class ObservabilityMetrics {
     _jobsFailedTotal++;
   }
 
+  void recordIntelProcessed(int processed, int skipped) {
+    if (processed > 0) _intelProductsProcessedTotal += processed;
+    if (skipped > 0) _intelProductsSkippedTotal += skipped;
+  }
+
+  void recordSupplierSwitch() {
+    _supplierSwitchesTotal++;
+  }
+
+  void recordAutoPauseHard() {
+    _autoPausesHardTotal++;
+  }
+
+  void recordAutoPauseSoft() {
+    _autoPausesSoftTotal++;
+  }
+
   /// Snapshot for logging or metrics endpoint. Keys are stable for parsing.
   ObservabilitySnapshot getSnapshot() {
     return ObservabilitySnapshot(
@@ -77,6 +101,11 @@ class ObservabilityMetrics {
       supplierApiFailedTotal: _supplierApiFailedTotal,
       jobsProcessedTotal: _jobsProcessedTotal,
       jobsFailedTotal: _jobsFailedTotal,
+      intelProductsProcessedTotal: _intelProductsProcessedTotal,
+      intelProductsSkippedTotal: _intelProductsSkippedTotal,
+      supplierSwitchesTotal: _supplierSwitchesTotal,
+      autoPausesHardTotal: _autoPausesHardTotal,
+      autoPausesSoftTotal: _autoPausesSoftTotal,
       at: DateTime.now(),
     );
   }
@@ -88,7 +117,9 @@ class ObservabilityMetrics {
         'fulfill_ok=${s.fulfillmentSuccessTotal} fulfill_fail=${s.fulfillmentFailedTotal} '
         'listing_enqueued=${s.listingUpdatesEnqueuedTotal} listing_processed=${s.listingUpdatesProcessedTotal} '
         'supplier_ok=${s.supplierApiSuccessTotal} supplier_fail=${s.supplierApiFailedTotal} '
-        'jobs_ok=${s.jobsProcessedTotal} jobs_fail=${s.jobsFailedTotal}';
+        'jobs_ok=${s.jobsProcessedTotal} jobs_fail=${s.jobsFailedTotal} '
+        'intel_ok=${s.intelProductsProcessedTotal} intel_skip=${s.intelProductsSkippedTotal} '
+        'switches=${s.supplierSwitchesTotal} pause_hard=${s.autoPausesHardTotal} pause_soft=${s.autoPausesSoftTotal}';
   }
 }
 
@@ -105,6 +136,11 @@ class ObservabilitySnapshot {
     required this.supplierApiFailedTotal,
     required this.jobsProcessedTotal,
     required this.jobsFailedTotal,
+    required this.intelProductsProcessedTotal,
+    required this.intelProductsSkippedTotal,
+    required this.supplierSwitchesTotal,
+    required this.autoPausesHardTotal,
+    required this.autoPausesSoftTotal,
     required this.at,
   });
 
@@ -118,5 +154,10 @@ class ObservabilitySnapshot {
   final int supplierApiFailedTotal;
   final int jobsProcessedTotal;
   final int jobsFailedTotal;
+  final int intelProductsProcessedTotal;
+  final int intelProductsSkippedTotal;
+  final int supplierSwitchesTotal;
+  final int autoPausesHardTotal;
+  final int autoPausesSoftTotal;
   final DateTime at;
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
+import 'package:jurassic_dropshipping/features/shared/section_header.dart';
 
 /// Dedicated page explaining what is automated vs where user action is needed.
 /// Settings-aware so copy reflects current rules (e.g. manual approval on/off).
@@ -20,15 +21,15 @@ class HowItWorksScreen extends ConsumerWidget {
       error: (e, _) => Center(child: Text('Could not load settings: $e')),
       data: (rules) {
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'How the system works',
-                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+              const SectionHeader(
+                title: 'How the system works',
+                icon: Icons.help_outline,
+                subtitle: 'What is automated, what needs your action, and how settings affect decisions.',
               ),
-              const SizedBox(height: 12),
               Text(
                 'This page explains what happens automatically and when you need to do something yourself. '
                 'Think of it as a map: the system handles a lot in the background, but some steps require your decision or action.',
@@ -36,7 +37,7 @@ class HowItWorksScreen extends ConsumerWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.sectionGap),
 
               _Section(
                 title: '1. Products and listings',
@@ -167,13 +168,13 @@ class HowItWorksScreen extends ConsumerWidget {
                 theme: theme,
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.sectionGap),
               _ModulesOverview(theme: theme),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.sectionGap),
               _DecisionFlowsSection(theme: theme, rules: rules),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.sectionGap),
               _FlowDiagramsSection(theme: theme, rules: rules),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.sectionGap),
               Card(
                 color: theme.colorScheme.surfaceContainerHighest,
                 child: Padding(

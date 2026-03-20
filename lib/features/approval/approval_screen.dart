@@ -11,6 +11,7 @@ import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 import 'package:jurassic_dropshipping/features/shared/section_header.dart';
+import 'package:jurassic_dropshipping/features/shared/message_insights.dart';
 
 class ApprovalScreen extends ConsumerWidget {
   const ApprovalScreen({super.key});
@@ -38,9 +39,9 @@ class ApprovalScreen extends ConsumerWidget {
                   'Orders: Approve to send the order to the supplier, Reject to cancel on the marketplace.',
             ),
             const ScreenHelpSection(
-            description: ScreenHelpTexts.approval,
-            howToUse: 'How to use: Approve to publish a listing or place an order with the supplier. Reject to cancel or set back to draft.',
-          ),
+              description: ScreenHelpTexts.approval,
+              howToUse: 'How to use: Approve to publish a listing or place an order with the supplier. Reject to cancel or set back to draft.',
+            ),
             const SizedBox(height: AppSpacing.sectionGap),
             const SectionHeader(title: 'Pending listings', icon: Icons.inventory_2),
             const SizedBox(height: AppSpacing.sm),
@@ -61,8 +62,8 @@ class ApprovalScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Text('Pending orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
+            const SectionHeader(title: 'Pending orders', icon: Icons.shopping_cart),
+            const SizedBox(height: AppSpacing.sm),
             pendingOrders.when(
               data: (orders) => orders.isEmpty
                   ? const EmptyState(
@@ -95,9 +96,11 @@ class _ListingApprovalTile extends ConsumerWidget {
     final listingRepo = ref.read(listingRepositoryProvider);
     final targets = ref.watch(targetsListProvider);
     final stockAsync = ref.watch(listingStockAtSourceProvider(listing.id));
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
         title: Text(listing.id),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,6 +188,7 @@ class _ListingApprovalTile extends ConsumerWidget {
           ],
         ),
       ),
+      ),
     );
   }
 }
@@ -198,9 +202,13 @@ class _OrderApprovalTile extends ConsumerWidget {
     final fulfillment = ref.read(fulfillmentServiceProvider);
     final orderCancellation = ref.read(orderCancellationServiceProvider);
     final stockAsync = ref.watch(orderStockAtSourceProvider(order.id));
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
+    final flags = ref.watch(featureFlagsProvider).valueOrNull ?? const <String, bool>{};
+    final messagingEnabled = flags[kFeatureFlagMessages] ?? false;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
         title: Text(order.targetOrderId),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,6 +219,10 @@ class _OrderApprovalTile extends ConsumerWidget {
               Text('Delivery: ${order.deliveryMethodName}', style: Theme.of(context).textTheme.bodySmall),
             if (order.buyerMessage != null && order.buyerMessage!.isNotEmpty)
               Text('Message: ${order.buyerMessage}', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)),
+            if (messagingEnabled && order.buyerMessage != null && order.buyerMessage!.trim().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              MessageInsights(message: order.buyerMessage!),
+            ],
             stockAsync.when(
               data: (stock) => stock != null
                   ? Text(
@@ -285,6 +297,7 @@ class _OrderApprovalTile extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

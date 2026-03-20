@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/features/analytics/analytics_engine.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
+import 'package:jurassic_dropshipping/features/shared/section_header.dart';
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
@@ -54,34 +56,32 @@ class AnalyticsScreen extends ConsumerWidget {
 
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SectionHeader(
+                  title: 'Analytics',
+                  icon: Icons.analytics,
+                  subtitle: 'KPIs, profit breakdowns, returns, and trend monitoring.',
+                ),
                 const ScreenHelpSection(
                   description: ScreenHelpTexts.analytics,
                   howToUse: 'How to use: Pull to refresh to reload data. Scroll to see KPIs, profit by platform, and returns analysis.',
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Analytics',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.sectionGap),
                 _SummaryKpiRow(engine: engine),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.sectionGap),
                 _MarginStrategyKpi(engine: engine),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.sectionGap),
                 _ProfitByPlatformChart(engine: engine),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.sectionGap),
                 _ProfitByProductList(engine: engine),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.sectionGap),
                 _IssuesAlerts(engine: engine),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.sectionGap),
                 _ProfitTrendChart(engine: engine),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.sectionGap),
                 _ReturnsAnalysis(engine: engine),
               ],
             ),
@@ -112,24 +112,28 @@ class _SummaryKpiRow extends StatelessWidget {
           value: '${engine.totalRevenue.toStringAsFixed(2)} PLN',
           icon: Icons.attach_money,
           color: cs.primary,
+          isPrimary: true,
         ),
         _KpiMetricCard(
           label: 'Total Profit',
           value: '${engine.totalProfit.toStringAsFixed(2)} PLN',
           icon: Icons.trending_up,
           color: profitColor,
+          isPrimary: true,
         ),
         _KpiMetricCard(
           label: 'Profit Margin',
           value: '${engine.profitMarginPercent.toStringAsFixed(1)}%',
           icon: Icons.pie_chart,
           color: cs.tertiary,
+          isPrimary: true,
         ),
         _KpiMetricCard(
           label: 'Return Rate',
           value: '${engine.returnRatePercent.toStringAsFixed(1)}%',
           icon: Icons.assignment_return,
           color: Colors.orange,
+          isPrimary: true,
         ),
       ],
     );
@@ -188,19 +192,31 @@ class _KpiMetricCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
+    this.isPrimary = false,
   });
   final String label;
   final String value;
   final IconData icon;
   final Color color;
+  final bool isPrimary;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final labelStyle = (isPrimary ? theme.textTheme.bodyMedium : theme.textTheme.bodySmall)?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+    );
+    final valueStyle = (isPrimary ? theme.textTheme.titleLarge : theme.textTheme.titleMedium)?.copyWith(
+      fontWeight: FontWeight.bold,
+      color: color,
+    );
+
     return SizedBox(
-      width: 180,
+      width: isPrimary ? 220 : 180,
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -212,19 +228,15 @@ class _KpiMetricCard extends StatelessWidget {
                   Flexible(
                     child: Text(
                       label,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: labelStyle,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
+                style: valueStyle,
               ),
             ],
           ),

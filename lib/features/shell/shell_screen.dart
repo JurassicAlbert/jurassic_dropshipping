@@ -70,13 +70,13 @@ class ShellScreen extends ConsumerWidget {
 
     Widget sectionHeader(String title) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
         child: Text(
           title,
-          style: theme.textTheme.labelSmall?.copyWith(
+          style: theme.textTheme.labelLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.8,
           ),
         ),
       );
@@ -87,16 +87,22 @@ class ShellScreen extends ConsumerWidget {
       final tooltip = index < ScreenHelpTexts.navTooltips.length
           ? ScreenHelpTexts.navTooltips[index]
           : labels[index];
+      final selected = current == _routes[index];
       return Tooltip(
         message: tooltip,
-        child: ListTile(
-          leading: Icon(_icons[index]),
-          title: Text(labels[index]),
-          selected: current == _routes[index],
-          onTap: () {
-            context.go(_routes[index]);
-            Navigator.of(context).pop();
-          },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+          child: ListTile(
+            leading: Icon(_icons[index]),
+            title: Text(labels[index]),
+            selected: selected,
+            selectedTileColor: theme.colorScheme.primaryContainer.withValues(alpha: 0.55),
+            selectedColor: theme.colorScheme.onPrimaryContainer,
+            onTap: () {
+              context.go(_routes[index]);
+              Navigator.of(context).pop();
+            },
+          ),
         ),
       );
     }
@@ -112,6 +118,7 @@ class ShellScreen extends ConsumerWidget {
         const Divider(indent: 16, endIndent: 16),
         sectionHeader('ADMIN'),
         for (var i = 12; i < 17; i++) navTile(i),
+        const SizedBox(height: 12),
       ],
     );
   }
@@ -168,7 +175,8 @@ class ShellScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final width = MediaQuery.sizeOf(context).width;
-    final useRail = width >= _railBreakpoint;
+    final height = MediaQuery.sizeOf(context).height;
+    final useRail = width >= _railBreakpoint && height >= 640;
     final currentPath = GoRouterState.of(context).uri.path;
     final theme = Theme.of(context);
     final rulesAsync = ref.watch(rulesProvider);
@@ -265,7 +273,7 @@ class ShellScreen extends ConsumerWidget {
                 children: [
                   DrawerHeader(
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
+                      color: theme.colorScheme.surfaceContainerLow,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,14 +282,21 @@ class ShellScreen extends ConsumerWidget {
                         Icon(
                           Icons.shopping_bag,
                           size: 36,
-                          color: theme.colorScheme.onPrimaryContainer,
+                          color: theme.colorScheme.primary,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Jurassic Dropshipping',
                           style: theme.textTheme.titleMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
+                            color: theme.colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Admin panel',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],

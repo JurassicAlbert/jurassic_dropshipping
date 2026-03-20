@@ -4,17 +4,22 @@ import 'package:jurassic_dropshipping/data/models/product.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/listing_decider.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/dynamic_pricing_engine.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/quality_risk_scoring.dart';
 
 void main() {
   late ListingDecider decider;
+  late PricingCalculator calc;
 
   setUp(() {
+    calc = PricingCalculator(marketplaceFeePercent: 10.0);
     decider = ListingDecider(
-      pricingCalculator: PricingCalculator(marketplaceFeePercent: 10.0),
+      pricingCalculator: calc,
+      dynamicPricingEngine: DynamicPricingEngine(pricingCalculator: calc),
     );
   });
 
-  Product _product({
+  Product product0({
     double basePrice = 50.0,
     double? shippingCost = 5.0,
     String? supplierId,
@@ -40,7 +45,7 @@ void main() {
         minProfitPercent: 15.0,
         defaultMarkupPercent: 30.0,
       );
-      final product = _product(basePrice: 50.0, shippingCost: 5.0);
+      final product = product0(basePrice: 50.0, shippingCost: 5.0);
       final decision = decider.decide(product, rules);
 
       expect(decision.isAccept, isTrue);
@@ -55,7 +60,7 @@ void main() {
         defaultMarkupPercent: 30.0,
         maxSourcePrice: 40.0,
       );
-      final product = _product(basePrice: 50.0, shippingCost: 5.0);
+      final product = product0(basePrice: 50.0, shippingCost: 5.0);
       final decision = decider.decide(product, rules);
 
       expect(decision.isAccept, isFalse);
@@ -68,7 +73,7 @@ void main() {
         defaultMarkupPercent: 30.0,
         blacklistedSupplierIds: ['bad_supplier'],
       );
-      final product = _product(supplierId: 'bad_supplier');
+      final product = product0(supplierId: 'bad_supplier');
       final decision = decider.decide(product, rules);
 
       expect(decision.isAccept, isFalse);
@@ -81,7 +86,7 @@ void main() {
         defaultMarkupPercent: 30.0,
         blacklistedProductIds: ['prod_1'],
       );
-      final product = _product();
+      final product = product0();
       final decision = decider.decide(product, rules);
 
       expect(decision.isAccept, isFalse);
@@ -94,7 +99,7 @@ void main() {
         defaultMarkupPercent: 30.0,
         manualApprovalListings: true,
       );
-      final product = _product();
+      final product = product0();
       final decision = decider.decide(product, rules);
 
       expect(decision.isAccept, isTrue);
@@ -108,7 +113,7 @@ void main() {
         defaultMarkupPercent: 30.0,
         manualApprovalListings: false,
       );
-      final product = _product();
+      final product = product0();
       final decision = decider.decide(product, rules);
 
       expect(decision.isAccept, isTrue);
@@ -121,7 +126,7 @@ void main() {
         minProfitPercent: 5.0,
         defaultMarkupPercent: 30.0,
       );
-      final product = _product();
+      final product = product0();
       final decision = decider.decide(product, rules);
 
       expect(decision.isAccept, isTrue);
@@ -137,11 +142,50 @@ void main() {
         minProfitPercent: 99.0,
         defaultMarkupPercent: 1.0,
       );
-      final product = _product();
+      final product = product0();
       final decision = decider.decide(product, rules);
 
       expect(decision.isAccept, isFalse);
       expect(decision.reason, contains('<'));
+    });
+
+    test('applies dynamic pricing when competitor input + intel signals provided', () {
+      const rules = UserRules(
+        minProfitPercent: 10.0,
+        defaultMarkupPercent: 20.0,
+        pricingStrategy: PricingStrategyId.matchLowest,
+      );
+      final product = product0(basePrice: 100, shippingCost: 0);
+
+      final base = calc.decideCompetitivePrice(
+        sourceCost: 100,
+        rules: rules,
+        platformId: 'allegro',
+        competitorInput: const CompetitivePricingInput(lowestCompetitorPrice: 150),
+      );
+      expect(base.shouldCreate, isTrue);
+
+      final decision = decider.decide(
+        product,
+        rules,
+        targetPlatformId: 'allegro',
+        competitorInput: const CompetitivePricingInput(lowestCompetitorPrice: 150),
+        qualityRisk: const ProductQualityRiskResult(
+          qualityScore: 50,
+          returnRiskScore: 100,
+          qualityFactors: [],
+          riskFactors: [],
+        ),
+        competitionLevel: 'medium',
+      );
+
+      expect(decision.isAccept, isTrue);
+      final accepted = decision as ListingDecisionAccept;
+      expect(accepted.listing.sellingPrice, greaterThan(base.createAtPrice!));
+      expect(accepted.criteriaSnapshot, isNotNull);
+      expect(accepted.criteriaSnapshot!['returnRiskScore'], 100.0);
+      expect(accepted.criteriaSnapshot!['competitionLevel'], 'medium');
+      expect(accepted.criteriaSnapshot!['dynamicPricingAdjusted'], isTrue);
     });
   });
 }

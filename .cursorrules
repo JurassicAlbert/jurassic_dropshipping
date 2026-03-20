@@ -1,5 +1,0 @@
-- Use Tailwind CSS for all styling.
-- Use shadcn/ui components from @/components/ui.
-- Follow atomic design principles.
-- Ensure all interactive elements have hover and focus states.
-- Mobile-first approach: all components must be responsive.

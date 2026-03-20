@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/features/settings/settings_screen.dart';
 import '../fixtures/test_fixtures.dart';
@@ -8,6 +11,20 @@ import '../mocks/mock_secure_storage.dart';
 
 void main() {
   group('SettingsScreen', () {
+    late Directory hiveTempDir;
+
+    setUpAll(() async {
+      hiveTempDir = await Directory.systemTemp.createTemp('hive_settings_test_');
+      Hive.init(hiveTempDir.path);
+    });
+
+    tearDownAll(() async {
+      await Hive.close();
+      if (hiveTempDir.existsSync()) {
+        hiveTempDir.deleteSync(recursive: true);
+      }
+    });
+
     testWidgets('shows all section headers', (tester) async {
       await tester.pumpWidget(
         ProviderScope(

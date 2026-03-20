@@ -38,4 +38,16 @@ class MockTargetPlatform implements TargetPlatform {
 
   @override
   Future<OrderStatus?> getOrderStatus(String targetOrderId) async => null;
+
+  @override
+  Future<List<CustomerReturnSummary>> getCustomerReturns({DateTime? since}) async => [];
+
+  @override
+  Future<CustomerReturnDetails?> getCustomerReturn(String returnId) async => null;
+
+  @override
+  Future<void> rejectReturn(String returnId, String reason) async {}
+
+  @override
+  Future<void> issueRefund(String targetOrderId, double amount, String reason) async {}
 }

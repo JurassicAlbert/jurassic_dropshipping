@@ -1,13 +1,14 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/feature_flag_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/product_intelligence_state_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/return_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
@@ -63,6 +64,8 @@ void main() {
       listingDecider: listingDecider,
       supplierSelector: supplierSelector,
       sources: [mockSource],
+      featureFlagRepository: FeatureFlagRepository(db),
+      productIntelligenceStateRepository: ProductIntelligenceStateRepository(db),
     );
 
     final orderCancellationService = OrderCancellationService(
@@ -84,6 +87,7 @@ void main() {
       orderRepository: orderRepo,
       listingRepository: listingRepo,
       productRepository: productRepo,
+      decisionLogRepository: decisionLogRepo,
       sources: [mockSource],
       targets: [mockTarget],
       orderCancellationService: orderCancellationService,
@@ -108,6 +112,7 @@ void main() {
       rulesRepository: rulesRepo,
       priceRefreshService: priceRefreshService,
       marketplaceListingSyncService: marketplaceListingSyncService,
+      featureFlagRepository: FeatureFlagRepository(db),
     );
   });
 

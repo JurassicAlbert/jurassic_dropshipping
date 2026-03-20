@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/domain/post_order/supplier_return_policy.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
@@ -33,7 +34,7 @@ class _ReturnPoliciesScreenState extends ConsumerState<ReturnPoliciesScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+              padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
               child: ScreenHelpSection(
                 description: ScreenHelpTexts.returnPolicies,
                 howToUse: 'How to use: Tap a policy to edit, or "Add policy" to create one per supplier.',
@@ -50,7 +51,12 @@ class _ReturnPoliciesScreenState extends ConsumerState<ReturnPoliciesScreen> {
             else
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                  ),
                   itemCount: policies.length,
                   itemBuilder: (context, index) {
                     final p = policies[index];
@@ -62,9 +68,11 @@ class _ReturnPoliciesScreenState extends ConsumerState<ReturnPoliciesScreen> {
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Tooltip(
                     message: 'Create a new return policy for a supplier (return window, restocking fee, RMA).',
@@ -74,7 +82,6 @@ class _ReturnPoliciesScreenState extends ConsumerState<ReturnPoliciesScreen> {
                       label: const Text('Add policy'),
                     ),
                   ),
-                  const SizedBox(width: 8),
                   InfoIcon(
                     tooltip: 'Add one policy per supplier. It defines return window, restocking fee, who pays return shipping, and RMA rules. '
                         'The Returns screen uses this when you click "Compute routing" to suggest where a return should go.',

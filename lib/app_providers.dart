@@ -30,6 +30,7 @@ import 'package:jurassic_dropshipping/data/repositories/stock_state_repository.d
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/product_intelligence_state_repository.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/listing_decider.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/scanner.dart';
@@ -88,8 +89,11 @@ import 'package:jurassic_dropshipping/services/targets/temu_target_platform.dart
 import 'package:jurassic_dropshipping/services/locale_service.dart';
 import 'package:jurassic_dropshipping/l10n/app_localizations.dart';
 import 'package:jurassic_dropshipping/services/product_intelligence/product_intelligence_service.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/dynamic_pricing_engine.dart';
 import 'package:jurassic_dropshipping/services/product_intelligence/supplier_switching_engine.dart';
 import 'package:jurassic_dropshipping/services/product_intelligence/auto_pausing_service.dart';
+import 'package:jurassic_dropshipping/services/messaging/customer_message_analyzer.dart';
+import 'package:jurassic_dropshipping/services/messaging/response_engine.dart';
 
 /// Feature flag keys (stored in DB; when missing, default is false).
 const String kFeatureFlagTemuTarget = 'temu_target';
@@ -146,6 +150,9 @@ final featureFlagRepositoryProvider = Provider<FeatureFlagRepository>((ref) => F
 final rulesRepositoryProvider = Provider<RulesRepository>((ref) => RulesRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final supplierRepositoryProvider = Provider<SupplierRepository>((ref) => SupplierRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final supplierOfferRepositoryProvider = Provider<SupplierOfferRepository>((ref) => SupplierOfferRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
+final productIntelligenceStateRepositoryProvider = Provider<ProductIntelligenceStateRepository>(
+  (ref) => ProductIntelligenceStateRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)),
+);
 final supplierReliabilityScoreRepositoryProvider = Provider<SupplierReliabilityScoreRepository>((ref) => SupplierReliabilityScoreRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final returnRepositoryProvider = Provider<ReturnRepository>((ref) => ReturnRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
 final supplierReturnPolicyRepositoryProvider = Provider<SupplierReturnPolicyRepository>((ref) => SupplierReturnPolicyRepository(ref.watch(dbProvider), tenantId: ref.watch(currentTenantIdProvider)));
@@ -296,7 +303,15 @@ final targetsListProvider = Provider<List<TargetPlatform>>((ref) {
 });
 
 final pricingCalculatorProvider = Provider<PricingCalculator>((ref) => PricingCalculator());
-final listingDeciderProvider = Provider<ListingDecider>((ref) => ListingDecider(pricingCalculator: ref.watch(pricingCalculatorProvider)));
+final dynamicPricingEngineProvider = Provider<DynamicPricingEngine>(
+  (ref) => DynamicPricingEngine(pricingCalculator: ref.watch(pricingCalculatorProvider)),
+);
+final listingDeciderProvider = Provider<ListingDecider>(
+  (ref) => ListingDecider(
+    pricingCalculator: ref.watch(pricingCalculatorProvider),
+    dynamicPricingEngine: ref.watch(dynamicPricingEngineProvider),
+  ),
+);
 final supplierSelectorProvider = Provider<SupplierSelector>((ref) => SupplierSelector());
 
 /// Uses live Allegro listing API when [kFeatureFlagCompetitorPricingLive] is enabled; otherwise behaves like stub (returns null).
@@ -316,6 +331,8 @@ final scannerProvider = Provider<Scanner>((ref) => Scanner(
   listingDecider: ref.watch(listingDeciderProvider),
   supplierSelector: ref.watch(supplierSelectorProvider),
   sources: ref.watch(sourcesListProvider),
+  featureFlagRepository: ref.watch(featureFlagRepositoryProvider),
+  productIntelligenceStateRepository: ref.watch(productIntelligenceStateRepositoryProvider),
   targetPlatformIds: ref.watch(targetsListProvider).map((t) => t.id).toList(),
   competitorPricingService: ref.watch(competitorPricingServiceProvider),
   billingService: ref.watch(billingServiceProvider),
@@ -343,7 +360,9 @@ final productIntelligenceServiceProvider = Provider<ProductIntelligenceService>(
   db: ref.watch(dbProvider),
   productRepository: ref.watch(productRepositoryProvider),
   productGroupRepository: ref.watch(productGroupRepositoryProvider),
+  supplierOfferRepository: ref.watch(supplierOfferRepositoryProvider),
   tenantId: ref.watch(currentTenantIdProvider),
+  observabilityMetrics: ref.watch(observabilityMetricsProvider),
 ));
 
 final supplierSwitchingEngineProvider = Provider<SupplierSwitchingEngine>((ref) => SupplierSwitchingEngine(
@@ -353,6 +372,7 @@ final supplierSwitchingEngineProvider = Provider<SupplierSwitchingEngine>((ref) 
   supplierOfferRepository: ref.watch(supplierOfferRepositoryProvider),
   supplierReliabilityScoreRepository: ref.watch(supplierReliabilityScoreRepositoryProvider),
   tenantId: ref.watch(currentTenantIdProvider),
+  observabilityMetrics: ref.watch(observabilityMetricsProvider),
 ));
 
 /// Pending background job count for dashboard system status.
@@ -412,7 +432,11 @@ final autoPausingServiceProvider = Provider<AutoPausingService>((ref) => AutoPau
   db: ref.watch(dbProvider),
   listingRepository: ref.watch(listingRepositoryProvider),
   tenantId: ref.watch(currentTenantIdProvider),
+  observabilityMetrics: ref.watch(observabilityMetricsProvider),
 ));
+
+final customerMessageAnalyzerProvider = Provider<CustomerMessageAnalyzer>((ref) => const CustomerMessageAnalyzer());
+final responseEngineProvider = Provider<ResponseEngine>((ref) => const ResponseEngine());
 
 final processIncidentJobHandlerProvider = Provider<ProcessIncidentJobHandler>((ref) => ProcessIncidentJobHandler(
   incidentRecordRepository: ref.watch(incidentRecordRepositoryProvider),

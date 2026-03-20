@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
+import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
@@ -41,6 +42,7 @@ void main() {
   late OrderRepository orderRepo;
   late ListingRepository listingRepo;
   late ProductRepository productRepo;
+  late DecisionLogRepository decisionLogRepo;
   late OrderCancellationService cancellationService;
 
   setUp(() {
@@ -49,6 +51,7 @@ void main() {
     orderRepo = OrderRepository(db);
     listingRepo = ListingRepository(db);
     productRepo = ProductRepository(db);
+    decisionLogRepo = DecisionLogRepository(db);
     cancellationService = OrderCancellationService(
       orderRepository: orderRepo,
       listingRepository: listingRepo,
@@ -96,6 +99,7 @@ void main() {
         orderRepository: orderRepo,
         listingRepository: listingRepo,
         productRepository: productRepo,
+        decisionLogRepository: decisionLogRepo,
         sources: [mockSource],
         targets: [mockTarget],
         orderCancellationService: cancellationService,
@@ -142,6 +146,7 @@ void main() {
         orderRepository: orderRepo,
         listingRepository: listingRepo,
         productRepository: productRepo,
+        decisionLogRepository: decisionLogRepo,
         sources: [trackingSource],
         targets: [mockTarget],
         orderCancellationService: cancellationService,
@@ -170,6 +175,7 @@ void main() {
         orderRepository: orderRepo,
         listingRepository: listingRepo,
         productRepository: productRepo,
+        decisionLogRepository: decisionLogRepo,
         sources: [MockSourcePlatform(mockId: 'mock_source')],
         targets: [MockTargetPlatform(mockId: 'mock_target')],
         orderCancellationService: cancellationService,
@@ -202,6 +208,7 @@ void main() {
         orderRepository: orderRepo,
         listingRepository: listingRepo,
         productRepository: productRepo,
+        decisionLogRepository: decisionLogRepo,
         sources: [MockSourcePlatform(mockId: 'mock_source')],
         targets: [MockTargetPlatform(mockId: 'mock_target')],
         orderCancellationService: cancellationService,
@@ -243,6 +250,7 @@ void main() {
         orderRepository: orderRepo,
         listingRepository: listingRepo,
         productRepository: productRepo,
+        decisionLogRepository: decisionLogRepo,
         sources: [throwingSource],
         targets: [mockTarget],
         orderCancellationService: cancellationService,

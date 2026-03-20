@@ -60,8 +60,8 @@ void main() {
       await rulesRepo.save(Fixtures.defaultRules);
 
       final mockOrders = [
-        Fixtures.order(id: 'new_order_1', targetPlatformId: 'mock_target'),
-        Fixtures.order(id: 'new_order_2', targetPlatformId: 'mock_target'),
+        Fixtures.order(id: 'new_order_1', targetPlatformId: 'mock_target', targetOrderId: 't_1'),
+        Fixtures.order(id: 'new_order_2', targetPlatformId: 'mock_target', targetOrderId: 't_2'),
       ];
 
       final target = MockTargetWithOrders(
@@ -93,8 +93,8 @@ void main() {
       await orderRepo.insert(existingOrder);
 
       final mockOrders = [
-        Fixtures.order(id: 'existing_order', targetPlatformId: 'mock_target'),
-        Fixtures.order(id: 'brand_new_order', targetPlatformId: 'mock_target'),
+        Fixtures.order(id: 'existing_order', targetPlatformId: 'mock_target', targetOrderId: 't_existing'),
+        Fixtures.order(id: 'brand_new_order', targetPlatformId: 'mock_target', targetOrderId: 't_new'),
       ];
 
       final target = MockTargetWithOrders(
@@ -122,7 +122,7 @@ void main() {
       await rulesRepo.save(Fixtures.defaultRules.copyWith(manualApprovalOrders: true));
 
       final mockOrders = [
-        Fixtures.order(id: 'approval_order', targetPlatformId: 'mock_target'),
+        Fixtures.order(id: 'approval_order', targetPlatformId: 'mock_target', targetOrderId: 't_approval'),
       ];
 
       final target = MockTargetWithOrders(
@@ -148,7 +148,7 @@ void main() {
       await rulesRepo.save(Fixtures.defaultRules.copyWith(manualApprovalOrders: false));
 
       final mockOrders = [
-        Fixtures.order(id: 'auto_order', targetPlatformId: 'mock_target'),
+        Fixtures.order(id: 'auto_order', targetPlatformId: 'mock_target', targetOrderId: 't_auto'),
       ];
 
       final target = MockTargetWithOrders(
@@ -174,9 +174,9 @@ void main() {
       await rulesRepo.save(Fixtures.defaultRules);
 
       final mockOrders = [
-        Fixtures.order(id: 'count_1', targetPlatformId: 'mock_target'),
-        Fixtures.order(id: 'count_2', targetPlatformId: 'mock_target'),
-        Fixtures.order(id: 'count_3', targetPlatformId: 'mock_target'),
+        Fixtures.order(id: 'count_1', targetPlatformId: 'mock_target', targetOrderId: 't_c1'),
+        Fixtures.order(id: 'count_2', targetPlatformId: 'mock_target', targetOrderId: 't_c2'),
+        Fixtures.order(id: 'count_3', targetPlatformId: 'mock_target', targetOrderId: 't_c3'),
       ];
 
       final target = MockTargetWithOrders(

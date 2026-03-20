@@ -179,7 +179,9 @@ class DashboardScreen extends ConsumerWidget {
 
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  child: Row(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
                       Tooltip(
                         message: 'Recalculates listing health metrics including margin, return rate and incident frequency.',
@@ -197,7 +199,6 @@ class DashboardScreen extends ConsumerWidget {
                           label: const Text('Refresh listing health'),
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Tooltip(
                         message: 'Updates customer return and complaint rates used for abuse checks.',
                         child: OutlinedButton.icon(
@@ -214,7 +215,6 @@ class DashboardScreen extends ConsumerWidget {
                           label: const Text('Refresh customer metrics'),
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Tooltip(
                         message: 'Refreshes inventory and sellability state for all listings.',
                         child: OutlinedButton.icon(
@@ -230,7 +230,6 @@ class DashboardScreen extends ConsumerWidget {
                           label: const Text('Refresh stock state'),
                         ),
                       ),
-                      const SizedBox(width: 8),
                       Tooltip(
                         message: 'Refreshes Phase 32 observability metrics (sync, fulfillment, jobs).',
                         child: OutlinedButton.icon(
@@ -750,6 +749,7 @@ class _StyledKpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       color: data.containerColor,
       child: Padding(
@@ -759,7 +759,7 @@ class _StyledKpiCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(data.icon, size: 20, color: data.onContainerColor),
+                Icon(data.icon, size: 22, color: data.onContainerColor),
                 const Spacer(),
                 Icon(
                   data.trendUp ? Icons.arrow_upward : Icons.arrow_downward,
@@ -768,19 +768,20 @@ class _StyledKpiCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Text(
               data.value,
-              style: TextStyle(
-                fontSize: 22,
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: data.onContainerColor,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               data.label,
-              style: TextStyle(fontSize: 13, color: data.onContainerColor.withAlpha(180)),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: data.onContainerColor.withValues(alpha: 0.8),
+              ),
             ),
           ],
         ),
@@ -797,6 +798,7 @@ class _ListingsSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final active = listings.where((l) => l.status.name == 'active').length;
     final pending = listings.where((l) => l.status.name == 'pendingApproval').length;
     return Card(
@@ -805,10 +807,10 @@ class _ListingsSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Listings', style: TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Text('Active: $active'),
-            Text('Pending approval: $pending'),
+            Text('Listings', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            Text('Active: $active', style: theme.textTheme.bodyLarge),
+            Text('Pending approval: $pending', style: theme.textTheme.bodyLarge),
           ],
         ),
       ),
@@ -824,6 +826,7 @@ class _OrdersSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final pending = orders.where((o) => o.status.name == 'pending' || o.status.name == 'pendingApproval').length;
     final totalSales = orders.fold<double>(0, (s, o) => s + o.sellingPrice);
     final totalCost = orders.fold<double>(0, (s, o) => s + o.sourceCost);
@@ -833,12 +836,12 @@ class _OrdersSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Orders', style: TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Text('Pending: $pending'),
-            Text('Total sales: ${totalSales.toStringAsFixed(2)} PLN'),
-            Text('Total cost: ${totalCost.toStringAsFixed(2)} PLN'),
-            Text('Est. profit: ${(totalSales - totalCost).toStringAsFixed(2)} PLN'),
+            Text('Orders', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            Text('Pending: $pending', style: theme.textTheme.bodyLarge),
+            Text('Total sales: ${totalSales.toStringAsFixed(2)} PLN', style: theme.textTheme.bodyLarge),
+            Text('Total cost: ${totalCost.toStringAsFixed(2)} PLN', style: theme.textTheme.bodyLarge),
+            Text('Est. profit: ${(totalSales - totalCost).toStringAsFixed(2)} PLN', style: theme.textTheme.bodyLarge),
           ],
         ),
       ),
@@ -866,7 +869,9 @@ class _AutomationCard extends StatelessWidget {
             _StatusRow(label: 'Order Sync', running: automation.isSyncRunning, lastTime: automation.lastSyncTime),
             _StatusRow(label: 'Price Refresh', running: automation.isPriceRefreshRunning, lastTime: automation.lastPriceRefreshTime),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 FilledButton(
                   onPressed: (automation.isScanRunning && automation.isSyncRunning)
@@ -874,7 +879,6 @@ class _AutomationCard extends StatelessWidget {
                       : () => automation.startAll(),
                   child: const Text('Start all'),
                 ),
-                const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: (automation.isScanRunning || automation.isSyncRunning || automation.isPriceRefreshRunning)
                       ? () => automation.stopAll()
@@ -948,22 +952,22 @@ class _StatusRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 2,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Icon(
             running ? Icons.play_circle : Icons.stop_circle,
             size: 16,
             color: running ? Colors.green : Colors.grey,
           ),
-          const SizedBox(width: 6),
           Text('$label: ${running ? "Running" : "Stopped"}'),
-          if (lastTime != null) ...[
-            const SizedBox(width: 8),
+          if (lastTime != null)
             Text(
               '(last: ${DashboardScreen._formatTime(lastTime!)})',
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
-          ],
         ],
       ),
     );

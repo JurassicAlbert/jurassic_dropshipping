@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/repositories/returned_stock_repository.dart';
 import 'package:jurassic_dropshipping/domain/post_order/returned_stock.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
@@ -34,12 +35,12 @@ class ReturnedStockScreen extends ConsumerWidget {
           );
         }
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
           itemCount: list.length + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
               return const Padding(
-                padding: EdgeInsets.only(bottom: 12),
+                padding: EdgeInsets.only(bottom: AppSpacing.sectionGap),
                 child: ScreenHelpSection(
                   description: ScreenHelpTexts.returnedStock,
                   howToUse: 'How to use: Reduce quantity when you fulfill from this stock; use Write off for items that cannot be restocked.',
@@ -66,9 +67,10 @@ class _StockCard extends ConsumerWidget {
     final repo = ref.watch(returnedStockRepositoryProvider);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -122,7 +124,10 @@ class _StockCard extends ConsumerWidget {
             ),
             if (stock.restockable && stock.quantity > 0) ...[
               const SizedBox(height: 12),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Tooltip(
                     message: 'Reduce quantity when you fulfill from this returned stock',
@@ -132,7 +137,6 @@ class _StockCard extends ConsumerWidget {
                       label: const Text('Reduce'),
                     ),
                   ),
-                  const SizedBox(width: 8),
                   Tooltip(
                     message: 'Write off this stock (cannot be restocked). Use for damaged or lost items.',
                     child: OutlinedButton.icon(
@@ -141,7 +145,6 @@ class _StockCard extends ConsumerWidget {
                       label: const Text('Write off'),
                     ),
                   ),
-                  const SizedBox(width: 8),
                   InfoIcon(
                     tooltip: 'Reduce: use when you sell or use this returned item (quantity goes down). '
                         'Write off: use when the item cannot be resold (e.g. damaged); it will no longer count as available stock.',

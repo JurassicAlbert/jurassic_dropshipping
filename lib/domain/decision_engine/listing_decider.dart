@@ -3,14 +3,18 @@ import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/product.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/dynamic_pricing_engine.dart';
+import 'package:jurassic_dropshipping/services/product_intelligence/quality_risk_scoring.dart';
 
 /// Decides whether to list a product and creates draft/pending_approval listing + decision log.
 class ListingDecider {
   ListingDecider({
     required this.pricingCalculator,
+    this.dynamicPricingEngine,
   });
 
   final PricingCalculator pricingCalculator;
+  final DynamicPricingEngine? dynamicPricingEngine;
 
   /// Returns a listing decision: if profitable and within rules, returns [ListingDecision.accept] with
   /// draft listing and reason; otherwise [ListingDecision.reject] with reason.
@@ -22,6 +26,8 @@ class ListingDecider {
     String? targetPlatformId,
     String? categoryId,
     CompetitivePricingInput? competitorInput,
+    ProductQualityRiskResult? qualityRisk,
+    String? competitionLevel,
   }) {
     final sourceCost = product.basePrice + (product.shippingCost ?? 0);
 
@@ -53,6 +59,7 @@ class ListingDecider {
     double sellingPrice;
     String reason;
     double margin;
+    var dynamicPricingAdjusted = false;
 
     if (targetPlatformId != null &&
         (competitorInput != null || rules.pricingStrategy == PricingStrategyId.fixedMarkup)) {
@@ -68,14 +75,29 @@ class ListingDecider {
           reason: decision.rejectReason ?? 'Pricing decision: do not create',
         );
       }
+
       sellingPrice = decision.createAtPrice!;
+
+      final dyn = dynamicPricingEngine;
+      if (dyn != null && (qualityRisk != null || competitionLevel != null)) {
+        final adjusted = dyn.decide(
+          sourceCost: sourceCost,
+          rules: rules,
+          platformId: targetPlatformId,
+          categoryId: categoryId,
+          competitorInput: competitorInput,
+          qualityRisk: qualityRisk,
+          competitionLevel: competitionLevel,
+        );
+        if (adjusted.shouldCreate && adjusted.createAtPrice != null) {
+          final next = adjusted.createAtPrice!;
+          dynamicPricingAdjusted = (next - sellingPrice).abs() >= 0.005;
+          sellingPrice = next;
+        }
+      }
+
       reason = 'Competitive price ${sellingPrice.toStringAsFixed(2)} (strategy: ${rules.pricingStrategy})';
-      margin = pricingCalculator.profitMarginPercent(
-        sellingPrice,
-        sourceCost,
-        targetPlatformId,
-        rules,
-      );
+      margin = pricingCalculator.profitMarginPercent(sellingPrice, sourceCost, targetPlatformId, rules);
     } else {
       sellingPrice = targetPlatformId != null
           ? pricingCalculator.calculateSellingPriceForPlatform(sourceCost, rules, targetPlatformId)
@@ -141,6 +163,11 @@ class ListingDecider {
         'sellingPrice': sellingPrice,
         'marginPercent': margin,
         'minProfitPercent': minMargin,
+        if (qualityRisk != null) 'qualityScore': qualityRisk.qualityScore,
+        if (qualityRisk != null) 'returnRiskScore': qualityRisk.returnRiskScore,
+        if (competitionLevel != null) 'competitionLevel': competitionLevel,
+        if (targetPlatformId != null && (qualityRisk != null || competitionLevel != null))
+          'dynamicPricingAdjusted': dynamicPricingAdjusted,
         ...? (targetPlatformId != null ? {'platformId': targetPlatformId} : null),
         ...? (rules.pricingStrategy.isNotEmpty ? {'pricingStrategy': rules.pricingStrategy} : null),
       },

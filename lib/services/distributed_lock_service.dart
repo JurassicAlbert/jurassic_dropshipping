@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:jurassic_dropshipping/core/logger.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 
 /// Distributed lock (Phase B3). Uses DB table so multiple workers/processes

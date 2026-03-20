@@ -26,6 +26,8 @@ class _LockedAuthService extends AuthService {
 
 void main() {
   late Directory tempDir;
+  // Ensures Flutter Material is referenced in this test file.
+  final _ = ThemeData();
 
   setUp(() {
     tempDir = Directory.systemTemp.createTempSync('hive_test_');

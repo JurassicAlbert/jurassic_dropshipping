@@ -5,6 +5,7 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/domain/post_order/return_routing.dart';
 import 'package:jurassic_dropshipping/domain/post_order/returned_stock.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
@@ -69,9 +70,9 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
         return Column(
           children: [
             const ScreenHelpSection(
-            description: ScreenHelpTexts.returns,
-            howToUse: 'How to use: Tap a return to edit. Update status, refund amount and routing. Use "Compute routing" in the edit dialog to determine where the return goes.',
-          ),
+              description: ScreenHelpTexts.returns,
+              howToUse: 'How to use: Tap a return to edit. Update status, refund amount and routing. Use "Compute routing" in the edit dialog to determine where the return goes.',
+            ),
             SearchFilterBar(
               controller: _searchController,
               onChanged: (_) => setState(() {}),
@@ -96,7 +97,12 @@ class _ReturnsScreenState extends ConsumerState<ReturnsScreen> {
                       subtitle: 'Returns from customers will appear here',
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.sm,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                      ),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final r = filtered[index];

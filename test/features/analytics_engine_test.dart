@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
-import 'package:jurassic_dropshipping/data/models/supplier.dart';
 import 'package:jurassic_dropshipping/features/analytics/analytics_engine.dart';
 import '../fixtures/test_fixtures.dart';
 

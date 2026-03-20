@@ -5,6 +5,7 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/repositories/background_job_repository.dart';
 import 'package:jurassic_dropshipping/domain/platforms.dart' as platforms;
 import 'package:jurassic_dropshipping/domain/post_order/incident_record.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
@@ -66,14 +67,15 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
             children: [
               if (widget.filterOrderId != null)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
                       Chip(
                         label: Text('Order: ${widget.filterOrderId}'),
                         onDeleted: () => context.go('/incidents'),
                       ),
-                      const SizedBox(width: 8),
                       TextButton(
                         onPressed: () => context.go('/incidents'),
                         child: const Text('Show all'),
@@ -89,7 +91,7 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
                 child: FilledButton.icon(
                   onPressed: () => _showCreateDialog(context, ref),
                   icon: const Icon(Icons.add),
@@ -102,19 +104,20 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
         return Column(
           children: [
             const ScreenHelpSection(
-            description: ScreenHelpTexts.incidents,
-            howToUse: 'How to use: Filter by status or order. Tap an incident to view details and link to the order or decision log.',
-          ),
+              description: ScreenHelpTexts.incidents,
+              howToUse: 'How to use: Filter by status or order. Tap an incident to view details and link to the order or decision log.',
+            ),
             if (widget.filterOrderId != null)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Row(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     Chip(
                       label: Text('Order: ${widget.filterOrderId}'),
                       onDeleted: () => context.go('/incidents'),
                     ),
-                    const SizedBox(width: 8),
                     TextButton(
                       onPressed: () => context.go('/incidents'),
                       child: const Text('Show all'),
@@ -140,7 +143,12 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
             ),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final r = filtered[index];
@@ -149,15 +157,16 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 8,
                 children: [
                   FilledButton.icon(
                     onPressed: () => _showCreateDialog(context, ref),
                     icon: const Icon(Icons.add),
                     label: const Text('Create incident'),
                   ),
-                  const SizedBox(width: 12),
                   OutlinedButton.icon(
                     onPressed: () => _showFetchAllegroReturnsDialog(context, ref),
                     icon: const Icon(Icons.download),

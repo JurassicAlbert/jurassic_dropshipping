@@ -151,6 +151,10 @@ class _KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final valueStyle = theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold);
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+
     final card = Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -159,12 +163,12 @@ class _KpiCard extends StatelessWidget {
           children: [
             Text(
               value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: valueStyle,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: labelStyle,
             ),
           ],
         ),

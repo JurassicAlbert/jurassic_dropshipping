@@ -73,11 +73,15 @@ ThemeData _buildLightTheme() {
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: true,
+    visualDensity: VisualDensity.standard,
+    scaffoldBackgroundColor: colorScheme.surface,
     textTheme: _buildTextTheme(Typography.material2021().black),
     cardTheme: CardThemeData(
-      elevation: 0,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: colorScheme.surfaceContainerLow,
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.08),
+      margin: const EdgeInsets.all(0),
     ),
     appBarTheme: AppBarTheme(
       centerTitle: false,
@@ -91,6 +95,15 @@ ThemeData _buildLightTheme() {
       indicatorColor: colorScheme.primaryContainer,
       selectedIconTheme: IconThemeData(color: colorScheme.onPrimaryContainer),
       unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
+      labelType: NavigationRailLabelType.all,
+    ),
+    listTileTheme: ListTileThemeData(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      iconColor: colorScheme.onSurfaceVariant,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+    dialogTheme: DialogThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -104,7 +117,7 @@ ThemeData _buildLightTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: colorScheme.primary, width: 2),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -118,20 +131,47 @@ ThemeData _buildLightTheme() {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
     chipTheme: ChipThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
     ),
-    dividerTheme: DividerThemeData(color: colorScheme.outlineVariant),
+    dividerTheme: DividerThemeData(color: colorScheme.outlineVariant, thickness: 1, space: 1),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: colorScheme.inverseSurface,
+      contentTextStyle: TextStyle(color: colorScheme.onInverseSurface),
+    ),
   );
 }
 
 TextTheme _buildTextTheme(TextTheme base) {
   return base.copyWith(
-    titleLarge: base.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-    titleMedium: base.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-    bodyLarge: base.bodyLarge,
-    bodyMedium: base.bodyMedium,
-    labelLarge: base.labelLarge?.copyWith(fontWeight: FontWeight.w500),
+    titleLarge: base.titleLarge?.copyWith(
+      fontWeight: FontWeight.w600,
+      fontSize: (base.titleLarge?.fontSize ?? 22) + 1,
+    ),
+    titleMedium: base.titleMedium?.copyWith(
+      fontWeight: FontWeight.w600,
+      fontSize: (base.titleMedium?.fontSize ?? 16) + 1,
+    ),
+    bodyLarge: base.bodyLarge?.copyWith(
+      fontSize: (base.bodyLarge?.fontSize ?? 14) + 0.5,
+    ),
+    bodyMedium: base.bodyMedium?.copyWith(
+      fontSize: (base.bodyMedium?.fontSize ?? 13) + 0.5,
+    ),
+    labelLarge: base.labelLarge?.copyWith(
+      fontWeight: FontWeight.w500,
+      fontSize: (base.labelLarge?.fontSize ?? 14) + 0.5,
+    ),
   );
 }
 
@@ -143,11 +183,15 @@ ThemeData _buildDarkTheme() {
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: true,
+    visualDensity: VisualDensity.standard,
+    scaffoldBackgroundColor: colorScheme.surface,
     textTheme: _buildTextTheme(Typography.material2021().white),
     cardTheme: CardThemeData(
-      elevation: 0,
+      elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: colorScheme.surfaceContainerLow,
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.22),
+      margin: const EdgeInsets.all(0),
     ),
     appBarTheme: AppBarTheme(
       centerTitle: false,
@@ -161,6 +205,15 @@ ThemeData _buildDarkTheme() {
       indicatorColor: colorScheme.primaryContainer,
       selectedIconTheme: IconThemeData(color: colorScheme.onPrimaryContainer),
       unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
+      labelType: NavigationRailLabelType.all,
+    ),
+    listTileTheme: ListTileThemeData(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      iconColor: colorScheme.onSurfaceVariant,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+    dialogTheme: DialogThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -174,7 +227,7 @@ ThemeData _buildDarkTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: colorScheme.primary, width: 2),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -188,10 +241,24 @@ ThemeData _buildDarkTheme() {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
     chipTheme: ChipThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
     ),
-    dividerTheme: DividerThemeData(color: colorScheme.outlineVariant),
+    dividerTheme: DividerThemeData(color: colorScheme.outlineVariant, thickness: 1, space: 1),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: colorScheme.inverseSurface,
+      contentTextStyle: TextStyle(color: colorScheme.onInverseSurface),
+    ),
   );
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
@@ -63,7 +64,7 @@ class MarketplacesScreen extends ConsumerWidget {
           return CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
                 sliver: SliverToBoxAdapter(
                   child: const ScreenHelpSection(
                     description: ScreenHelpTexts.marketplaces,
@@ -72,7 +73,7 @@ class MarketplacesScreen extends ConsumerWidget {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
                 sliver: SliverList.builder(
                   itemCount: sortedIds.length,
                   itemBuilder: (_, i) {
@@ -81,29 +82,29 @@ class MarketplacesScreen extends ConsumerWidget {
                     final isConnected = registeredIds.contains(platformId);
                     final displayName = _marketplaceNames[platformId] ?? platformId;
                     final platformAccounts = accountsByPlatform[platformId];
+                    final theme = Theme.of(context);
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-                      child: ListTile(
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: ListTile(
                         leading: const Icon(Icons.public),
                         title: Row(
                           children: [
                             Text(displayName),
                             const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: isConnected ? Colors.green.shade100 : Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(4),
+                            Chip(
+                              label: Text(isConnected ? 'Connected' : 'Not connected'),
+                              backgroundColor: isConnected
+                                  ? Colors.green.withValues(alpha: 0.15)
+                                  : theme.colorScheme.surfaceContainerHighest,
+                              labelStyle: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: isConnected ? Colors.green.shade800 : theme.colorScheme.onSurfaceVariant,
                               ),
-                              child: Text(
-                                isConnected ? 'Connected' : 'Not connected',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: isConnected ? Colors.green.shade800 : Colors.grey.shade600,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              padding: EdgeInsets.zero,
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                           ],
                         ),
@@ -121,11 +122,14 @@ class MarketplacesScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
                                   'Accounts: ${platformAccounts.join(', ')}',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                           ],
                         ),
+                      ),
                       ),
                     );
                   },

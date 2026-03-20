@@ -10,6 +10,9 @@ class TemuStubSource implements SourcePlatform {
   String get displayName => 'Temu (not supported)';
 
   @override
+  Future<bool> isConfigured() async => false;
+
+  @override
   Future<List<Product>> searchProducts(
     List<String> keywords, {
     SourceSearchFilters? filters,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 import 'package:jurassic_dropshipping/features/shared/section_header.dart';
@@ -210,16 +211,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     });
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const ScreenHelpSection(
-            description: ScreenHelpTexts.settings,
-            howToUse: 'How to use: Edit rules and save. Connect marketplaces in Integrations. Use Developer tools for demo data.',
-          ),
+              description: ScreenHelpTexts.settings,
+              howToUse: 'How to use: Edit rules and save. Connect marketplaces in Integrations. Use Developer tools for demo data.',
+            ),
             if (_showSaveBanner)
               MaterialBanner(
                 content: Text(ref.watch(appLocalizationsProvider).rulesSaved),
@@ -346,6 +347,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: _pricingStrategy,
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Pricing strategy',
                         helperText: 'How selling price is set relative to competitors and cost.',
@@ -354,27 +356,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       items: const [
                         DropdownMenuItem(
                           value: PricingStrategyId.alwaysBelowLowest,
-                          child: Text('Always 0.01 below lowest (if safe)'),
+                          child: Text('Always 0.01 below lowest (if safe)', overflow: TextOverflow.ellipsis),
                         ),
                         DropdownMenuItem(
                           value: PricingStrategyId.premiumWhenBetterReviews,
-                          child: Text('Premium when better reviews'),
+                          child: Text('Premium when better reviews', overflow: TextOverflow.ellipsis),
                         ),
                         DropdownMenuItem(
                           value: PricingStrategyId.matchLowest,
-                          child: Text('Match lowest (if safe)'),
+                          child: Text('Match lowest (if safe)', overflow: TextOverflow.ellipsis),
                         ),
                         DropdownMenuItem(
                           value: PricingStrategyId.fixedMarkup,
-                          child: Text('Fixed markup (ignore competitors)'),
+                          child: Text('Fixed markup (ignore competitors)', overflow: TextOverflow.ellipsis),
                         ),
                         DropdownMenuItem(
                           value: PricingStrategyId.listAtMinEvenIfAboveLowest,
-                          child: Text('List at min even if above lowest'),
+                          child: Text('List at min even if above lowest', overflow: TextOverflow.ellipsis),
                         ),
                         DropdownMenuItem(
                           value: PricingStrategyId.returnRateAware,
-                          child: Text('Return-rate aware (P_min includes return cost)'),
+                          child: Text('Return-rate aware (P_min includes return cost)', overflow: TextOverflow.ellipsis),
                         ),
                       ],
                       onChanged: (value) {

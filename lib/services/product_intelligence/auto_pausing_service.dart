@@ -5,6 +5,7 @@ import 'package:jurassic_dropshipping/core/logger.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
+import 'package:jurassic_dropshipping/domain/observability/observability_metrics.dart';
 
 /// Phase 37: Centralized auto-pausing logger and (safe) auto-recovery.
 ///
@@ -17,11 +18,13 @@ class AutoPausingService {
     required this.db,
     required this.listingRepository,
     this.tenantId = 1,
+    this.observabilityMetrics,
   });
 
   final AppDatabase db;
   final ListingRepository listingRepository;
   final int tenantId;
+  final ObservabilityMetrics? observabilityMetrics;
 
   Future<void> recordSoftPause({
     required String listingId,
@@ -34,6 +37,7 @@ class AutoPausingService {
       reason: reason,
       metrics: metrics,
     );
+    observabilityMetrics?.recordAutoPauseSoft();
   }
 
   Future<void> applyHardPause({
@@ -48,6 +52,7 @@ class AutoPausingService {
       reason: reason,
       metrics: metrics,
     );
+    observabilityMetrics?.recordAutoPauseHard();
   }
 
   /// Auto-recovery for hard-paused listings: mark recovered + set Active.

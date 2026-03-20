@@ -3,7 +3,9 @@ import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/feature_flag_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/product_intelligence_state_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/listing_decider.dart';
 import 'package:jurassic_dropshipping/domain/decision_engine/pricing_calculator.dart';
@@ -83,6 +85,8 @@ void main() {
         listingDecider: listingDecider,
         supplierSelector: supplierSelector,
         sources: [mockSource],
+        featureFlagRepository: FeatureFlagRepository(db),
+        productIntelligenceStateRepository: ProductIntelligenceStateRepository(db),
         targetPlatformId: 'allegro',
       );
 
@@ -134,6 +138,8 @@ void main() {
         listingDecider: listingDecider,
         supplierSelector: supplierSelector,
         sources: [MockSourcePlatform(mockId: 'mock_source', products: products)],
+        featureFlagRepository: FeatureFlagRepository(db),
+        productIntelligenceStateRepository: ProductIntelligenceStateRepository(db),
         targetPlatformId: 'allegro',
       );
 
@@ -167,6 +173,8 @@ void main() {
         listingDecider: listingDecider,
         supplierSelector: supplierSelector,
         sources: [MockSourcePlatform(mockId: 'mock_source', products: products)],
+        featureFlagRepository: FeatureFlagRepository(db),
+        productIntelligenceStateRepository: ProductIntelligenceStateRepository(db),
         targetPlatformId: 'allegro',
       );
 
@@ -196,6 +204,8 @@ void main() {
         listingDecider: listingDecider,
         supplierSelector: supplierSelector,
         sources: [MockSourcePlatform(products: [Fixtures.product()])],
+        featureFlagRepository: FeatureFlagRepository(db),
+        productIntelligenceStateRepository: ProductIntelligenceStateRepository(db),
         targetPlatformId: 'allegro',
       );
 
@@ -227,6 +237,8 @@ void main() {
         listingDecider: listingDecider,
         supplierSelector: supplierSelector,
         sources: [MockSourcePlatform(mockId: 'mock_source', products: products)],
+        featureFlagRepository: FeatureFlagRepository(db),
+        productIntelligenceStateRepository: ProductIntelligenceStateRepository(db),
         targetPlatformId: 'temu',
       );
 
@@ -282,6 +294,8 @@ void main() {
         listingDecider: listingDecider,
         supplierSelector: supplierSelector,
         sources: [source1, source2],
+        featureFlagRepository: FeatureFlagRepository(db),
+        productIntelligenceStateRepository: ProductIntelligenceStateRepository(db),
         targetPlatformId: 'allegro',
       );
 

@@ -9,6 +9,8 @@ import 'package:jurassic_dropshipping/services/product_intelligence/supplier_swi
 import 'package:jurassic_dropshipping/data/models/product.dart';
 import 'package:jurassic_dropshipping/data/models/supplier_offer.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:jurassic_dropshipping/services/product_intelligence/product_intelligence_service.dart';
+import 'package:jurassic_dropshipping/domain/observability/observability_metrics.dart';
 
 void main() {
   setUp(() {
@@ -103,6 +105,37 @@ void main() {
     final events = await (db.select(db.supplierSwitchEvents)..where((t) => t.groupId.equals('g1'))).get();
     expect(events.length, 1);
     expect(events.first.toSupplierId, 'supB');
+  });
+
+  test('intelligence sets competitionLevel based on offers', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final productRepo = ProductRepository(db);
+    final groupRepo = ProductGroupRepository(db);
+    final offerRepo = SupplierOfferRepository(db);
+
+    await productRepo.upsert(Product(
+      id: 'p1',
+      sourceId: 's1',
+      sourcePlatformId: 'cj',
+      title: 'A',
+      basePrice: 10,
+      variants: const [ProductVariant(id: 'v1', productId: 'p1', attributes: {}, price: 10, stock: 1)],
+      rawJson: {'ean': '5901234123457'},
+    ));
+    await offerRepo.upsert(const SupplierOffer(id: 'o1', productId: 'p1', supplierId: 'sA', sourcePlatformId: 'cj', cost: 10));
+    await offerRepo.upsert(const SupplierOffer(id: 'o2', productId: 'p1', supplierId: 'sB', sourcePlatformId: 'cj', cost: 11));
+
+    final intel = ProductIntelligenceService(
+      db: db,
+      productRepository: productRepo,
+      productGroupRepository: groupRepo,
+      supplierOfferRepository: offerRepo,
+      observabilityMetrics: ObservabilityMetrics(),
+    );
+
+    await intel.processBatch(limit: 50);
+    final row = await (db.select(db.productIntelligenceStates)..where((t) => t.productId.equals('p1'))).getSingle();
+    expect(row.competitionLevel, isNotNull);
   });
 }
 

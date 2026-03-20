@@ -57,6 +57,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final listingsAsync = ref.watch(listingsProvider);
     final healthAsync = ref.watch(listingHealthMetricsListProvider);
     return RefreshIndicator(
@@ -112,6 +113,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         ),
                       )
                     : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          AppSpacing.sm,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
                         itemCount: filtered.length,
                         itemBuilder: (_, i) {
                           final l = filtered[i];
@@ -119,9 +126,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           final marginPct = l.sellingPrice > 0 ? (profit / l.sellingPrice * 100) : 0.0;
                           final health = healthMap[l.id];
                           final healthLabel = _healthLabel(l, health, marginPct);
-                          return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-                            child: ListTile(
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                            child: Card(
+                              clipBehavior: Clip.antiAlias,
+                              child: ListTile(
                               title: Row(
                                 children: [
                                   Expanded(child: Text(l.id)),
@@ -129,7 +138,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                     Padding(
                                       padding: const EdgeInsets.only(left: 8),
                                       child: Chip(
-                                        label: Text(healthLabel.label, style: const TextStyle(fontSize: 10)),
+                                        label: Text(
+                                          healthLabel.label,
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            color: theme.colorScheme.onSurface,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
                                         backgroundColor: healthLabel.color,
                                         padding: EdgeInsets.zero,
                                         visualDensity: VisualDensity.compact,
@@ -149,12 +164,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                   if (l.promisedMinDays != null || l.promisedMaxDays != null)
                                     Text(
                                       'Delivery: ${l.promisedMinDays ?? "?"}–${l.promisedMaxDays ?? "?"}d',
-                                      style: const TextStyle(fontSize: 12),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      ),
                                     ),
                                 ],
                               ),
-                              trailing: _statusChip(l.status),
+                              trailing: _statusChip(context, l.status),
                               isThreeLine: true,
+                            ),
                             ),
                           );
                         },
@@ -186,31 +204,42 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     return null;
   }
 
-  Widget _statusChip(ListingStatus status) {
-    final Color color;
+  Widget _statusChip(BuildContext context, ListingStatus status) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final Color bg;
+    final Color fg;
     switch (status) {
       case ListingStatus.active:
-        color = Colors.green;
+        bg = Colors.green.withValues(alpha: 0.15);
+        fg = Colors.green.shade800;
         break;
       case ListingStatus.pendingApproval:
-        color = Colors.orange;
+        bg = Colors.orange.withValues(alpha: 0.18);
+        fg = Colors.orange.shade800;
         break;
       case ListingStatus.draft:
-        color = Colors.grey;
+        bg = cs.surfaceContainerHighest;
+        fg = cs.onSurfaceVariant;
         break;
       case ListingStatus.soldOut:
-        color = Colors.red;
+        bg = Colors.red.withValues(alpha: 0.15);
+        fg = Colors.red.shade700;
         break;
       case ListingStatus.paused:
-        color = Colors.amber;
+        bg = Colors.amber.withValues(alpha: 0.22);
+        fg = Colors.brown.shade700;
         break;
     }
     return Chip(
       label: Text(
         status.name,
-        style: const TextStyle(color: Colors.white, fontSize: 11),
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w700,
+        ),
       ),
-      backgroundColor: color,
+      backgroundColor: bg,
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );

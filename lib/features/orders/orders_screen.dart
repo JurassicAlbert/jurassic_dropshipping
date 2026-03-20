@@ -6,6 +6,7 @@ import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/domain/post_order/post_order_lifecycle_engine.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
@@ -14,6 +15,7 @@ import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
 import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
 import 'package:jurassic_dropshipping/features/shared/search_filter_bar.dart';
+import 'package:jurassic_dropshipping/features/shared/message_insights.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
   const OrdersScreen({super.key, this.highlightOrderId, this.initialQueuedForCapitalFilter});
@@ -81,6 +83,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final ordersAsync = ref.watch(ordersProvider);
+    final flags = ref.watch(featureFlagsProvider).valueOrNull ?? const <String, bool>{};
+    final messagingEnabled = flags[kFeatureFlagMessages] ?? false;
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(ordersProvider),
       child: ordersAsync.when(
@@ -91,9 +95,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           return Column(
             children: [
               const ScreenHelpSection(
-              description: ScreenHelpTexts.orders,
-              howToUse: 'How to use: Search by order ID or tracking. Use "Backfill lifecycle" to sync state from marketplace. Tap an order to see details.',
-            ),
+                description: ScreenHelpTexts.orders,
+                howToUse: 'How to use: Search by order ID or tracking. Use "Backfill lifecycle" to sync state from marketplace. Tap an order to see details.',
+              ),
               SearchFilterBar(
                 controller: _searchController,
                 onChanged: (_) => setState(() {}),
@@ -119,16 +123,17 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     OutlinedButton.icon(
                       onPressed: filtered.isEmpty ? null : () => _runBackfillLifecycle(context),
                       icon: const Icon(Icons.refresh, size: 18),
                       label: const Text('Backfill lifecycle'),
                     ),
-                    const SizedBox(width: 4),
                     InfoIcon(
                       tooltip: 'Sync order status from the marketplace (e.g. Shipped, Delivered, Cancelled). '
                           'Use this when you want the app to match what the marketplace shows.',
@@ -144,14 +149,22 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                         subtitle: 'Orders will appear here when customers buy your listings',
                       )
                     : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          AppSpacing.sm,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
                         itemCount: filtered.length,
                         itemBuilder: (_, i) {
                           final o = filtered[i];
                           final profit = o.sellingPrice - o.sourceCost;
                           final snap = inventoryMapAsync.valueOrNull?[o.id];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                            child: ListTile(
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                            child: Card(
+                              clipBehavior: Clip.antiAlias,
+                              child: ListTile(
                               title: Row(
                                 children: [
                                   Expanded(child: Text(o.targetOrderId)),
@@ -204,6 +217,20 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                         style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.tertiary),
                                       ),
                                     ),
+                                  if (o.deliveryMethodName != null && o.deliveryMethodName!.trim().isNotEmpty)
+                                    Text(
+                                      'Delivery method: ${o.deliveryMethodName}',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  if (o.buyerMessage != null && o.buyerMessage!.trim().isNotEmpty)
+                                    Text(
+                                      'Buyer message: ${o.buyerMessage}',
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+                                    ),
+                                  if (messagingEnabled && o.buyerMessage != null && o.buyerMessage!.trim().isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    MessageInsights(message: o.buyerMessage!),
+                                  ],
                                   if (o.riskScore != null)
                                     Text(
                                       'Risk: ${o.riskScore!.toStringAsFixed(0)}${o.riskFactorsJson != null && o.riskFactorsJson!.trim().isNotEmpty && o.riskFactorsJson != '[]' ? ' (${o.riskFactorsJson!.replaceAll('"', '').replaceAll('[', '').replaceAll(']', '')})' : ''}',
@@ -294,6 +321,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                               ),
                               isThreeLine: true,
                             ),
+                          ),
                           );
                         },
                       ),
@@ -383,7 +411,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             return AlertDialog(
               title: const Text('Set lifecycle'),
               content: DropdownButtonFormField<OrderLifecycleState>(
-                value: selected,
+                key: ValueKey(selected.name),
+                initialValue: selected,
                 decoration: const InputDecoration(
                   labelText: 'Lifecycle state',
                   border: OutlineInputBorder(),
@@ -452,7 +481,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     }
     final repo = ref.read(decisionLogRepositoryProvider);
     final log = await repo.getByLocalId(logId);
-    if (!mounted) return;
+    if (!context.mounted) return;
     await showDialog<void>(
       context: context,
       builder: (ctx) {
@@ -534,6 +563,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 ),
                 FilledButton(
                   onPressed: () async {
+                    final navigator = Navigator.of(ctx);
                     final repo = ref.read(returnRepositoryProvider);
                     final now = DateTime.now();
                     final id = 'ret_${order.id}_${now.millisecondsSinceEpoch}';
@@ -552,9 +582,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                       returnDestination: ReturnDestination.toSupplier,
                     );
                     await repo.insert(req);
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     ref.invalidate(returnRequestsProvider);
-                    Navigator.of(ctx).pop();
+                    navigator.pop();
                   },
                   child: const Text('Create'),
                 ),

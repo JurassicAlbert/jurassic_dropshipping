@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/empty_state.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
@@ -37,7 +38,7 @@ class DecisionLogScreen extends ConsumerWidget {
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
                   child: const ScreenHelpSection(
                     description: ScreenHelpTexts.decisionLog,
                     howToUse: 'How to use: Each entry shows why a listing or order was accepted, rejected or paused. Filter by order from an incident or order detail.',
@@ -47,14 +48,15 @@ class DecisionLogScreen extends ConsumerWidget {
               if (filterEntityId != null)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: Row(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
                         Chip(
                           label: Text('Order: $filterEntityId'),
                           onDeleted: () => context.go('/decision-log'),
                         ),
-                        const SizedBox(width: 8),
                         TextButton(
                           onPressed: () => context.go('/decision-log'),
                           child: const Text('Show all'),
@@ -67,11 +69,43 @@ class DecisionLogScreen extends ConsumerWidget {
                 delegate: SliverChildBuilderDelegate(
                   (_, i) {
                     final log = filtered[i];
+                    final snap = log.criteriaSnapshot ?? const <String, dynamic>{};
+                    final hasIntel = snap.containsKey('returnRiskScore') ||
+                        snap.containsKey('qualityScore') ||
+                        snap.containsKey('competitionLevel') ||
+                        snap.containsKey('dynamicPricingAdjusted');
+                    final intelParts = <String>[
+                      if (snap['returnRiskScore'] != null) 'risk ${snap['returnRiskScore']}',
+                      if (snap['competitionLevel'] != null) 'comp ${snap['competitionLevel']}',
+                      if (snap['dynamicPricingAdjusted'] != null) 'dyn ${snap['dynamicPricingAdjusted']}',
+                    ];
                     return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      margin: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+                      clipBehavior: Clip.antiAlias,
                       child: ListTile(
                         title: Text(log.reason),
-                        subtitle: Text('${log.type.name} · ${log.entityId}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${log.type.name} · ${log.entityId}'),
+                            if (hasIntel && intelParts.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: [
+                                    for (final p in intelParts)
+                                      Chip(
+                                        label: Text(p),
+                                        visualDensity: VisualDensity.compact,
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
                         trailing: Text(_formatDate(log.createdAt)),
                       ),
                     );

@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jurassic_dropshipping/app_providers.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
+import 'package:jurassic_dropshipping/features/shared/app_spacing.dart';
 import 'package:jurassic_dropshipping/features/shared/error_card.dart';
 import 'package:jurassic_dropshipping/features/shared/info_icon.dart';
 import 'package:jurassic_dropshipping/features/shared/loading_skeleton.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_section.dart';
 import 'package:jurassic_dropshipping/features/shared/screen_help_texts.dart';
+import 'package:jurassic_dropshipping/features/shared/section_header.dart';
 
 /// Capital / ledger screen (Phase 14). Shows available balance, add adjustment, orders queued for capital.
 class CapitalScreen extends ConsumerStatefulWidget {
@@ -35,15 +37,20 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
     final ordersAsync = ref.watch(ordersProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const SectionHeader(
+            title: 'Capital',
+            icon: Icons.account_balance,
+            subtitle: 'Track available funds and orders waiting for capital.',
+          ),
           const ScreenHelpSection(
             description: ScreenHelpTexts.capital,
             howToUse: 'How to use: Record adjustments to correct balance. View orders queued for capital and open them from here.',
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sectionGap),
           balanceAsync.when(
             loading: () => const LoadingSkeleton(),
             error: (e, _) => ErrorCard(
@@ -53,7 +60,7 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
             data: (balance) {
               return Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -79,10 +86,10 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
               );
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.sectionGap),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -109,7 +116,6 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
                     controller: _amountController,
                     decoration: const InputDecoration(
                       labelText: 'Amount (PLN)',
-                      border: OutlineInputBorder(),
                       hintText: 'e.g. 1000 or -50',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
@@ -119,7 +125,6 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
                     controller: _noteController,
                     decoration: const InputDecoration(
                       labelText: 'Note (optional)',
-                      border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -135,9 +140,9 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.sectionGap),
           const _RecentLedgerActivity(),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.sectionGap),
           ordersAsync.when(
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
@@ -146,7 +151,7 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
               if (queued.isEmpty) {
                 return Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Text(
                       'No orders queued for capital.',
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -156,7 +161,7 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
               }
               return Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

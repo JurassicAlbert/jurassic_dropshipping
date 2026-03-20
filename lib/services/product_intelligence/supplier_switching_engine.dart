@@ -5,6 +5,7 @@ import 'package:jurassic_dropshipping/data/repositories/product_group_repository
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_reliability_score_repository.dart';
+import 'package:jurassic_dropshipping/domain/observability/observability_metrics.dart';
 
 class SupplierSwitchDecision {
   const SupplierSwitchDecision({
@@ -35,6 +36,7 @@ class SupplierSwitchingEngine {
     required this.supplierReliabilityScoreRepository,
     this.tenantId = 1,
     this.cooldown = const Duration(hours: 24),
+    this.observabilityMetrics,
   });
 
   final AppDatabase db;
@@ -44,6 +46,7 @@ class SupplierSwitchingEngine {
   final SupplierReliabilityScoreRepository supplierReliabilityScoreRepository;
   final int tenantId;
   final Duration cooldown;
+  final ObservabilityMetrics? observabilityMetrics;
 
   Future<SupplierSwitchDecision?> chooseAlternativeForOutOfStock({
     required String currentProductId,
@@ -122,6 +125,7 @@ class SupplierSwitchingEngine {
         );
 
     appLogger.i('SupplierSwitch: group=$groupId listing=$listingId $fromSupplierId -> ${decision.toSupplierId} (product ${decision.toProductId})');
+    observabilityMetrics?.recordSupplierSwitch();
     return decision;
   }
 

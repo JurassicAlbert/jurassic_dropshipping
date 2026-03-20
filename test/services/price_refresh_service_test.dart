@@ -57,7 +57,7 @@ void main() {
         staleDuration: const Duration(hours: 6),
       );
 
-      expect(refreshed, 1);
+      expect(refreshed, ['prod_1']);
 
       final updated = await offerRepo.getById('off_stale');
       expect(updated, isNotNull);
@@ -84,7 +84,7 @@ void main() {
         staleDuration: const Duration(hours: 6),
       );
 
-      expect(refreshed, 0);
+      expect(refreshed, isEmpty);
     });
 
     test('returns 0 when no stale offers exist', () async {
@@ -100,7 +100,7 @@ void main() {
         staleDuration: const Duration(hours: 6),
       );
 
-      expect(refreshed, 0);
+      expect(refreshed, isEmpty);
     });
 
     test('skips offer when source returns null product', () async {
@@ -122,7 +122,7 @@ void main() {
         staleDuration: const Duration(hours: 6),
       );
 
-      expect(refreshed, 0);
+      expect(refreshed, isEmpty);
     });
 
     test('refreshes multiple stale offers', () async {
@@ -159,7 +159,8 @@ void main() {
         staleDuration: const Duration(hours: 6),
       );
 
-      expect(refreshed, 2);
+      expect(refreshed, containsAll(<String>['prod_a', 'prod_b']));
+      expect(refreshed.length, 2);
     });
   });
 }

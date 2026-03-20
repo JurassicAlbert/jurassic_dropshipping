@@ -7,8 +7,10 @@ import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/product.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_group_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
 import 'package:jurassic_dropshipping/services/product_intelligence/product_matching_engine.dart';
 import 'package:jurassic_dropshipping/services/product_intelligence/quality_risk_scoring.dart';
+import 'package:jurassic_dropshipping/domain/observability/observability_metrics.dart';
 
 /// Phase 37: Deterministic-first product intelligence pipeline core.
 ///
@@ -22,13 +24,17 @@ class ProductIntelligenceService {
     required this.db,
     required this.productRepository,
     required this.productGroupRepository,
+    required this.supplierOfferRepository,
     this.tenantId = 1,
+    this.observabilityMetrics,
   });
 
   final AppDatabase db;
   final ProductRepository productRepository;
   final ProductGroupRepository productGroupRepository;
+  final SupplierOfferRepository supplierOfferRepository;
   final int tenantId;
+  final ObservabilityMetrics? observabilityMetrics;
 
   Future<int> processBatch({int limit = 200, DateTime? since}) async {
     // Batch size safety limits: keep deterministic and bounded.
@@ -58,6 +64,8 @@ class ProductIntelligenceService {
       final qualityScore = scored.qualityScore;
       final returnRiskScore = scored.returnRiskScore;
 
+      final competitionLevel = await _computeCompetitionLevel(match.groupId);
+
       final debug = <String, dynamic>{
         'hash': hash,
         'version': 1,
@@ -79,7 +87,7 @@ class ProductIntelligenceService {
                 groupId: Value(match.groupId),
                 qualityScore: Value(qualityScore),
                 returnRiskScore: Value(returnRiskScore),
-                competitionLevel: const Value.absent(),
+                competitionLevel: Value(competitionLevel),
                 debugJson: Value(jsonEncode(debug)),
                 lastProcessedAt: DateTime.now(),
               ),
@@ -93,6 +101,7 @@ class ProductIntelligenceService {
             groupId: Value(match.groupId),
             qualityScore: Value(qualityScore),
             returnRiskScore: Value(returnRiskScore),
+            competitionLevel: Value(competitionLevel),
             debugJson: Value(jsonEncode(debug)),
             lastProcessedAt: Value(DateTime.now()),
           ),
@@ -102,6 +111,7 @@ class ProductIntelligenceService {
     }
 
     appLogger.i('ProductIntelligence: processed=$processed skipped=$skipped limit=$safeLimit since=${since?.toIso8601String() ?? "null"}');
+    observabilityMetrics?.recordIntelProcessed(processed, skipped);
     return processed;
   }
 
@@ -159,6 +169,39 @@ class ProductIntelligenceService {
     }
     final bytes = utf8.encode(b.toString());
     return sha256.convert(bytes).toString();
+  }
+
+  Future<String> _computeCompetitionLevel(String groupId) async {
+    final members = await productGroupRepository.getMembers(groupId);
+    final productIds = members.map((m) => m.productId).toSet().toList();
+    final supplierIds = <String>{};
+    final prices = <double>[];
+
+    for (final pid in productIds) {
+      final offers = await supplierOfferRepository.getByProductId(pid);
+      for (final o in offers) {
+        supplierIds.add(o.supplierId);
+        prices.add(o.cost + (o.shippingCost ?? 0));
+      }
+    }
+
+    final supplierCount = supplierIds.length;
+    if (prices.isEmpty) {
+      // Unknown -> treat as medium so we don't over-boost.
+      return 'medium';
+    }
+    prices.sort();
+    final minP = prices.first;
+    final maxP = prices.last;
+    final variancePct = minP > 0 ? ((maxP - minP) / minP) : 0.0;
+
+    // Deterministic thresholds:
+    // - high competition: many suppliers and tight price band
+    // - low competition: few suppliers or wide variance
+    if (supplierCount >= 6 && variancePct < 0.08) return 'high';
+    if (supplierCount <= 2) return 'low';
+    if (variancePct >= 0.25) return 'low';
+    return 'medium';
   }
 
   String _norm(String s) => s.trim().toLowerCase();

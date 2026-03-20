@@ -10,6 +10,9 @@ class AmazonStubTarget implements TargetPlatform {
   String get displayName => 'Amazon (coming soon)';
 
   @override
+  Future<bool> isConfigured() async => false;
+
+  @override
   Future<String> createListing(ListingDraft draft) async {
     throw UnsupportedError('Amazon SP-API integration not yet implemented');
   }
@@ -31,4 +34,20 @@ class AmazonStubTarget implements TargetPlatform {
 
   @override
   Future<OrderStatus?> getOrderStatus(String targetOrderId) async => null;
+
+  @override
+  Future<List<CustomerReturnSummary>> getCustomerReturns({DateTime? since}) async => [];
+
+  @override
+  Future<CustomerReturnDetails?> getCustomerReturn(String returnId) async => null;
+
+  @override
+  Future<void> rejectReturn(String returnId, String reason) async {
+    throw UnsupportedError('rejectReturn not supported on $id');
+  }
+
+  @override
+  Future<void> issueRefund(String targetOrderId, double amount, String reason) async {
+    throw UnsupportedError('issueRefund not supported on $id');
+  }
 }
