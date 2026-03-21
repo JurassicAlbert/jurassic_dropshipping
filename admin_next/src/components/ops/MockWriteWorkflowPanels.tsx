@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -67,6 +67,9 @@ export function ApprovalWorkflowPanel() {
     else setError((prev) => prev ?? { message: oRes.error.message });
     setLoading(false);
   };
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []);
 
   const runAction = async (kind: "approveListing" | "rejectListing" | "approveOrder" | "rejectOrder", id: string) => {
     setLoading(true);
@@ -191,6 +194,9 @@ export function ReturnsWorkflowPanel() {
     else setError({ message: res.error.message });
     setLoading(false);
   };
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []);
 
   const openEdit = (r: ReturnRow) => {
     setSelected(r);
@@ -325,6 +331,9 @@ export function IncidentsWorkflowPanel() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []);
+
   const createIncident = async () => {
     setLoading(true);
     setError(null);
@@ -422,6 +431,9 @@ export function CapitalWorkflowPanel() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []);
+
   const record = async () => {
     const parsed = Number(amount);
     if (!Number.isFinite(parsed) || parsed === 0) {
@@ -510,6 +522,9 @@ export function ReturnPoliciesWorkflowPanel() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []);
+
   const save = async () => {
     setLoading(true);
     setError(null);
@@ -589,6 +604,9 @@ export function SupplierReliabilityAndRiskPanel() {
     else setError((prev) => prev ?? { message: rRes.error.message });
     setLoading(false);
   };
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []);
 
   const refreshReliability = async () => {
     setLoading(true);
