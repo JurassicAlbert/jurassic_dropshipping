@@ -2,11 +2,12 @@
 
 import { Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { useClientMounted } from "@/lib/useClientMounted";
 
 export type ProfitPoint = { day: string; profit: number };
 
 export function ProfitTrendChartCard({ points }: { points: ProfitPoint[] }) {
-  const canRenderChart = typeof window !== "undefined";
+  const mounted = useClientMounted();
 
   return (
     <Card>
@@ -25,7 +26,7 @@ export function ProfitTrendChartCard({ points }: { points: ProfitPoint[] }) {
         </Typography>
 
         <Box sx={{ height: 280, minWidth: 0 }}>
-          {canRenderChart ? (
+          {mounted ? (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={points} margin={{ left: 4, right: 12, top: 10, bottom: 0 }}>
                 <defs>

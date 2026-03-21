@@ -286,7 +286,7 @@ class ShellScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Jurassic Dropshipping',
+                          'Jurasic Dropshipping',
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: theme.colorScheme.onSurface,
                             fontWeight: FontWeight.bold,

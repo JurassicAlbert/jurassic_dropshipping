@@ -81,7 +81,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       >
         <Toolbar sx={{ pl: `${drawerWidth}px` }}>
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1 }}>
-            <Typography variant="h6">Jurassic Admin</Typography>
+            <Typography variant="h6">Jurasic Admin</Typography>
           </Stack>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mr: 1.5 }}>

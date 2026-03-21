@@ -1,4 +1,4 @@
-# Jurassic Dropshipping – Modules, Features, and Architecture
+# Jurasic Dropshipping – Modules, Features, and Architecture
 
 ## 1. High-level architecture
 

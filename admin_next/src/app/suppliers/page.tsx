@@ -4,24 +4,8 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AdminShell } from "@/components/AdminShell";
 import { SupplierReliabilityAndRiskPanel } from "@/components/ops/MockWriteWorkflowPanels";
+import { SUPPLIERS_OFFLINE, type SuppliersPayload } from "@/lib/emptyTablePayloads";
 import { Box, Chip, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Card, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, TableSortLabel, TablePagination, Button } from "@mui/material";
-
-type SuppliersPayload = {
-  summary: { total: number; withActiveListings: number };
-  rows: {
-    id: string;
-    name: string;
-    platformType: string;
-    countryCode?: string | null;
-    rating?: number | null;
-    productsCount: number;
-    listingsCount: number;
-    activeListingsCount: number;
-    ordersCount: number;
-    returnsCount: number;
-    avgOrderProfit: number;
-  }[];
-};
 
 function SuppliersPageContent() {
   const router = useRouter();
@@ -29,7 +13,7 @@ function SuppliersPageContent() {
   const searchParams = useSearchParams();
   const [data, setData] = useState<SuppliersPayload | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [offline, setOffline] = useState(false);
   const query = searchParams.get("q") ?? "";
   const country = searchParams.get("country") ?? "all";
   const profitBucket = searchParams.get("profit") ?? "all";
@@ -52,13 +36,22 @@ function SuppliersPageContent() {
       try {
         const res = await fetch("/api/suppliers", { cache: "no-store" });
         if (!res.ok) {
-          if (!cancelled) setError(`API error (${res.status})`);
+          if (!cancelled) {
+            setData(SUPPLIERS_OFFLINE);
+            setOffline(true);
+          }
           return;
         }
         const json = (await res.json()) as SuppliersPayload;
-        if (!cancelled) setData(json);
+        if (!cancelled) {
+          setData(json);
+          setOffline(false);
+        }
       } catch {
-        if (!cancelled) setError("Unable to reach suppliers API");
+        if (!cancelled) {
+          setData(SUPPLIERS_OFFLINE);
+          setOffline(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -132,7 +125,11 @@ function SuppliersPageContent() {
             Live supplier performance and operational quality.
           </Typography>
           {loading ? <Typography color="text.secondary" sx={{ mt: 0.5 }}>Loading suppliers...</Typography> : null}
-          {error ? <Typography sx={{ mt: 0.5, color: "warning.main", fontWeight: 700 }}>{error}</Typography> : null}
+          {offline ? (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Live data unavailable — start the Dart dashboard API or set `DART_API_BASE_URL`. Showing empty table.
+            </Typography>
+          ) : null}
         </Box>
 
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">

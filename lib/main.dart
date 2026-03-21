@@ -271,7 +271,7 @@ class JurassicDropshippingApp extends ConsumerWidget {
     final localeAsync = ref.watch(localeProvider);
     final locale = localeAsync.valueOrNull ?? AppLocalizations.defaultLocale;
     return MaterialApp.router(
-      title: 'Jurassic Dropshipping',
+      title: 'Jurasic Dropshipping',
       theme: _buildLightTheme(),
       darkTheme: _buildDarkTheme(),
       themeMode: themeMode,

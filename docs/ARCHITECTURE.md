@@ -2,7 +2,7 @@
 
 ## Overview
 
-Jurassic Dropshipping is a single-user Flutter app that automates product sourcing, listing, and order fulfillment for the Polish market. All data is obtained via **official APIs only** (no scraping).
+Jurasic Dropshipping is a single-user Flutter app that automates product sourcing, listing, and order fulfillment for the Polish market. All data is obtained via **official APIs only** (no scraping).
 
 ## High-level flow
 

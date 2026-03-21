@@ -1,4 +1,4 @@
-# Handoff / Agent Snapshot – Jurassic Dropshipping
+# Handoff / Agent Snapshot – Jurasic Dropshipping
 
 **Last updated:** After completing Phases 1–6 + all suggested next changes (marketplace accounts, Temu target, API2Cart source, suppliers/offers, returns, safety guardrails, price refresh, automation scheduler, shipping estimator).
 

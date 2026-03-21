@@ -23,6 +23,7 @@ const adminSurfaces = [
   { page: "app/profit-dashboard/page.tsx", api: "app/api/[...proxy]/route.ts" },
   { page: "app/how-it-works/page.tsx", api: "app/api/[...proxy]/route.ts" },
   { page: "app/suppliers/[id]/page.tsx", api: "app/api/[...proxy]/route.ts" },
+  { page: "app/settings/page.tsx", api: "app/api/rules/route.ts" },
 ];
 
 describe("TP-D logic availability (file presence)", () => {

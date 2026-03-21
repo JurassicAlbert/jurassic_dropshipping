@@ -31,7 +31,6 @@ export function LiveDataTablePage({
 }) {
   const [data, setData] = useState<LivePayload | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,13 +38,29 @@ export function LiveDataTablePage({
       try {
         const res = await fetch(apiPath, { cache: "no-store" });
         if (!res.ok) {
-          if (!cancelled) setError(`API error (${res.status})`);
+          if (!cancelled) {
+            setData({
+              rows: [],
+              summary: {},
+              placeholder: true,
+              placeholderReason:
+                "Live API unavailable (start `dart run tool/dashboard_api_server_dart_main.dart` or set DART_API_BASE_URL).",
+            });
+          }
           return;
         }
         const json = (await res.json()) as LivePayload;
         if (!cancelled) setData(json);
       } catch {
-        if (!cancelled) setError(`Unable to reach ${apiPath}`);
+        if (!cancelled) {
+          setData({
+            rows: [],
+            summary: {},
+            placeholder: true,
+            placeholderReason:
+              "Could not reach API. Start the Dart dashboard server or check the Next.js proxy.",
+          });
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -71,10 +86,9 @@ export function LiveDataTablePage({
           {subtitle}
         </Typography>
         {loading ? <Typography color="text.secondary" sx={{ mt: 0.5 }}>Loading data...</Typography> : null}
-        {error ? <Typography sx={{ mt: 0.5, color: "warning.main", fontWeight: 700 }}>{error}</Typography> : null}
         {data?.placeholder ? (
-          <Typography sx={{ mt: 0.5, color: "warning.main", fontWeight: 700 }}>
-            Placeholder: {data.placeholderReason ?? "Pending integration"}
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {data.placeholderReason ?? "Pending integration"}
           </Typography>
         ) : null}
       </Box>

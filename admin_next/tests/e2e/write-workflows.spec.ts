@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Write workflow resilience', () => {
-  test('approval page loads and shows approval queue', async ({ page }) => {
-    await page.goto('/approval');
-    await expect(page.locator('h1, h2, h3').first()).toContainText(/approval/i);
+  test("approval page loads and shows approval queue", async ({ page }) => {
+    await page.goto("/approval");
+    await expect(page.getByRole("heading", { name: "Approval Queue", exact: true })).toBeVisible();
   });
 
   test('handles slow API response gracefully', async ({ page }) => {

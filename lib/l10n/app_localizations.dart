@@ -16,7 +16,7 @@ class AppLocalizations {
   static const List<Locale> supportedLocales = [Locale('pl'), Locale('en')];
 
   // ─── App & nav ───
-  String get appTitle => isPl ? 'Jurassic Dropshipping' : 'Jurassic Dropshipping';
+  String get appTitle => isPl ? 'Jurasic Dropshipping' : 'Jurasic Dropshipping';
 
   List<String> get navLabels => isPl ? _navLabelsPl : _navLabelsEn;
   static const _navLabelsPl = [

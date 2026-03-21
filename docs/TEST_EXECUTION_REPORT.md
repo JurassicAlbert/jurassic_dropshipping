@@ -9,7 +9,7 @@ Date: 2026-03-04 (agent run)
 | Flutter (full) | `flutter test` | Pass |
 | Dart analyze (API server) | `dart analyze tool/dashboard_api_server_dart_main.dart` | Pass |
 | Admin lint | `npm run lint` (in `admin_next`) | Pass |
-| Admin unit/component | `npm run test` (Vitest) | Pass |
+| Admin unit/component | `npm run test` (Vitest) | Pass (35+ tests; includes `useClientMounted`, `/api/rules`, logic availability) |
 | Admin build | `npm run build` | Pass |
 | Admin E2E | `npm run test:e2e` (Playwright) | Pass |
 

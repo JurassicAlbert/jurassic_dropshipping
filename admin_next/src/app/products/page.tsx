@@ -3,25 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AdminShell } from "@/components/AdminShell";
+import { PRODUCTS_OFFLINE, type ProductsPayload } from "@/lib/emptyTablePayloads";
 import { Box, Chip, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Card, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, TableSortLabel, TablePagination, Button } from "@mui/material";
-
-type ProductsPayload = {
-  summary: { total: number; withActiveListings: number };
-  rows: {
-    id: string;
-    title: string;
-    sourcePlatformId: string;
-    supplierId?: string | null;
-    supplierCountry?: string | null;
-    basePrice: number;
-    shippingCost?: number | null;
-    currency: string;
-    estimatedDays?: number | null;
-    listingCount: number;
-    activeListingCount: number;
-    avgMarginPercent: number;
-  }[];
-};
 
 function ProductsPageContent() {
   const router = useRouter();
@@ -29,7 +12,7 @@ function ProductsPageContent() {
   const searchParams = useSearchParams();
   const [data, setData] = useState<ProductsPayload | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [offline, setOffline] = useState(false);
   const query = searchParams.get("q") ?? "";
   const platform = searchParams.get("platform") ?? "all";
   const marginBucket = searchParams.get("margin") ?? "all";
@@ -52,13 +35,22 @@ function ProductsPageContent() {
       try {
         const res = await fetch("/api/products", { cache: "no-store" });
         if (!res.ok) {
-          if (!cancelled) setError(`API error (${res.status})`);
+          if (!cancelled) {
+            setData(PRODUCTS_OFFLINE);
+            setOffline(true);
+          }
           return;
         }
         const json = (await res.json()) as ProductsPayload;
-        if (!cancelled) setData(json);
+        if (!cancelled) {
+          setData(json);
+          setOffline(false);
+        }
       } catch {
-        if (!cancelled) setError("Unable to reach products API");
+        if (!cancelled) {
+          setData(PRODUCTS_OFFLINE);
+          setOffline(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -133,7 +125,11 @@ function ProductsPageContent() {
             Live catalog with listing density and margin profile.
           </Typography>
           {loading ? <Typography color="text.secondary" sx={{ mt: 0.5 }}>Loading products...</Typography> : null}
-          {error ? <Typography sx={{ mt: 0.5, color: "warning.main", fontWeight: 700 }}>{error}</Typography> : null}
+          {offline ? (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Live data unavailable — start the Dart dashboard API or set `DART_API_BASE_URL`. Showing empty table.
+            </Typography>
+          ) : null}
         </Box>
 
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">

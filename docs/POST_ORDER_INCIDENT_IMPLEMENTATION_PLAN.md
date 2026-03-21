@@ -1,6 +1,6 @@
 # Post-Order Incident & Returns – Implementation Plan
 
-**Jurassic Dropshipping** – Extension of the existing architecture for robust post-order incident and returns handling. This plan **extends** current models and services; it does not replace them.
+**Jurasic Dropshipping** – Extension of the existing architecture for robust post-order incident and returns handling. This plan **extends** current models and services; it does not replace them.
 
 ---
 

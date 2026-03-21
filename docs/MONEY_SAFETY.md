@@ -1,4 +1,4 @@
-# Money Safety Guide — Jurassic Dropshipping
+# Money Safety Guide — Jurasic Dropshipping
 
 This document explains built-in protections against financial loss and how to configure them properly.
 

@@ -1,12 +1,13 @@
 # Deployment and runbook
 
-How to run Jurassic Dropshipping in a production-like environment and operate it day to day.
+How to run Jurasic Dropshipping in a production-like environment and operate it day to day.
 
 ## Build
 
 - **Android:** `flutter build apk` (or `flutter build appbundle` for Play Store). Output under `build/app/outputs/`.
 - **Web:** `flutter build web`. Serve the `build/web` directory (static files). For persistence, serve with appropriate headers (COOP/COEP if using shared-array-buffer for Drift WASM).
 - **Desktop (Windows/macOS/Linux):** `flutter build windows` / `macos` / `linux`. Run the executable from `build/windows/runner/Release/` (or equivalent).
+- **Next.js admin (`admin_next/`):** `npm ci && npm run build && npm run start` (or deploy to a Node host). Set `DART_API_BASE_URL` (or run `dart run tool/dashboard_api_server_dart_main.dart`) so the proxy can reach the read/write API. CI runs `lint`, `vitest`, `next build`, and Playwright against `admin_next` (see `.github/workflows/ci.yml`).
 
 ## Run (production mode)
 

@@ -1,6 +1,10 @@
-import { http, HttpResponse } from 'msw';
+import { http, HttpResponse } from "msw";
 
-const BASE = '/api';
+const BASE = "/api";
+
+function jsonRecord(v: unknown): Record<string, unknown> {
+  return v !== null && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+}
 
 export const handlers = [
   // Approval: approve order
@@ -15,31 +19,31 @@ export const handlers = [
 
   // Returns: update status
   http.patch(`${BASE}/returns/:id`, async ({ params, request }) => {
-    const body = await request.json();
+    const body = jsonRecord(await request.json());
     return HttpResponse.json({ id: params.id, ...body });
   }),
 
   // Incidents: create
   http.post(`${BASE}/incidents`, async ({ request }) => {
-    const body = await request.json();
-    return HttpResponse.json({ id: 'inc_new', ...body }, { status: 201 });
+    const body = jsonRecord(await request.json());
+    return HttpResponse.json({ id: "inc_new", ...body }, { status: 201 });
   }),
 
   // Incidents: process
   http.patch(`${BASE}/incidents/:id`, async ({ params, request }) => {
-    const body = await request.json();
+    const body = jsonRecord(await request.json());
     return HttpResponse.json({ id: params.id, ...body });
   }),
 
   // Capital: adjust
   http.post(`${BASE}/capital/adjust`, async ({ request }) => {
-    const body = await request.json();
+    const body = jsonRecord(await request.json());
     return HttpResponse.json({ success: true, ...body });
   }),
 
   // Return policies: upsert
   http.put(`${BASE}/return-policies/:id`, async ({ params, request }) => {
-    const body = await request.json();
+    const body = jsonRecord(await request.json());
     return HttpResponse.json({ id: params.id, ...body });
   }),
 

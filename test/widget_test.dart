@@ -54,7 +54,7 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 100));
     });
     await tester.pump();
-    expect(find.text('Jurassic Dropshipping'), findsWidgets);
+    expect(find.text('Jurasic Dropshipping'), findsWidgets);
     expect(find.text('Set Password'), findsOneWidget);
   });
 

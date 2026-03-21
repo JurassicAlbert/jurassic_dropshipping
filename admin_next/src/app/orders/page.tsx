@@ -3,25 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AdminShell } from "@/components/AdminShell";
+import { ORDERS_OFFLINE, type OrdersPayload } from "@/lib/emptyTablePayloads";
 import { Box, Chip, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Card, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, TableSortLabel, TablePagination, Button } from "@mui/material";
-
-type OrdersPayload = {
-  summary: { total: number; queuedForCapital: number; statusCounts: Record<string, number> };
-  rows: {
-    id: string;
-    targetOrderId: string;
-    platform: string;
-    listingId: string;
-    status: string;
-    quantity: number;
-    sellingPrice: number;
-    sourceCost: number;
-    profit: number;
-    riskScore?: number | null;
-    queuedForCapital: boolean;
-    createdAt?: string | null;
-  }[];
-};
 
 function OrdersPageContent() {
   const router = useRouter();
@@ -29,7 +12,7 @@ function OrdersPageContent() {
   const searchParams = useSearchParams();
   const [data, setData] = useState<OrdersPayload | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [offline, setOffline] = useState(false);
   const query = searchParams.get("q") ?? "";
   const platform = searchParams.get("platform") ?? "all";
   const status = searchParams.get("status") ?? "all";
@@ -57,13 +40,22 @@ function OrdersPageContent() {
       try {
         const res = await fetch("/api/orders", { cache: "no-store" });
         if (!res.ok) {
-          if (!cancelled) setError(`API error (${res.status})`);
+          if (!cancelled) {
+            setData(ORDERS_OFFLINE);
+            setOffline(true);
+          }
           return;
         }
         const json = (await res.json()) as OrdersPayload;
-        if (!cancelled) setData(json);
+        if (!cancelled) {
+          setData(json);
+          setOffline(false);
+        }
       } catch {
-        if (!cancelled) setError("Unable to reach orders API");
+        if (!cancelled) {
+          setData(ORDERS_OFFLINE);
+          setOffline(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -134,7 +126,11 @@ function OrdersPageContent() {
             Live orders with status and profit diagnostics.
           </Typography>
           {loading ? <Typography color="text.secondary" sx={{ mt: 0.5 }}>Loading orders...</Typography> : null}
-          {error ? <Typography sx={{ mt: 0.5, color: "warning.main", fontWeight: 700 }}>{error}</Typography> : null}
+          {offline ? (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Live data unavailable — start the Dart dashboard API or set `DART_API_BASE_URL`. Showing empty table.
+            </Typography>
+          ) : null}
         </Box>
 
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">

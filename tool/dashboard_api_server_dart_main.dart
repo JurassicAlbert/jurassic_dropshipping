@@ -17,6 +17,7 @@ import 'package:jurassic_dropshipping/data/repositories/returned_stock_repositor
 import 'package:jurassic_dropshipping/data/repositories/rules_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_repository.dart';
+import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_return_policy_repository.dart';
 import 'package:jurassic_dropshipping/features/analytics/analytics_engine.dart';
 import 'package:jurassic_dropshipping/services/seed_service.dart';
@@ -40,6 +41,7 @@ Future<void> main() async {
   final listingRepo = ListingRepository(database, tenantId: tenantId);
   final returnRepo = ReturnRepository(database, tenantId: tenantId);
   final supplierRepo = SupplierRepository(database, tenantId: tenantId);
+  final rulesRepo = RulesRepository(database, tenantId: tenantId);
 
   // Ensure there's something to display.
   final existingOrders = await orderRepo.getAll();
@@ -50,8 +52,6 @@ Future<void> main() async {
     final productRepo = ProductRepository(database, tenantId: tenantId);
     final supplierOfferRepo = SupplierOfferRepository(database, tenantId: tenantId);
     final decisionLogRepo = DecisionLogRepository(database, tenantId: tenantId);
-    final rulesRepo = RulesRepository(database, tenantId: tenantId);
-
     final seed = SeedService(
       db: database,
       productRepository: productRepo,
@@ -260,6 +260,31 @@ Future<void> main() async {
           ..write(jsonEncode(payload))
           ..close();
         continue;
+      }
+
+      if (request.uri.path == '/rules') {
+        if (request.method == 'GET') {
+          final r = await rulesRepo.get();
+          request.response
+            ..statusCode = 200
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode(r.toJson()))
+            ..close();
+          continue;
+        }
+        if (request.method == 'POST') {
+          final body = await utf8.decoder.bind(request).join();
+          final map = jsonDecode(body) as Map<String, dynamic>;
+          final rules = UserRules.fromJson(map);
+          await rulesRepo.save(rules);
+          final saved = await rulesRepo.get();
+          request.response
+            ..statusCode = 200
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode(saved.toJson()))
+            ..close();
+          continue;
+        }
       }
 
       request.response

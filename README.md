@@ -1,10 +1,11 @@
-# Jurassic Dropshipping
+# Jurasic Dropshipping
 
 Personal dropshipping arbitrage app (Flutter) – automate sourcing, listing, and order fulfillment for the Polish market. Single-user; optional manual approval for listings and orders.
 
 ## Features
 
-- **Multi-source product sourcing**: CJ Dropshipping (API v2), API2Cart (Shopify, WooCommerce, Magento, etc.)
+- **Primary sourcing**: warehouse / depot feeds (CSV, XML, API) — see [WAREHOUSE_FEEDS.md](docs/WAREHOUSE_FEEDS.md)
+- **Secondary integrations**: CJ Dropshipping (API v2), API2Cart (Shopify, WooCommerce, Magento, etc.)
 - **Multi-target listing**: Allegro (REST API + OAuth), Temu (seller API — forward-looking)
 - **Decision engine**: automated product scanning, supplier selection, pricing with configurable rules
 - **Safety guardrails**: minimum profit floor (5 PLN), max source price, 10x sanity check, return risk buffer, blacklists — see [MONEY_SAFETY.md](docs/MONEY_SAFETY.md)
@@ -99,6 +100,9 @@ flutter test test/integration/ # integration (6)
 - [docs/ADMIN_NEXT_CONTINUATION.md](docs/ADMIN_NEXT_CONTINUATION.md) – **Next.js admin** (`admin_next/`): handoff for agents, env, commands, and follow-up work (mock transport, tests, HTTP writes).
 - [docs/TEST_TRACEABILITY_MATRIX.md](docs/TEST_TRACEABILITY_MATRIX.md) – Test plan mapping (TP-A..TP-E) and admin parity.
 - [docs/NO_API_WRITE_WORKFLOW_CONTRACTS.md](docs/NO_API_WRITE_WORKFLOW_CONTRACTS.md) – Write-workflow contracts for the admin transport layer.
+- [docs/FEATURE_MAP.md](docs/FEATURE_MAP.md) – Feature → function → route mapping for tests.
+- [docs/PRICING_PATH_AUDIT.md](docs/PRICING_PATH_AUDIT.md) – Where `PricingCalculator` is used end-to-end.
+- [docs/JURASIC_BACKLOG_CHECKLIST.md](docs/JURASIC_BACKLOG_CHECKLIST.md) – **p1–p18 backlog** (Git-tracked; same as Cursor plan, for agents).
 
 ### Next.js admin (optional local dashboard)
 

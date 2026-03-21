@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Jurassic Admin",
-  description: "Jurassic Dropshipping admin panel",
+  title: "Jurasic Admin",
+  description: "Jurasic Dropshipping admin panel",
 };
 
 export default function RootLayout({

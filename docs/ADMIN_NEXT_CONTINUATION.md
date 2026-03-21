@@ -2,6 +2,8 @@
 
 **Purpose:** Single handoff document so a web agent (or human) can resume work without relying on chat history. Last aligned with repo state: 2026-03-04.
 
+**Backlog p1–p18 (versioned checklist):** [JURASIC_BACKLOG_CHECKLIST.md](./JURASIC_BACKLOG_CHECKLIST.md) — use this in Git; Cursor plan files may live only under your local `.cursor/plans/`.
+
 ## Quick orientation
 
 | Item | Location |
@@ -11,6 +13,7 @@
 | Deterministic mock (no backend) | `admin_next/src/lib/adminTransport/mockTransportFixed.ts` |
 | HTTP reads / stubbed writes | `admin_next/src/lib/adminTransport/httpTransport.ts` |
 | Switch mock vs HTTP | `NEXT_PUBLIC_ADMIN_TRANSPORT` — see `getAdminTransport.ts` |
+| Dashboard API debug logs | `NEXT_PUBLIC_SHOW_DASHBOARD_API_ERRORS=true` at **build** time — logs `console.warn` when `/api/dashboard` fails. UI uses a **muted** one-line hint + offline snapshot, not a loud error banner. |
 | Write UI panels (mock transport) | `admin_next/src/components/ops/MockWriteWorkflowPanels.tsx` |
 | Generic read-only tables | `admin_next/src/components/ops/LiveDataTablePage.tsx` |
 | Proxy to Dart API server | `admin_next/src/app/api/[...proxy]/route.ts` |
@@ -33,9 +36,9 @@
 - **Supplier detail (`/suppliers/[id]`):** Still `LiveDataTablePage` only. Consider transport-scoped policy edit or reliability actions for the **route `id`** (reuse patterns from `ReturnPoliciesWorkflowPanel` / `SupplierReliabilityAndRiskPanel`).
 - **Duplicate panel:** `SupplierReliabilityAndRiskPanel` appears on both **Suppliers** and **Risk Dashboard** — acceptable; differentiate copy/primary CTA if UX asks for it.
 
-### 2. MSW — `msw-handlers` (not started)
+### 2. MSW — `msw-handlers`
 
-- Add `msw` as a dev dependency and handlers that mirror write endpoints (or mirror `AdminTransport` shapes) so component tests can assert **request schema** and **failure responses** without using in-memory `MockTransportFixed` only.
+- Dev dependency `msw` + stub handlers live under `admin_next/src/test/msw/handlers.ts` (Vitest / future component tests). Extend handlers when HTTP write routes are added.
 - Target: Vitest + MSW for any future `fetch`-based write client; until HTTP writes exist, MSW can stub `PATCH/POST` under `/api/...` if you add Next route handlers.
 
 ### 3. Playwright — `playwright-route-stubs` (partial)

@@ -2,6 +2,7 @@
 
 import { Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useClientMounted } from "@/lib/useClientMounted";
 
 export type ProfitByPlatformPoint = {
   platformId: string;
@@ -9,7 +10,7 @@ export type ProfitByPlatformPoint = {
 };
 
 export function ProfitByPlatformCard({ points }: { points: ProfitByPlatformPoint[] }) {
-  const canRenderChart = typeof window !== "undefined";
+  const mounted = useClientMounted();
 
   return (
     <Card>
@@ -27,7 +28,7 @@ export function ProfitByPlatformCard({ points }: { points: ProfitByPlatformPoint
         </Typography>
 
         <Box sx={{ height: 260, minWidth: 0 }}>
-          {canRenderChart ? (
+          {mounted ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={points} margin={{ left: 4, right: 12, top: 10, bottom: 0 }}>
                 <CartesianGrid stroke="rgba(16,24,40,0.06)" vertical={false} />

@@ -12,10 +12,14 @@ import type {
 } from "./types";
 
 import { mkFailExternal } from "./httpTransportUtils";
-import type { ReturnRow } from "./types";
 
 function mkOk<T>(requestId: string, extra: T): TransportResponse<T> {
   return { requestId, ok: true, ...(extra as T) } as TransportResponse<T>;
+}
+
+/** Narrow JSON body for dynamic field access without duplicate identifier issues. */
+function jsonBody(data: unknown): Record<string, unknown> {
+  return data !== null && typeof data === "object" ? (data as Record<string, unknown>) : {};
 }
 
 async function fetchJson(
@@ -42,14 +46,16 @@ export class HttpTransport implements AdminTransport {
   async approvalGetPendingListings(requestId: string): Promise<TransportResponse<{ pendingListings: ApprovalListing[] }>> {
     const res = await fetchJson(requestId, `${this.base()}/api/approval`);
     if (!res.ok) return mkFailExternal(requestId, "external_integration_required", `Failed to load approval (${res.status})`);
-    const pendingListings = (res.data?.pendingListings ?? []) as ApprovalListing[];
+    const d = jsonBody(res.data);
+    const pendingListings = (d.pendingListings ?? []) as ApprovalListing[];
     return mkOk(requestId, { pendingListings });
   }
 
   async approvalGetPendingOrders(requestId: string): Promise<TransportResponse<{ pendingOrders: ApprovalOrder[] }>> {
     const res = await fetchJson(requestId, `${this.base()}/api/approval`);
     if (!res.ok) return mkFailExternal(requestId, "external_integration_required", `Failed to load approval (${res.status})`);
-    const pendingOrders = (res.data?.pendingOrders ?? []) as ApprovalOrder[];
+    const d = jsonBody(res.data);
+    const pendingOrders = (d.pendingOrders ?? []) as ApprovalOrder[];
     return mkOk(requestId, { pendingOrders });
   }
 
@@ -86,7 +92,7 @@ export class HttpTransport implements AdminTransport {
   async returnsGetReturns(requestId: string): Promise<TransportResponse<{ rows: ReturnRow[] }>> {
     const res = await fetchJson(requestId, `${this.base()}/api/returns`);
     if (!res.ok) return mkFailExternal(requestId, "external_integration_required", `Failed to load returns (${res.status})`);
-    return mkOk(requestId, { rows: (res.data?.rows ?? []) as ReturnRow[] });
+    return mkOk(requestId, { rows: (jsonBody(res.data).rows ?? []) as ReturnRow[] });
   }
 
   async returnsComputeRouting(
@@ -119,7 +125,7 @@ export class HttpTransport implements AdminTransport {
   async incidentsGetIncidents(requestId: string): Promise<TransportResponse<{ rows: IncidentRow[] }>> {
     const res = await fetchJson(requestId, `${this.base()}/api/incidents`);
     if (!res.ok) return mkFailExternal(requestId, "external_integration_required", `Failed to load incidents (${res.status})`);
-    return mkOk(requestId, { rows: (res.data?.rows ?? []) as IncidentRow[] });
+    return mkOk(requestId, { rows: (jsonBody(res.data).rows ?? []) as IncidentRow[] });
   }
 
   async incidentsCreateIncident(
@@ -147,7 +153,8 @@ export class HttpTransport implements AdminTransport {
   async capitalGetSnapshot(requestId: string): Promise<TransportResponse<{ snapshot: CapitalSnapshot }>> {
     const res = await fetchJson(requestId, `${this.base()}/api/capital`);
     if (!res.ok) return mkFailExternal(requestId, "external_integration_required", `Failed to load capital (${res.status})`);
-    const snapshot = (res.data?.summary ?? res.data?.snapshot ?? null) as CapitalSnapshot;
+    const b = jsonBody(res.data);
+    const snapshot = (b.summary ?? b.snapshot ?? null) as CapitalSnapshot;
     return mkOk(requestId, { snapshot: snapshot ?? { balance: 0, entriesRecent: [], queuedOrders: [] } });
   }
 
@@ -162,7 +169,7 @@ export class HttpTransport implements AdminTransport {
   async policiesGetAll(requestId: string): Promise<TransportResponse<{ rows: SupplierReturnPolicy[] }>> {
     const res = await fetchJson(requestId, `${this.base()}/api/return-policies`);
     if (!res.ok) return mkFailExternal(requestId, "external_integration_required", `Failed to load return policies (${res.status})`);
-    return mkOk(requestId, { rows: (res.data?.rows ?? []) as SupplierReturnPolicy[] });
+    return mkOk(requestId, { rows: (jsonBody(res.data).rows ?? []) as SupplierReturnPolicy[] });
   }
 
   async policiesUpsert(
@@ -176,7 +183,7 @@ export class HttpTransport implements AdminTransport {
   async suppliersGetSuppliers(requestId: string): Promise<TransportResponse<{ rows: SupplierRow[] }>> {
     const res = await fetchJson(requestId, `${this.base()}/api/suppliers`);
     if (!res.ok) return mkFailExternal(requestId, "external_integration_required", `Failed to load suppliers (${res.status})`);
-    return mkOk(requestId, { rows: (res.data?.rows ?? []) as SupplierRow[] });
+    return mkOk(requestId, { rows: (jsonBody(res.data).rows ?? []) as SupplierRow[] });
   }
 
   async suppliersRefreshReliabilityScores(

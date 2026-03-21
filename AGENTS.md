@@ -4,7 +4,7 @@
 
 ### Overview
 
-Jurassic Dropshipping is a single Flutter desktop/mobile app for dropshipping arbitrage in the Polish market. It uses Drift (SQLite) for local storage, Riverpod for state management, and Freezed for model code generation. See `README.md` for standard commands and `HANDOFF.md` for implementation status.
+Jurasic Dropshipping is a single Flutter desktop/mobile app for dropshipping arbitrage in the Polish market. It uses Drift (SQLite) for local storage, Riverpod for state management, and Freezed for model code generation. See `README.md` for standard commands and `HANDOFF.md` for implementation status.
 
 ### Running the app on Linux desktop
 

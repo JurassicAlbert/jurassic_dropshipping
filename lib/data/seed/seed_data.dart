@@ -273,7 +273,7 @@ class DemoSeedData {
   }
 
   static List<MarketplaceAccount> get accounts => [
-    MarketplaceAccount(id: 'mkt_allegro_1', platformId: 'allegro', displayName: 'Jurassic Store PL', isActive: true, connectedAt: _daysAgo(60)),
-    MarketplaceAccount(id: 'mkt_temu_1', platformId: 'temu', displayName: 'Jurassic Temu', isActive: true, connectedAt: _daysAgo(30)),
+    MarketplaceAccount(id: 'mkt_allegro_1', platformId: 'allegro', displayName: 'Jurasic Store PL', isActive: true, connectedAt: _daysAgo(60)),
+    MarketplaceAccount(id: 'mkt_temu_1', platformId: 'temu', displayName: 'Jurasic Temu', isActive: true, connectedAt: _daysAgo(30)),
   ];
 }
