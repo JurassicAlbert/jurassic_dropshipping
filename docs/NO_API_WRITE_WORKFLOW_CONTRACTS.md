@@ -495,3 +495,5 @@ After contracts are agreed, the next tasks implement:
    - Playwright `page.route` stubs for latency and failure
    - synthetic stress loops for repeated actions
 
+**Current status and next tasks for agents:** [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md)
+

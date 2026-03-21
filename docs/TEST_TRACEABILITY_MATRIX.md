@@ -46,12 +46,11 @@ Source: `lib/app_router.dart`
 
 Source: `admin_next/src/app/**/page.tsx`
 
-- `/`
-- `/analytics`
-- `/orders`
-- `/products`
-- `/suppliers`
-- `/settings`
+- `/` (dashboard)
+- `/analytics`, `/orders`, `/products`, `/suppliers`, `/suppliers/[id]`, `/settings`
+- `/approval`, `/returns`, `/incidents`, `/capital`, `/return-policies`, `/returned-stock`, `/risk-dashboard`, `/decision-log`, `/marketplaces`, `/profit-dashboard`, `/how-it-works`
+
+**Handoff / next tasks:** [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md)
 
 ## Business logic -> UI/API/Test traceability
 
@@ -59,28 +58,30 @@ Source: `admin_next/src/app/**/page.tsx`
 |---|---|---|---|---|---|---|---|---|---|
 | Decision engine (scan/list/price/select) | `lib/domain/decision_engine/scanner.dart`, `listing_decider.dart`, `pricing_calculator.dart`, `supplier_selector.dart` | `/dashboard`, `/approval`, `/decision-log` | `/`, `/analytics` | `/api/dashboard` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Orders lifecycle | `lib/domain/post_order/post_order_lifecycle_engine.dart`, `lib/data/repositories/order_repository.dart` | `/orders`, `/approval`, `/returns`, `/incidents` | `/orders` | `/api/orders`, `/api/dashboard` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
-| Risk scoring | `lib/domain/risk/order_risk_scoring_service.dart`, `lib/domain/listing_health/listing_health_scoring_service.dart` | `/risk-dashboard`, `/orders` | `/orders`, `/analytics`, `/` | `/api/orders`, `/api/dashboard` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
-| Returns and incidents | `lib/domain/post_order/incident_handling_engine.dart`, `return_routing_service.dart`, `lib/data/repositories/return_repository.dart` | `/returns`, `/incidents`, `/incidents/:id` | MISSING | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
-| Returned stock | `lib/data/repositories/returned_stock_repository.dart`, `lib/features/returned_stock/**` | `/returned-stock` | MISSING | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
-| Capital and ledger | `lib/domain/capital/capital_management_service.dart`, `lib/data/repositories/financial_ledger_repository.dart` | `/capital` | MISSING | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
-| Approval queue | `lib/features/approval/**`, repo/service integrations | `/approval` | MISSING | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
-| Decision log | `lib/data/repositories/decision_log_repository.dart`, `lib/features/decision_log/**` | `/decision-log` | MISSING | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
+| Risk scoring | `lib/domain/risk/order_risk_scoring_service.dart`, `lib/domain/listing_health/listing_health_scoring_service.dart` | `/risk-dashboard`, `/orders` | `/risk-dashboard`, `/orders`, `/analytics`, `/` | `/api/risk-dashboard`, `/api/orders`, `/api/dashboard` + mock refresh | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
+| Returns and incidents | `lib/domain/post_order/incident_handling_engine.dart`, `return_routing_service.dart`, `lib/data/repositories/return_repository.dart` | `/returns`, `/incidents`, `/incidents/:id` | `/returns`, `/incidents` | proxy `/api/returns`, `/api/incidents` + mock writes in `MockWriteWorkflowPanels` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
+| Returned stock | `lib/data/repositories/returned_stock_repository.dart`, `lib/features/returned_stock/**` | `/returned-stock` | `/returned-stock` | proxy `/api/returned-stock` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
+| Capital and ledger | `lib/domain/capital/capital_management_service.dart`, `lib/data/repositories/financial_ledger_repository.dart` | `/capital` | `/capital` | proxy `/api/capital` + mock writes | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
+| Approval queue | `lib/features/approval/**`, repo/service integrations | `/approval` | `/approval` | proxy `/api/approval` + mock writes | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
+| Decision log | `lib/data/repositories/decision_log_repository.dart`, `lib/features/decision_log/**` | `/decision-log` | `/decision-log` | proxy `/api/decision-log` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Suppliers and reliability | `lib/domain/supplier_reliability/**`, `lib/data/repositories/supplier_repository.dart` | `/suppliers`, `/suppliers/:id` | `/suppliers` | `/api/suppliers` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Products/listings margin health | `lib/data/repositories/product_repository.dart`, `listing_repository.dart` | `/products`, `/profit-dashboard` | `/products`, `/analytics`, `/` | `/api/products`, `/api/dashboard` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Marketplaces/accounts | `lib/data/repositories/marketplace_account_repository.dart`, `lib/features/marketplaces/**` | `/marketplaces` | MISSING | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
 | Return policies | `lib/data/repositories/supplier_return_policy_repository.dart`, `lib/features/return_policies/**` | `/return-policies` | MISSING | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
 | Inventory/stock refresh | `lib/domain/inventory/**`, `lib/services/price_refresh_service.dart` | `/products`, `/orders`, `/returned-stock` | `/products`, `/orders` | `/api/products`, `/api/orders` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
-| Messaging automation | `lib/services/messaging/customer_message_analyzer.dart`, `response_engine.dart` | Embedded in existing Flutter screens | MISSING | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
-| Settings/rules | `lib/data/repositories/rules_repository.dart`, `lib/features/settings/**` | `/settings` | `/settings` (stub) | MISSING | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
-| How it works (functional explainability) | `lib/features/how_it_works/**` | `/how-it-works` | MISSING | N/A | REQUIRED | REQUIRED | OPTIONAL | REQUIRED | MISSING |
+| Messaging automation | `lib/services/messaging/customer_message_analyzer.dart`, `response_engine.dart` | Embedded in existing Flutter screens | N/A (not separate Next route yet) | N/A | REQUIRED | REQUIRED | REQUIRED | REQUIRED | MISSING |
+| Settings/rules | `lib/data/repositories/rules_repository.dart`, `lib/features/settings/**` | `/settings` | `/settings` (stub) | N/A | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
+| How it works (functional explainability) | `lib/features/how_it_works/**` | `/how-it-works` | `/how-it-works` | proxy `/api/how-it-works` | REQUIRED | REQUIRED | OPTIONAL | REQUIRED | PARTIAL |
 
 ## Admin panel parity checklist (implementation work queue)
 
-1. Implement missing Next pages + navigation entries for:
-   - `marketplaces`, `returns`, `incidents`, `risk-dashboard`, `returned-stock`, `capital`, `approval`, `decision-log`, `return-policies`, `how-it-works`, `suppliers/[id]`.
-2. Add Next API routes for each missing data surface.
-3. Add actionable workflows (approve/reject/update/status transitions) where backend supports writes.
-4. Add read-only placeholders for not-yet-live integrations with explicit `PLACEHOLDER` tags.
+**Done (baseline):** Next pages + nav for `marketplaces`, `returns`, `incidents`, `risk-dashboard`, `returned-stock`, `capital`, `approval`, `decision-log`, `return-policies`, `how-it-works`, `profit-dashboard`, `suppliers/[id]`; dynamic proxy `admin_next/src/app/api/[...proxy]/route.ts`; mock write panels (`MockWriteWorkflowPanels`) for transport-backed actions.
+
+**Remaining:** See [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md) — HTTP write wiring, MSW, Playwright write stubs, stress loops, supplier-detail policy UX, auto-load on workflow panels.
+
+1. Wire **real HTTP writes** where Dart API exposes them (currently many writes are mock-only or `mkFailExternal` in `httpTransport.ts`).
+2. Keep read-only **placeholders** from Dart API where integration is not live (`placeholder: true` in payloads when applicable).
+3. Expand tests per TP-B/TP-C (see continuation doc).
 
 ## Test suite mapping (TP-A .. TP-E)
 

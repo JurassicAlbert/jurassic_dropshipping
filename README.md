@@ -96,6 +96,17 @@ flutter test test/integration/ # integration (6)
 - [docs/OOS_DETECTION.md](docs/OOS_DETECTION.md) – How we detect out-of-stock (CJ codes, heuristics, strict mode).
 - [docs/WAREHOUSE_FEEDS.md](docs/WAREHOUSE_FEEDS.md) – Sourcing from warehouse/depot (CSV, XML, API) with flexible mapping; middleman optional.
 - [docs/POST_ORDER_INCIDENT_IMPLEMENTATION_PLAN.md](docs/POST_ORDER_INCIDENT_IMPLEMENTATION_PLAN.md) – Post-order lifecycle, incidents, returns, supplier policies, capital management, risk scoring, and pricing adaptation (18-phase plan).
+- [docs/ADMIN_NEXT_CONTINUATION.md](docs/ADMIN_NEXT_CONTINUATION.md) – **Next.js admin** (`admin_next/`): handoff for agents, env, commands, and follow-up work (mock transport, tests, HTTP writes).
+- [docs/TEST_TRACEABILITY_MATRIX.md](docs/TEST_TRACEABILITY_MATRIX.md) – Test plan mapping (TP-A..TP-E) and admin parity.
+- [docs/NO_API_WRITE_WORKFLOW_CONTRACTS.md](docs/NO_API_WRITE_WORKFLOW_CONTRACTS.md) – Write-workflow contracts for the admin transport layer.
+
+### Next.js admin (optional local dashboard)
+
+```bash
+cd admin_next && npm ci && npm run dev
+```
+
+Uses `admin_next/` with optional Dart API (`tool/dashboard_api_server_dart_main.dart`). See [ADMIN_NEXT_CONTINUATION.md](docs/ADMIN_NEXT_CONTINUATION.md) for transport modes and CI.
 
 ## Integrations
 

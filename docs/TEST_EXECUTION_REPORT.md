@@ -30,6 +30,7 @@ Date: 2026-03-04 (agent run)
 
 ## Next actions
 
+- **Primary handoff for web agents:** [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md) (UI follow-ups, MSW, Playwright write stubs, stress, CI notes).
 - Remove `skip` on warehouse placeholder when connector env is available.
 - Tighten SLO numbers for TP-E once production hardware and warehouse cadence are known.
 - Extend Playwright per-page action coverage (products/suppliers CSV, filters) as UX stabilizes.
