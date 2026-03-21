@@ -199,8 +199,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       if (health.returnRate >= 0.2) return (label: 'High return rate', color: Colors.orange);
       if (health.lateRate >= 0.15) return (label: 'Late delivery risk', color: Colors.amber);
     }
-    if (l.status == ListingStatus.active && health != null && health.returnRate < 0.1 && marginPct >= 10)
+    if (l.status == ListingStatus.active && health != null && health.returnRate < 0.1 && marginPct >= 10) {
       return (label: 'Healthy', color: Colors.green.shade700);
+    }
     return null;
   }
 

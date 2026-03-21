@@ -125,12 +125,12 @@ class CsvProductFeed implements ProductFeed {
   }
 
   Product? _rowToProduct(List<String> row, Map<String, int> columnIndex, int rowIndex) {
-    final get = (String field) {
+    String? get(String field) {
       final i = columnIndex[field];
       if (i == null || i >= row.length) return null;
       final v = row[i].trim();
       return v.isEmpty ? null : v;
-    };
+    }
     final sourceId = get(FeedFields.sourceId);
     if (sourceId == null) return null;
     final title = get(FeedFields.title) ?? 'Product $rowIndex';

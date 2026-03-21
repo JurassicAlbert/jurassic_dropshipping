@@ -285,7 +285,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         );
                       },
                       loading: () => const SizedBox(height: 24, child: Center(child: CircularProgressIndicator())),
-                      error: (_, __) => Text('Could not load usage', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.error)),
+                      error: (_, _) => Text('Could not load usage', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.error)),
                     ),
                   ],
                 ),
@@ -925,7 +925,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ],
                       ),
                       loading: () => const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),
-                      error: (_, __) => Text('Could not load flags', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.error)),
+                      error: (_, _) => Text('Could not load flags', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.error)),
                     ),
                   ],
                 ),

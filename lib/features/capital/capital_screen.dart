@@ -145,7 +145,7 @@ class _CapitalScreenState extends ConsumerState<CapitalScreen> {
           const SizedBox(height: AppSpacing.sectionGap),
           ordersAsync.when(
             loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
             data: (orders) {
               final queued = orders.where((o) => o.queuedForCapital).toList();
               if (queued.isEmpty) {
@@ -359,7 +359,7 @@ class _RecentLedgerActivity extends ConsumerWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: entries.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (_, i) {
                     final r = entries[i];
                     final isInflow = r.amount >= 0;

@@ -75,18 +75,29 @@ final dashboardKpiProvider = FutureProvider<DashboardKpiData>((ref) async {
   if (totalSupplier > 0 && snapshot.supplierApiFailedTotal > 0) {
     health -= (snapshot.supplierApiFailedTotal / totalSupplier * 20).clamp(0, 20).round();
   }
-  if (pendingJobs > 50) health -= 15;
-  else if (pendingJobs > 20) health -= 5;
+  if (pendingJobs > 50) {
+    health -= 15;
+  } else if (pendingJobs > 20) {
+    health -= 5;
+  }
   final lastSync = automation.lastSyncTime;
-  if (lastSync != null && now.difference(lastSync).inMinutes > 120) health -= 20;
+  if (lastSync != null && now.difference(lastSync).inMinutes > 120) {
+    health -= 20;
+  }
   final openIncidents = incidents.where((i) => i.status == IncidentStatus.open).length;
-  if (openIncidents > 20) health -= 10;
+  if (openIncidents > 20) {
+    health -= 10;
+  }
   health = health.clamp(0, 100);
 
   String label;
-  if (health >= 80) label = 'Good';
-  else if (health >= 50) label = 'Degraded';
-  else label = 'Poor';
+  if (health >= 80) {
+    label = 'Good';
+  } else if (health >= 50) {
+    label = 'Degraded';
+  } else {
+    label = 'Poor';
+  }
 
   return DashboardKpiData(
     revenueToday: revenueToday,

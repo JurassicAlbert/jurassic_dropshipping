@@ -228,6 +228,7 @@ class _StockCard extends ConsumerWidget {
       ),
     );
     if (confirm != true) return;
+    if (!context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     await repo.updateRestockable(stock.id, false);
     if (!context.mounted) return;

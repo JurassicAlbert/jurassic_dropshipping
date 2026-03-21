@@ -165,7 +165,7 @@ class ListingDecider {
         'minProfitPercent': minMargin,
         if (qualityRisk != null) 'qualityScore': qualityRisk.qualityScore,
         if (qualityRisk != null) 'returnRiskScore': qualityRisk.returnRiskScore,
-        if (competitionLevel != null) 'competitionLevel': competitionLevel,
+        'competitionLevel': ?competitionLevel,
         if (targetPlatformId != null && (qualityRisk != null || competitionLevel != null))
           'dynamicPricingAdjusted': dynamicPricingAdjusted,
         ...? (targetPlatformId != null ? {'platformId': targetPlatformId} : null),

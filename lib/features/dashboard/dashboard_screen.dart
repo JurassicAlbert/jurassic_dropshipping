@@ -467,7 +467,7 @@ class _AutomationStatusPanel extends ConsumerWidget {
                     backgroundColor: cs.surfaceContainerHighest,
                   ),
                   loading: () => const Chip(label: Text('Jobs: …')),
-                  error: (_, __) => const Chip(label: Text('Jobs: ?')),
+                  error: (_, _) => const Chip(label: Text('Jobs: ?')),
                 ),
                 ref.watch(dashboardKpiProvider).when(
                   data: (kpi) => Chip(
@@ -479,7 +479,7 @@ class _AutomationStatusPanel extends ConsumerWidget {
                             : cs.errorContainer,
                   ),
                   loading: () => const Chip(label: Text('Health: …')),
-                  error: (_, __) => const Chip(label: Text('Health: ?')),
+                  error: (_, _) => const Chip(label: Text('Health: ?')),
                 ),
                 Chip(
                   label: Text('Supplier sync: ${_timeAgo(automation.lastSyncTime)}'),
