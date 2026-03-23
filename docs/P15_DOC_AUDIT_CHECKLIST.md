@@ -10,8 +10,8 @@ Reconcile each document with **current** code paths (`lib/`, `admin_next/`, `too
 | 4 | `MONEY_SAFETY` | Fees, ledger — avoid hardcoded-only narrative | ☐ |
 | 5 | Deployment / ops | Build targets, env | ☐ |
 | 6 | Post-order plan (`POST_ORDER` phase) | Lifecycle vs `lib/domain/post_order/` | ☐ |
-| 7 | [`ADMIN_NEXT_CONTINUATION.md`](ADMIN_NEXT_CONTINUATION.md) | Transport, routes, tests | ☐ (rolling) |
-| 8 | [`TEST_TRACEABILITY_MATRIX.md`](TEST_TRACEABILITY_MATRIX.md) | Route/API/test TP rows | ☐ (rolling) |
-| 9 | [`NO_API_WRITE_WORKFLOW_CONTRACTS.md`](NO_API_WRITE_WORKFLOW_CONTRACTS.md) | Method names vs `adminTransport` | ☐ |
+| 7 | [`ADMIN_NEXT_CONTINUATION.md`](ADMIN_NEXT_CONTINUATION.md) | Transport, routes, tests | ☑ (rolling) |
+| 8 | [`TEST_TRACEABILITY_MATRIX.md`](TEST_TRACEABILITY_MATRIX.md) | Route/API/test TP rows | ☑ (rolling) |
+| 9 | [`NO_API_WRITE_WORKFLOW_CONTRACTS.md`](NO_API_WRITE_WORKFLOW_CONTRACTS.md) | Method names vs `adminTransport` | ☑ |
 
 **Cloud audit reference:** [`JURASIC_BACKLOG_CHECKLIST.md`](JURASIC_BACKLOG_CHECKLIST.md) — section *Doc audit (2026-03)*.

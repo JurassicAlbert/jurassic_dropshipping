@@ -14,10 +14,17 @@ It is derived from the Flutter admin UI flows:
 
 ## Contract framing
 
-All contracts target the **transport layer** in `admin_next/src/lib` (to be added by the next plan steps):
+All contracts target the **transport layer** in `admin_next/src/lib`:
 - `AdminTransport` interface methods for each workflow.
-- `MockTransport` will implement these methods using in-memory deterministic state.
-- Later, `HttpTransport` will map the same methods to real Dart endpoints.
+- `MockTransport` implements these methods using in-memory deterministic state.
+- `HttpTransport` maps read methods to Dart/Next endpoints; many writes remain intentionally mock-only.
+
+Current method names (authoritative) are in `admin_next/src/lib/adminTransport/adminTransport.ts`, e.g.:
+- `approvalRejectListing`, `approvalApproveListing`
+- `returnsUpdateReturn`, `returnsComputeRouting`
+- `incidentsCreateIncident`, `incidentsGetIncident`, `incidentsProcessIncident`
+- `capitalRecordAdjustment`, `policiesUpsert`, `suppliersRefreshReliabilityScores`
+- `riskRefreshListingHealth`, `riskRefreshCustomerMetrics`
 
 ### Common response fields
 
