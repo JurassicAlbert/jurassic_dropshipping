@@ -119,4 +119,27 @@ class BackgroundJobRepository {
           ..limit(limit))
         .get();
   }
+
+  /// Count jobs per status (for admin KPIs).
+  Future<Map<String, int>> countByStatus() async {
+    final rows = await (_db.select(_db.backgroundJobs)
+          ..where((t) => t.tenantId.equals(tenantId)))
+        .get();
+    final m = <String, int>{};
+    for (final r in rows) {
+      m.update(r.status, (v) => v + 1, ifAbsent: () => 1);
+    }
+    return m;
+  }
+
+  /// Age of oldest pending job in minutes, or null if none.
+  Future<int?> oldestPendingAgeMinutes() async {
+    final row = await (_db.select(_db.backgroundJobs)
+          ..where((t) => t.tenantId.equals(tenantId) & t.status.equals(BackgroundJobStatus.pending))
+          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)])
+          ..limit(1))
+        .getSingleOrNull();
+    if (row == null) return null;
+    return DateTime.now().difference(row.createdAt).inMinutes;
+  }
 }

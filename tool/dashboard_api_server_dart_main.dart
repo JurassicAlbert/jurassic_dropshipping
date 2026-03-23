@@ -4,11 +4,12 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
+import 'package:jurassic_dropshipping/data/repositories/background_job_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/financial_ledger_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/incident_record_repository.dart';
-import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_health_metrics_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/marketplace_account_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/order_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/product_repository.dart';
@@ -19,6 +20,7 @@ import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repositor
 import 'package:jurassic_dropshipping/data/repositories/supplier_repository.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_return_policy_repository.dart';
+import 'package:jurassic_dropshipping/domain/post_order/incident_record.dart';
 import 'package:jurassic_dropshipping/features/analytics/analytics_engine.dart';
 import 'package:jurassic_dropshipping/services/seed_service.dart';
 import 'package:path/path.dart' as p;
@@ -161,6 +163,32 @@ Future<void> main() async {
           ..write(jsonEncode(payload))
           ..close();
         continue;
+      }
+
+      if (request.uri.pathSegments.length == 2 &&
+          request.uri.pathSegments[0] == 'incidents') {
+        final id = int.tryParse(request.uri.pathSegments[1]);
+        if (id != null) {
+          final payload = await _computeIncidentDetailPayload(
+            database: database,
+            tenantId: tenantId,
+            id: id,
+          );
+          if (payload == null) {
+            request.response
+              ..statusCode = 404
+              ..headers.contentType = ContentType.json
+              ..write(jsonEncode({'error': 'not_found'}))
+              ..close();
+          } else {
+            request.response
+              ..statusCode = 200
+              ..headers.contentType = ContentType.json
+              ..write(jsonEncode(payload))
+              ..close();
+          }
+          continue;
+        }
       }
 
       if (request.uri.path == '/risk-dashboard') {
@@ -312,11 +340,22 @@ Future<Map<String, dynamic>> _computeDashboardPayload({
   final listingRepo = ListingRepository(database, tenantId: tenantId);
   final returnRepo = ReturnRepository(database, tenantId: tenantId);
   final supplierRepo = SupplierRepository(database, tenantId: tenantId);
+  final incidentRepo = IncidentRecordRepository(database, tenantId: tenantId);
+  final ledgerRepo = FinancialLedgerRepository(database, tenantId: tenantId);
+  final jobRepo = BackgroundJobRepository(database, tenantId: tenantId);
+  final healthRepo = ListingHealthMetricsRepository(database, tenantId: tenantId);
+  final productRepo = ProductRepository(database, tenantId: tenantId);
 
   final orders = await orderRepo.getAll();
   final listings = await listingRepo.getAll();
   final returns = await returnRepo.getAll();
   final suppliers = await supplierRepo.getAll();
+  final incidents = await incidentRepo.getAll();
+  final healthMetrics = await healthRepo.getAll();
+  final products = await productRepo.getAll();
+  final ledgerBalance = await ledgerRepo.getBalance();
+  final jobStatusCounts = await jobRepo.countByStatus();
+  final oldestPendingJobMinutes = await jobRepo.oldestPendingAgeMinutes();
 
   final engine = AnalyticsEngine(
     orders: orders,
@@ -427,9 +466,103 @@ Future<Map<String, dynamic>> _computeDashboardPayload({
     },
   ];
 
+  final dailyFin = engine.dailyRevenueProfitSeries(days: 30);
+  final dailyFinancialSeries = dailyFin
+      .map((d) => {
+            'dayLabel': '${d.date.month}/${d.date.day}',
+            'revenue': d.revenue,
+            'profit': d.profit,
+            'marginPercent': d.marginPercent,
+          })
+      .toList();
+
+  final listingToSupplier = <String, String>{};
+  for (final l in listings) {
+    for (final p in products) {
+      if (p.id != l.productId) continue;
+      final sid = p.supplierId;
+      if (sid != null && sid.isNotEmpty) {
+        listingToSupplier[l.id] = sid;
+      }
+      break;
+    }
+  }
+
+  var lockedCapital = 0.0;
+  for (final o in orders) {
+    if (o.queuedForCapital) {
+      lockedCapital += o.sellingPrice * o.quantity;
+    }
+  }
+  final returnReservePln = engine.totalReturnCost;
+  final cashflowGapPln = ledgerBalance - lockedCapital - returnReservePln;
+
+  final incidentsByType = <String, int>{};
+  for (final i in incidents) {
+    incidentsByType.update(i.incidentType.name, (v) => v + 1, ifAbsent: () => 1);
+  }
+
+  final incidentByDay = <DateTime, int>{};
+  for (final i in incidents) {
+    final d = DateTime(i.createdAt.year, i.createdAt.month, i.createdAt.day);
+    incidentByDay.update(d, (v) => v + 1, ifAbsent: () => 1);
+  }
+  final incidentDaysSorted = incidentByDay.keys.toList()..sort();
+  final incidentLast = incidentDaysSorted.length > 14
+      ? incidentDaysSorted.sublist(incidentDaysSorted.length - 14)
+      : incidentDaysSorted;
+  final dailyIncidents =
+      incidentLast.map((d) => {'dayLabel': '${d.month}/${d.day}', 'count': incidentByDay[d] ?? 0}).toList();
+
+  final supplierOrderCounts = engine.supplierOrderCounts(listingToSupplier);
+  final supplierKpiRows = <Map<String, dynamic>>[];
+  for (final s in suppliers) {
+    final oc = supplierOrderCounts[s.id] ?? 0;
+    final rc = engine.returnsBySupplierId[s.id] ?? 0;
+    final rate = oc > 0 ? (rc / oc) * 100 : 0.0;
+    supplierKpiRows.add({
+      'supplierId': s.id,
+      'name': s.name,
+      'orderCount': oc,
+      'returnCount': rc,
+      'returnRatePercent': rate,
+    });
+  }
+  supplierKpiRows.sort((a, b) => (b['returnRatePercent'] as double).compareTo(a['returnRatePercent'] as double));
+
+  final blockedListingsCount =
+      listings.where((l) => l.status.name == 'paused' || l.status.name == 'draft').length;
+
+  final completedJobs = jobStatusCounts[BackgroundJobStatus.completed] ?? 0;
+  final failedJobs = jobStatusCounts[BackgroundJobStatus.failed] ?? 0;
+  final processingEfficiencyPercent = (completedJobs + failedJobs) > 0
+      ? (completedJobs / (completedJobs + failedJobs)) * 100
+      : 100.0;
+
   return {
+    'dashboardPayloadVersion': 2,
     'kpis': kpis,
     'profitPoints': profitPoints,
+    'dailyFinancialSeries': dailyFinancialSeries,
+    'profitTopProducts': engine.profitByProduct
+        .map((p) => {
+              'listingId': p.listingId,
+              'revenue': p.revenue,
+              'cost': p.cost,
+              'profit': p.profit,
+              'marginPercent': p.marginPercent,
+              'orderCount': p.orderCount,
+            })
+        .toList(),
+    'lossMakingProducts': engine.lossMakingProducts()
+        .map((p) => {
+              'listingId': p.listingId,
+              'revenue': p.revenue,
+              'profit': p.profit,
+              'marginPercent': p.marginPercent,
+              'orderCount': p.orderCount,
+            })
+        .toList(),
     'profitByPlatform': engine.profitByPlatform.entries
         .map((e) => {
               'platformId': e.key,
@@ -446,6 +579,13 @@ Future<Map<String, dynamic>> _computeDashboardPayload({
     'returnsByReason': engine.returnsByReason.entries
         .map((e) => {'reason': e.key.name, 'count': e.value})
         .toList(),
+    'orderStatusDistribution': engine.orderStatusCounts().entries
+        .map((e) => {'status': e.key, 'count': e.value})
+        .toList(),
+    'riskScoreHistogram': engine.riskScoreHistogramBuckets().map((e) => {'bucket': e.key, 'count': e.value}).toList(),
+    'listingStatusCounts': engine.listingStatusNameCounts().entries
+        .map((e) => {'status': e.key, 'count': e.value})
+        .toList(),
     'issues': engine.issues
         .map((i) => {
               'severity': i.severity.name,
@@ -456,6 +596,42 @@ Future<Map<String, dynamic>> _computeDashboardPayload({
         .toList(),
     'signals': signals,
     'recentOrders': recentOrders,
+    'dailyReturnRateSeries': engine.dailyReturnRateSeries(days: 30),
+    'returnCostByReason': engine.returnCostByReason(),
+    'totalReturnCostPln': engine.totalReturnCost,
+    'lowMarginHighRiskCount': engine.lowMarginHighRiskCount,
+    'incidentsByType': incidentsByType.entries.map((e) => {'type': e.key, 'count': e.value}).toList(),
+    'dailyIncidents': dailyIncidents,
+    'incidentsOpenCount': incidents.where((i) => i.status == IncidentStatus.open).length,
+    'capital': {
+      'availablePln': ledgerBalance,
+      'lockedPln': lockedCapital,
+      'returnReservePln': returnReservePln,
+      'cashflowGapPln': cashflowGapPln,
+    },
+    'fulfillment': engine.fulfillmentStats30d(),
+    'failedOrders': engine.failedOrderRate30d(),
+    'orderFunnel': engine.orderFunnelStages(),
+    'supplierKpis': supplierKpiRows.take(15).toList(),
+    'listingHealthHistogram': engine.listingHealthHistogram(healthMetrics),
+    'blockedListingsCount': blockedListingsCount,
+    'topRiskListings': engine.topRiskListings(limit: 8),
+    'customerMessaging': {
+      'hasData': false,
+      'note': 'Wire customer/message tables when messaging ingestion is enabled.',
+    },
+    'marketListing': {
+      'priceCompetitivenessIndex': null,
+      'listingConversionRate': null,
+      'note': 'Requires marketplace impression/click feeds or stored competitor samples.',
+    },
+    'systemJobs': {
+      'byStatus': jobStatusCounts,
+      'oldestPendingAgeMinutes': oldestPendingJobMinutes,
+      'processingEfficiencyPercent': processingEfficiencyPercent,
+      'queueDepth': (jobStatusCounts[BackgroundJobStatus.pending] ?? 0) +
+          (jobStatusCounts[BackgroundJobStatus.running] ?? 0),
+    },
   };
 }
 
@@ -731,6 +907,32 @@ Future<Map<String, dynamic>> _computeIncidentsPayload({
   };
 }
 
+/// Single incident for Next `/incidents/[id]` + proxy `GET /api/incidents/:id`.
+Future<Map<String, dynamic>?> _computeIncidentDetailPayload({
+  required AppDatabase database,
+  required int tenantId,
+  required int id,
+}) async {
+  final repo = IncidentRecordRepository(database, tenantId: tenantId);
+  final i = await repo.getById(id);
+  if (i == null) return null;
+  return {
+    'summary': {'id': i.id, 'orderId': i.orderId},
+    'rows': [
+      {
+        'id': i.id,
+        'orderId': i.orderId,
+        'incidentType': _enumName(i.incidentType),
+        'status': _enumName(i.status),
+        'financialImpact': i.financialImpact,
+        'createdAt': _toIso(i.createdAt),
+        'resolvedAt': _toIso(i.resolvedAt),
+      },
+    ],
+    'placeholder': false,
+  };
+}
+
 Future<Map<String, dynamic>> _computeRiskDashboardPayload({
   required AppDatabase database,
   required int tenantId,
@@ -903,13 +1105,10 @@ Future<Map<String, dynamic>> _computeProfitDashboardPayload({
   required AppDatabase database,
   required int tenantId,
 }) async {
+  // Same aggregates as /dashboard — Next profit page uses /api/dashboard via hook.
   final dashboard = await _computeDashboardPayload(database: database, tenantId: tenantId);
   return {
-    'summary': {
-      'kpis': dashboard['kpis'],
-      'profitByPlatform': dashboard['profitByPlatform'],
-      'profitByMarginBand': dashboard['profitByMarginBand'],
-    },
+    ...dashboard,
     'placeholder': false,
   };
 }

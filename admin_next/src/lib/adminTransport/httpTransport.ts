@@ -22,6 +22,28 @@ function jsonBody(data: unknown): Record<string, unknown> {
   return data !== null && typeof data === "object" ? (data as Record<string, unknown>) : {};
 }
 
+/** Map Dart/Next `GET /incidents/:id` list row shape to `IncidentRow` (optional fields defaulted). */
+function incidentRowFromDetailPayload(r: Record<string, unknown>): IncidentRow {
+  const statusRaw = String(r.status ?? "open");
+  const status: IncidentRow["status"] = statusRaw === "resolved" ? "resolved" : "open";
+  return {
+    id: Number(r.id),
+    orderId: String(r.orderId ?? ""),
+    incidentType: String(r.incidentType ?? ""),
+    status,
+    trigger: String(r.trigger ?? ""),
+    automaticDecision: r.automaticDecision != null ? String(r.automaticDecision) : null,
+    supplierInteraction: r.supplierInteraction != null ? String(r.supplierInteraction) : null,
+    marketplaceInteraction: r.marketplaceInteraction != null ? String(r.marketplaceInteraction) : null,
+    refundAmount: typeof r.refundAmount === "number" ? r.refundAmount : null,
+    financialImpact: typeof r.financialImpact === "number" ? r.financialImpact : null,
+    decisionLogId: r.decisionLogId != null ? String(r.decisionLogId) : null,
+    createdAt: String(r.createdAt ?? ""),
+    resolvedAt: r.resolvedAt != null && String(r.resolvedAt) !== "" ? String(r.resolvedAt) : null,
+    attachmentIds: Array.isArray(r.attachmentIds) ? (r.attachmentIds as string[]) : null,
+  };
+}
+
 async function fetchJson(
   requestId: string,
   path: string,
@@ -137,9 +159,18 @@ export class HttpTransport implements AdminTransport {
 
   async incidentsGetIncident(
     requestId: string,
-    _incidentId: number,
+    incidentId: number,
   ): Promise<TransportResponse<{ incident: IncidentRow | null }>> {
-    return mkFailExternal(requestId, "external_integration_required", "incident detail not wired to HTTP mode yet");
+    const res = await fetchJson(requestId, `${this.base()}/api/incidents/${incidentId}`);
+    if (!res.ok) {
+      if (res.status === 404) return mkOk(requestId, { incident: null });
+      return mkFailExternal(requestId, "external_integration_required", `Failed to load incident (${res.status})`);
+    }
+    const d = jsonBody(res.data);
+    const rows = (d.rows ?? []) as Record<string, unknown>[];
+    const first = rows[0];
+    if (!first) return mkOk(requestId, { incident: null });
+    return mkOk(requestId, { incident: incidentRowFromDetailPayload(first) });
   }
 
   async incidentsProcessIncident(

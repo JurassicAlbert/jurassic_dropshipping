@@ -11,15 +11,15 @@
 | **p3** | Fix CI (`analyze-and-test`, `admin-next-tests`) | Done | `analysis_options.yaml` excludes generated `*.freezed.dart`/`*.g.dart`; `admin_next` build + TS fixes |
 | **p4** | Fix Admin Next **hydration** mismatch | Done | [`useClientMounted`](../admin_next/src/lib/useClientMounted.ts) uses `useSyncExternalStore`; Recharts gated on client |
 | **p5** | **503** messaging + **Settings** → rules / flags | Done | [`/api/rules`](../admin_next/src/app/api/rules/route.ts); Dart `GET/POST /rules`; [`settings/page.tsx`](../admin_next/src/app/settings/page.tsx); dashboard errors in [`dashboardApi.ts`](../admin_next/src/lib/dashboardApi.ts) |
-| **p6** | KPI: Core Financial (5) | Partial | Placeholders in [`JurasicKpiDashboard.tsx`](../admin_next/src/components/kpi/JurasicKpiDashboard.tsx) — wire Dart aggregates + charts |
-| **p7** | KPI: Risk (5) — priority | Partial | Same component block; needs risk/return/incident series from DB or analytics |
-| **p8** | KPI: Operations (5) | Partial | Placeholders; needs order funnel / fulfillment metrics |
-| **p9** | KPI: Supplier (4) | Partial | Placeholders; align with supplier reliability services |
-| **p10** | KPI: Product Quality (4) | Partial | Placeholders; listing/product health data |
-| **p11** | KPI: Customer / Message (4) | Partial | Placeholders; needs messaging/analyzer metrics when available |
-| **p12** | KPI: Capital / Cashflow (4) — critical | Partial | Placeholders; connect to ledger/capital snapshots |
-| **p13** | KPI: Market / Listing (4) | Partial | Placeholders; listing health + competitiveness |
-| **p14** | KPI: System Performance (4) | Partial | Placeholders; needs job queue / feed instrumentation |
+| **p6** | KPI: Core Financial (5) | Done (MVP) | [`profit-dashboard`](../admin_next/src/app/profit-dashboard/page.tsx) + [`ProfitDashboardCharts.tsx`](../admin_next/src/components/profit/ProfitDashboardCharts.tsx); Dart [`analytics_engine.dart`](../lib/features/analytics/analytics_engine.dart) `dailyRevenueProfitSeries` |
+| **p7** | KPI: Risk (5) — priority | Done (MVP) | [`/analytics`](../admin_next/src/app/analytics/page.tsx): return-rate trend, return cost by reason, incidents; [`dashboard_api_server_dart_main.dart`](../tool/dashboard_api_server_dart_main.dart) + [`analytics_engine.dart`](../lib/features/analytics/analytics_engine.dart) |
+| **p8** | KPI: Operations (5) | Done (MVP) | Funnel, fulfillment stats, failed-order rate (30d) on Analytics |
+| **p9** | KPI: Supplier (4) | Done (MVP) | `supplierKpis` table (return rate by supplier) on Analytics |
+| **p10** | KPI: Product Quality (4) | Done (MVP) | `listingHealthHistogram`, `topRiskListings`, `blockedListingsCount` |
+| **p11** | KPI: Customer / Message (4) | Partial | Explicit placeholder card until messaging metrics exist |
+| **p12** | KPI: Capital / Cashflow (4) — critical | Done (MVP) | `capital` object (ledger + locked + reserve); [`capital/page.tsx`](../admin_next/src/app/capital/page.tsx) + [`CapitalSnapshotCards.tsx`](../admin_next/src/components/analytics/CapitalSnapshotCards.tsx) |
+| **p13** | KPI: Market / Listing (4) | Partial | Placeholder card; competitiveness/conversion need marketplace feeds |
+| **p14** | KPI: System Performance (4) | Done (MVP) | `systemJobs` from `BackgroundJobRepository` on Analytics |
 | **p15** | Refresh **9 docs** (architecture, decision logic, marketplace, money safety, deployment, post-order plan, admin continuation, traceability matrix, no-api contracts) | Partial | Several titles/branding/admin sections updated; finish service/repo inventory per [cloud audit](#doc-audit-2026-03) |
 | **p16** | README: **warehouse-first** sourcing, CJ/API2Cart secondary | Done | [README.md](../README.md) |
 | **p17** | **`FEATURE_MAP.md`** (feature → function → nav → UI) | Done | [`FEATURE_MAP.md`](FEATURE_MAP.md) — expand rows over time |
@@ -35,6 +35,8 @@
 
 ## Related docs
 
+- [CONTINUATION_PLAN.md](CONTINUATION_PLAN.md) — CI, E2E, p11/p13/p15/p18 follow-up (step-by-step).  
+- [P15_DOC_AUDIT_CHECKLIST.md](P15_DOC_AUDIT_CHECKLIST.md) — nine-doc audit tracker.  
 - [ADMIN_NEXT_CONTINUATION.md](ADMIN_NEXT_CONTINUATION.md) — env, commands, transport.  
 - [FEATURE_MAP.md](FEATURE_MAP.md) — matrix seed.  
 - [TEST_TRACEABILITY_MATRIX.md](TEST_TRACEABILITY_MATRIX.md) — TP-A..TP-E.  

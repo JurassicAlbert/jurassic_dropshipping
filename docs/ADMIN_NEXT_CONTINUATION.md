@@ -4,6 +4,16 @@
 
 **Backlog p1–p18 (versioned checklist):** [JURASIC_BACKLOG_CHECKLIST.md](./JURASIC_BACKLOG_CHECKLIST.md) — use this in Git; Cursor plan files may live only under your local `.cursor/plans/`.
 
+## Dashboard vs Profit Dashboard vs Analytics
+
+| Route | Role |
+|-------|------|
+| **`/` (Dashboard)** | Executive overview: KPI row, 7d profit trend, signals, platform + margin band charts, issues, recent orders. |
+| **`/profit-dashboard`** | **Financial drill-down:** same KPI row + **Recharts** for revenue / profit / margin over time (30d daily series), profit-by-listing bar, loss-making listings table, platform + margin bands. Data: `/api/dashboard` (Dart `AnalyticsEngine`). |
+| **`/analytics`** | **Full KPI program (p7–p14):** same KPI row + risk/returns/incidents, capital strip, operations funnel, suppliers, product quality, system jobs, placeholders where data is N/A. Profit time-series stay on **Profit Dashboard** to avoid duplication. |
+
+All three use **`useDashboardData()`** → `/api/dashboard` → Dart `GET /dashboard`. Extended fields (`dailyFinancialSeries`, `capital`, `supplierKpis`, `systemJobs`, etc.) are merged with the offline fallback when the API omits keys. **`dashboardPayloadVersion`** (e.g. `2`) is set by the Dart server when the full KPI payload is present.
+
 ## Quick orientation
 
 | Item | Location |
@@ -19,13 +29,22 @@
 | Proxy to Dart API server | `admin_next/src/app/api/[...proxy]/route.ts` |
 | Dart read API (local dev) | `tool/dashboard_api_server_dart_main.dart` (port often `4000`) |
 
+### Git Bash on Windows (paths)
+
+In **Git Bash**, backslashes are interpreted oddly (`\t` = tab). From the repo root, use **forward slashes**:
+
+```bash
+ls tool/dashboard_api_server_dart_main.dart
+dart run tool/dashboard_api_server_dart_main.dart
+```
+
 ## What is already implemented
 
 - **Dashboard, analytics, orders, products, suppliers** with URL state: search, filters, sort, pagination, CSV export (where applicable).
-- **Parity pages** (shell + data): `marketplaces`, `returns`, `incidents`, `risk-dashboard`, `returned-stock`, `capital`, `approval`, `decision-log`, `return-policies`, `profit-dashboard`, `how-it-works`, `suppliers/[id]`.
+- **Parity pages** (shell + data): `marketplaces`, `returns`, `incidents`, `incidents/[id]` (`GET /api/incidents/:id` → Dart `GET /incidents/:id` when dashboard API runs), `risk-dashboard`, `returned-stock`, `capital`, `approval`, `decision-log`, `return-policies`, `profit-dashboard`, `how-it-works`, `suppliers/[id]`.
 - **API proxy** for allowed paths to `DART_API_BASE_URL` / `http://127.0.0.1:4000`.
 - **Mock write workflows** (in-memory, idempotent, failure injection): approval approve/reject, returns update + returned stock path, incidents create/process, capital adjustment, return policies upsert, supplier reliability refresh, risk refresh — all callable from `MockWriteWorkflowPanels` when transport is mock.
-- **Tests:** Vitest (components, proxy, logic availability, load-shape synthetics), Playwright (navigation, admin headings, orders interactions, dashboard error stub). CI: `.github/workflows/ci.yml` job `admin-next-tests`.
+- **Tests:** Vitest (components, proxy, logic availability, Flutter→Next route parity file list, load-shape synthetics), Playwright (navigation, **direct URL parity** `flutter-parity-routes.spec.ts`, admin headings, orders interactions, dashboard stub). CI: `.github/workflows/ci.yml` job `admin-next-tests`.
 
 ## Follow-up work (priority order)
 

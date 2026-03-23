@@ -48,9 +48,11 @@ Source: `admin_next/src/app/**/page.tsx`
 
 - `/` (dashboard)
 - `/analytics`, `/orders`, `/products`, `/suppliers`, `/suppliers/[id]`, `/settings`
-- `/approval`, `/returns`, `/incidents`, `/capital`, `/return-policies`, `/returned-stock`, `/risk-dashboard`, `/decision-log`, `/marketplaces`, `/profit-dashboard`, `/how-it-works`
+- `/approval`, `/returns`, `/incidents`, `/incidents/[id]`, `/capital`, `/return-policies`, `/returned-stock`, `/risk-dashboard`, `/decision-log`, `/marketplaces`, `/profit-dashboard`, `/how-it-works`
 
 **Handoff / next tasks:** [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md)
+
+**KPI extended payload (p7–p14):** Dart `GET /dashboard` (`tool/dashboard_api_server_dart_main.dart`) returns `dashboardPayloadVersion: 2` with risk, capital, operations, supplier, health, jobs. Consumed by `admin_next/src/lib/dashboardApi.ts`. Flutter unit tests: `test/features/analytics/analytics_engine_kpi_test.dart`.
 
 ## Business logic -> UI/API/Test traceability
 
@@ -59,7 +61,7 @@ Source: `admin_next/src/app/**/page.tsx`
 | Decision engine (scan/list/price/select) | `lib/domain/decision_engine/scanner.dart`, `listing_decider.dart`, `pricing_calculator.dart`, `supplier_selector.dart` | `/dashboard`, `/approval`, `/decision-log` | `/`, `/analytics` | `/api/dashboard` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Orders lifecycle | `lib/domain/post_order/post_order_lifecycle_engine.dart`, `lib/data/repositories/order_repository.dart` | `/orders`, `/approval`, `/returns`, `/incidents` | `/orders` | `/api/orders`, `/api/dashboard` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Risk scoring | `lib/domain/risk/order_risk_scoring_service.dart`, `lib/domain/listing_health/listing_health_scoring_service.dart` | `/risk-dashboard`, `/orders` | `/risk-dashboard`, `/orders`, `/analytics`, `/` | `/api/risk-dashboard`, `/api/orders`, `/api/dashboard` + mock refresh | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
-| Returns and incidents | `lib/domain/post_order/incident_handling_engine.dart`, `return_routing_service.dart`, `lib/data/repositories/return_repository.dart` | `/returns`, `/incidents`, `/incidents/:id` | `/returns`, `/incidents` | proxy `/api/returns`, `/api/incidents` + mock writes in `MockWriteWorkflowPanels` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
+| Returns and incidents | `lib/domain/post_order/incident_handling_engine.dart`, `return_routing_service.dart`, `lib/data/repositories/return_repository.dart` | `/returns`, `/incidents`, `/incidents/:id` | `/returns`, `/incidents`, `/incidents/[id]` | proxy `/api/returns`, `/api/incidents`, `/api/incidents/:id` (Dart dashboard API) + mock writes in `MockWriteWorkflowPanels` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Returned stock | `lib/data/repositories/returned_stock_repository.dart`, `lib/features/returned_stock/**` | `/returned-stock` | `/returned-stock` | proxy `/api/returned-stock` | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Capital and ledger | `lib/domain/capital/capital_management_service.dart`, `lib/data/repositories/financial_ledger_repository.dart` | `/capital` | `/capital` | proxy `/api/capital` + mock writes | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |
 | Approval queue | `lib/features/approval/**`, repo/service integrations | `/approval` | `/approval` | proxy `/api/approval` + mock writes | REQUIRED | REQUIRED | REQUIRED | REQUIRED | PARTIAL |

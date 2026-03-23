@@ -25,7 +25,13 @@ Legend: **F** = Flutter (`lib/`), **N** = Next admin (`admin_next/`).
 |--------|----------------------|------|---------|---------|
 | Returns | `ReturnRepository`, routing | `return_requests` | `/returns` | `/returns` |
 | Incidents | `IncidentHandlingEngine`, incident repo | incidents | `/incidents` | `/incidents` |
-| Capital | `CapitalManagementService`, ledger | `financial_ledger` | `/capital` | `/capital` |
+| Capital | `CapitalManagementService`, ledger | `financial_ledger` | `/capital` | `/capital` + `capital` snapshot in `GET /dashboard` (Dart) |
+
+## Analytics & KPI (admin)
+
+| Feature | Domain / functions | Data | F route | N route |
+|--------|----------------------|------|---------|---------|
+| Extended KPIs (p7–p14) | `AnalyticsEngine`, repos (incidents, ledger, jobs, health) | orders, returns, listings, ledger, `background_jobs`, etc. | `/analytics` (Flutter) | `/analytics`, `/profit-dashboard`, `/capital`; `GET /dashboard` → [`dashboardApi.ts`](../admin_next/src/lib/dashboardApi.ts) `dashboardPayloadVersion` |
 
 ## How to extend
 

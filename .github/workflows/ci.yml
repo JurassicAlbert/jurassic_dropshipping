@@ -112,14 +112,9 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: admin_next
 
-      - name: Start admin server
-        run: |
-          npx next start -p 3001 &
-          npx wait-on http://127.0.0.1:3001
-        working-directory: admin_next
-
       - name: E2E smoke
         env:
+          CI: "true"
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
         run: npm run test:e2e
         working-directory: admin_next

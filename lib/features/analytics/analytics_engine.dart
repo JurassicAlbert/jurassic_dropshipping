@@ -2,6 +2,7 @@ import 'package:jurassic_dropshipping/data/models/listing.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
 import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/data/models/supplier.dart';
+import 'package:jurassic_dropshipping/domain/listing_health/listing_health_metrics.dart';
 
 class AnalyticsEngine {
   AnalyticsEngine({
@@ -217,6 +218,279 @@ class AnalyticsEngine {
         .map((e) => DailyProfit(date: e.key, profit: e.value))
         .toList();
   }
+
+  /// Per-day revenue, profit, and margin % (for admin charts).
+  List<DailyRevenueProfit> dailyRevenueProfitSeries({int days = 30}) {
+    final profitMap = <DateTime, double>{};
+    final revenueMap = <DateTime, double>{};
+    for (final o in orders) {
+      if (o.createdAt == null) continue;
+      final day =
+          DateTime(o.createdAt!.year, o.createdAt!.month, o.createdAt!.day);
+      final rev = o.sellingPrice * o.quantity;
+      final cost = o.sourceCost * o.quantity;
+      final p = rev - cost;
+      profitMap.update(day, (v) => v + p, ifAbsent: () => p);
+      revenueMap.update(day, (v) => v + rev, ifAbsent: () => rev);
+    }
+    final sortedKeys = profitMap.keys.toList()..sort();
+    final lastN = sortedKeys.length > days
+        ? sortedKeys.sublist(sortedKeys.length - days)
+        : sortedKeys;
+    return lastN
+        .map((d) {
+          final rev = revenueMap[d] ?? 0;
+          final prof = profitMap[d] ?? 0;
+          return DailyRevenueProfit(date: d, revenue: rev, profit: prof);
+        })
+        .toList();
+  }
+
+  Map<String, int> orderStatusCounts() {
+    final m = <String, int>{};
+    for (final o in orders) {
+      m.update(o.status.name, (v) => v + 1, ifAbsent: () => 1);
+    }
+    return m;
+  }
+
+  /// Risk score buckets (0–100) for histogram.
+  List<MapEntry<String, int>> riskScoreHistogramBuckets() {
+    const labels = ['0–20', '21–40', '41–60', '61–80', '81–100'];
+    final buckets = List<int>.filled(5, 0);
+    for (final o in orders) {
+      final r = o.riskScore ?? 0;
+      final idx = (r / 20).floor();
+      final i = idx < 0
+          ? 0
+          : idx > 4
+              ? 4
+              : idx;
+      buckets[i]++;
+    }
+    return List.generate(5, (i) => MapEntry(labels[i], buckets[i]));
+  }
+
+  Map<String, int> listingStatusNameCounts() {
+    final m = <String, int>{};
+    for (final l in listings) {
+      m.update(l.status.name, (v) => v + 1, ifAbsent: () => 1);
+    }
+    return m;
+  }
+
+  /// All listings with aggregate negative profit (from orders).
+  List<ProductStats> lossMakingProducts() {
+    final map = <String, ProductStats>{};
+    for (final o in orders) {
+      map.update(
+        o.listingId,
+        (s) => s..addOrder(o.sellingPrice * o.quantity, o.sourceCost * o.quantity),
+        ifAbsent: () =>
+            ProductStats(o.listingId)..addOrder(o.sellingPrice * o.quantity, o.sourceCost * o.quantity),
+      );
+    }
+    final neg = map.values.where((p) => p.profit < 0).toList()
+      ..sort((a, b) => a.profit.compareTo(b.profit));
+    return neg;
+  }
+
+  /// Daily return rate % = returns that day / shipped+delivered orders that day (×100), capped sensibly.
+  List<Map<String, dynamic>> dailyReturnRateSeries({int days = 30}) {
+    final returnByDay = <DateTime, int>{};
+    for (final r in returns) {
+      final t = r.requestedAt ?? r.resolvedAt;
+      if (t == null) continue;
+      final day = DateTime(t.year, t.month, t.day);
+      returnByDay.update(day, (v) => v + 1, ifAbsent: () => 1);
+    }
+    final shippedByDay = <DateTime, int>{};
+    for (final o in orders) {
+      if (o.createdAt == null) continue;
+      if (o.status != OrderStatus.shipped && o.status != OrderStatus.delivered) {
+        continue;
+      }
+      final day = DateTime(
+        o.createdAt!.year,
+        o.createdAt!.month,
+        o.createdAt!.day,
+      );
+      shippedByDay.update(day, (v) => v + 1, ifAbsent: () => 1);
+    }
+    final allDays = {...returnByDay.keys, ...shippedByDay.keys}.toList()..sort();
+    final lastN = allDays.length > days
+        ? allDays.sublist(allDays.length - days)
+        : allDays;
+    return lastN.map((d) {
+      final rc = returnByDay[d] ?? 0;
+      final sc = shippedByDay[d] ?? 0;
+      final rate = sc > 0 ? (rc / sc) * 100 : 0.0;
+      return {
+        'dayLabel': '${d.month}/${d.day}',
+        'returnCount': rc,
+        'shippedCount': sc,
+        'returnRatePercent': rate,
+      };
+    }).toList();
+  }
+
+  /// Refund + shipping cost aggregated by return reason.
+  List<Map<String, dynamic>> returnCostByReason() {
+    final m = <ReturnReason, double>{};
+    for (final r in returns) {
+      final cost = (r.refundAmount ?? 0) + (r.returnShippingCost ?? 0);
+      m.update(r.reason, (v) => v + cost, ifAbsent: () => cost);
+    }
+    return m.entries
+        .map((e) => {'reason': e.key.name, 'costPln': e.value})
+        .toList();
+  }
+
+  /// Orders with risk > 50 and margin < 15% (expectation gap proxy).
+  int get lowMarginHighRiskCount {
+    var n = 0;
+    for (final o in orders) {
+      final r = o.riskScore ?? 0;
+      final m = AnalyticsEngine.orderMarginPercent(o);
+      if (r > 50 && m < 15) n++;
+    }
+    return n;
+  }
+
+  Map<String, dynamic> fulfillmentStats30d() {
+    final since = DateTime.now().subtract(const Duration(days: 30));
+    final durations = <double>[];
+    for (final o in orders) {
+      if (o.deliveredAt == null || o.createdAt == null) continue;
+      if (o.createdAt!.isBefore(since)) continue;
+      durations.add(o.deliveredAt!.difference(o.createdAt!).inHours / 24.0);
+    }
+    if (durations.isEmpty) {
+      return {'medianDays': 0.0, 'avgDays': 0.0, 'sampleCount': 0};
+    }
+    durations.sort();
+    final mid = durations.length ~/ 2;
+    final median = durations.length.isOdd
+        ? durations[mid]
+        : (durations[mid - 1] + durations[mid]) / 2;
+    final avg = durations.fold<double>(0, (a, b) => a + b) / durations.length;
+    return {
+      'medianDays': median,
+      'avgDays': avg,
+      'sampleCount': durations.length,
+    };
+  }
+
+  Map<String, dynamic> failedOrderRate30d() {
+    final since = DateTime.now().subtract(const Duration(days: 30));
+    var failed = 0;
+    var total = 0;
+    for (final o in orders) {
+      if (o.createdAt == null || o.createdAt!.isBefore(since)) continue;
+      total++;
+      if (o.status == OrderStatus.failed ||
+          o.status == OrderStatus.failedOutOfStock) {
+        failed++;
+      }
+    }
+    final rate = total > 0 ? (failed / total) * 100 : 0.0;
+    return {'failed': failed, 'total': total, 'ratePercent': rate};
+  }
+
+  /// Simplified funnel: pending → in-flight → shipped/delivered → failed/cancelled.
+  List<Map<String, dynamic>> orderFunnelStages() {
+    var pending = 0;
+    var inFlight = 0;
+    var done = 0;
+    var bad = 0;
+    for (final o in orders) {
+      switch (o.status) {
+        case OrderStatus.pending:
+        case OrderStatus.pendingApproval:
+          pending++;
+          break;
+        case OrderStatus.sourceOrderPlaced:
+          inFlight++;
+          break;
+        case OrderStatus.shipped:
+        case OrderStatus.delivered:
+          done++;
+          break;
+        case OrderStatus.failed:
+        case OrderStatus.failedOutOfStock:
+        case OrderStatus.cancelled:
+          bad++;
+          break;
+      }
+    }
+    return [
+      {'stage': 'pending', 'count': pending},
+      {'stage': 'supplier', 'count': inFlight},
+      {'stage': 'fulfilled', 'count': done},
+      {'stage': 'failed_cancel', 'count': bad},
+    ];
+  }
+
+  /// Top listings by average risk score (orders with risk set).
+  List<Map<String, dynamic>> topRiskListings({int limit = 5}) {
+    final byListing = <String, List<double>>{};
+    for (final o in orders) {
+      if (o.riskScore == null) continue;
+      byListing.putIfAbsent(o.listingId, () => []).add(o.riskScore!);
+    }
+    final rows = byListing.entries.map((e) {
+      final rs = e.value;
+      final avg = rs.fold<double>(0, (a, b) => a + b) / rs.length;
+      return {'listingId': e.key, 'avgRisk': avg, 'orderCount': rs.length};
+    }).toList()
+      ..sort((a, b) => (b['avgRisk'] as double).compareTo(a['avgRisk'] as double));
+    return rows.take(limit).toList();
+  }
+
+  /// Order counts per supplier id (listing → supplier mapping supplied by caller).
+  Map<String, int> supplierOrderCounts(Map<String, String> listingIdToSupplierId) {
+    final m = <String, int>{};
+    for (final o in orders) {
+      final sid = listingIdToSupplierId[o.listingId];
+      if (sid == null) continue;
+      m.update(sid, (v) => v + 1, ifAbsent: () => 1);
+    }
+    return m;
+  }
+
+  /// Listing health histogram: buckets by returnOrIncident rate (0, 1, 2+).
+  List<Map<String, dynamic>> listingHealthHistogram(List<ListingHealthRecord> records) {
+    var b0 = 0;
+    var b1 = 0;
+    var b2 = 0;
+    for (final r in records) {
+      final x = r.returnOrIncidentCount;
+      if (x <= 0) {
+        b0++;
+      } else if (x == 1) {
+        b1++;
+      } else {
+        b2++;
+      }
+    }
+    return [
+      {'bucket': '0 issues', 'count': b0},
+      {'bucket': '1 issue', 'count': b1},
+      {'bucket': '2+ issues', 'count': b2},
+    ];
+  }
+}
+
+class DailyRevenueProfit {
+  const DailyRevenueProfit({
+    required this.date,
+    required this.revenue,
+    required this.profit,
+  });
+  final DateTime date;
+  final double revenue;
+  final double profit;
+  double get marginPercent => revenue > 0 ? (profit / revenue) * 100 : 0;
 }
 
 class PlatformStats {
