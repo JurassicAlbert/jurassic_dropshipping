@@ -228,11 +228,26 @@ export function ReturnsWorkflowPanel() {
 
   const save = async () => {
     if (!selected) return;
+    const selectedId = selected.id;
+    const prevRows = rows;
+    // Optimistic: reflect edited status/fields in list immediately; rollback on failure.
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id === selectedId
+          ? {
+              ...r,
+              status,
+              notes: notes.trim() || null,
+              refundAmount: refundAmount.trim() ? Number(refundAmount) : null,
+            }
+          : r,
+      ),
+    );
     setLoading(true);
     setError(null);
     const res = await transport.returnsUpdateReturn(
       reqId("returns-save"),
-      selected.id,
+      selectedId,
       {
         status,
         notes: notes.trim() || null,
@@ -240,7 +255,12 @@ export function ReturnsWorkflowPanel() {
       },
       addToReturnedStock,
     );
-    if (!res.ok) setError({ message: res.error.message });
+    if (!res.ok) {
+      setRows(prevRows);
+      setError({ message: res.error.message });
+      setLoading(false);
+      return;
+    }
     setSelected(null);
     await load();
     setLoading(false);

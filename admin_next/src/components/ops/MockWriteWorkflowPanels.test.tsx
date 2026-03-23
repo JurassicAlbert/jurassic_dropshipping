@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ApprovalWorkflowPanel } from "./MockWriteWorkflowPanels";
+import { ApprovalWorkflowPanel, ReturnsWorkflowPanel } from "./MockWriteWorkflowPanels";
 
 const approvalGetPendingListings = vi.fn();
 const approvalGetPendingOrders = vi.fn();
@@ -8,6 +8,9 @@ const approvalApproveListing = vi.fn();
 const approvalRejectListing = vi.fn();
 const approvalApproveAndFulfillOrder = vi.fn();
 const approvalRejectOrder = vi.fn();
+const returnsGetReturns = vi.fn();
+const returnsComputeRouting = vi.fn();
+const returnsUpdateReturn = vi.fn();
 
 vi.mock("@/lib/adminTransport", () => ({
   getAdminTransport: () => ({
@@ -17,6 +20,9 @@ vi.mock("@/lib/adminTransport", () => ({
     approvalRejectListing,
     approvalApproveAndFulfillOrder,
     approvalRejectOrder,
+    returnsGetReturns,
+    returnsComputeRouting,
+    returnsUpdateReturn,
   }),
 }));
 
@@ -28,6 +34,9 @@ describe("ApprovalWorkflowPanel", () => {
     approvalRejectListing.mockReset();
     approvalApproveAndFulfillOrder.mockReset();
     approvalRejectOrder.mockReset();
+    returnsGetReturns.mockReset();
+    returnsComputeRouting.mockReset();
+    returnsUpdateReturn.mockReset();
 
     approvalGetPendingListings.mockResolvedValue({
       ok: true,
@@ -58,6 +67,36 @@ describe("ApprovalWorkflowPanel", () => {
       ok: true,
       requestId: "r6",
       order: { id: "ord-internal-1", targetOrderId: "ORD-1", status: "cancelled" },
+    });
+    returnsGetReturns.mockResolvedValue({
+      ok: true,
+      requestId: "r9",
+      rows: [
+        {
+          id: "ret-1",
+          orderId: "ord-1",
+          status: "requested",
+          reason: "notAsDescribed",
+          notes: null,
+          refundAmount: null,
+        },
+      ],
+    });
+    returnsComputeRouting.mockResolvedValue({
+      ok: true,
+      requestId: "r10",
+      returnId: "ret-1",
+      routing: { destination: "sellerAddress" },
+    });
+    returnsUpdateReturn.mockResolvedValue({
+      ok: true,
+      requestId: "r11",
+      return: {
+        id: "ret-1",
+        orderId: "ord-1",
+        status: "approved",
+      },
+      returnedStockCreated: { created: false, rowsInserted: 0 },
     });
   });
 
@@ -127,6 +166,55 @@ describe("ApprovalWorkflowPanel", () => {
 
     await waitFor(() => expect(screen.getByText("lst-1")).toBeInTheDocument());
     expect(screen.getByText("approve failed")).toBeInTheDocument();
+  });
+});
+
+describe("ReturnsWorkflowPanel", () => {
+  beforeEach(() => {
+    returnsGetReturns.mockReset();
+    returnsComputeRouting.mockReset();
+    returnsUpdateReturn.mockReset();
+    returnsGetReturns.mockResolvedValue({
+      ok: true,
+      requestId: "rr-1",
+      rows: [
+        {
+          id: "ret-1",
+          orderId: "ord-1",
+          status: "requested",
+          reason: "notAsDescribed",
+          notes: null,
+          refundAmount: null,
+        },
+      ],
+    });
+    returnsUpdateReturn.mockResolvedValue({
+      ok: true,
+      requestId: "rr-2",
+      return: { id: "ret-1", orderId: "ord-1", status: "approved" },
+      returnedStockCreated: { created: false, rowsInserted: 0 },
+    });
+  });
+
+  it("optimistically updates status and rolls back when save fails", async () => {
+    const user = userEvent.setup();
+    returnsUpdateReturn.mockResolvedValueOnce({
+      ok: false,
+      requestId: "rr-3",
+      error: { code: "conflict", message: "save failed" },
+    });
+
+    render(<ReturnsWorkflowPanel />);
+    await screen.findByText("ret-1");
+    expect(screen.getByText("requested")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getAllByRole("combobox")[0]);
+    await user.click(screen.getByRole("option", { name: "approved" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(screen.getByText("requested")).toBeInTheDocument());
+    expect(screen.getByText("save failed")).toBeInTheDocument();
   });
 });
 

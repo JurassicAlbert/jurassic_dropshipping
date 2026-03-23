@@ -51,7 +51,7 @@ dart run tool/dashboard_api_server_dart_main.dart
 ### 1. UI polish — `ui-write-workflows` (incomplete)
 
 - **Auto-load:** Implemented. Workflow panels call `load()` on mount via `useEffect` and keep manual **Refresh**. Coverage: `admin_next/src/components/ops/MockWriteWorkflowPanels.test.tsx`.
-- **Optimistic updates:** Partially implemented for approval actions (`ApprovalWorkflowPanel` removes pending row immediately, rolls back on failure). Coverage: `MockWriteWorkflowPanels.test.tsx`. Extend same pattern to returns/incidents/capital/policies if desired.
+- **Optimistic updates:** Partially implemented for approval **and returns save** flows (`ApprovalWorkflowPanel`, `ReturnsWorkflowPanel`) with rollback on failure. Coverage: `MockWriteWorkflowPanels.test.tsx`. Extend same pattern to incidents/capital/policies if desired.
 - **Supplier detail (`/suppliers/[id]`):** Still `LiveDataTablePage` only. Consider transport-scoped policy edit or reliability actions for the **route `id`** (reuse patterns from `ReturnPoliciesWorkflowPanel` / `SupplierReliabilityAndRiskPanel`).
 - **Duplicate panel:** `SupplierReliabilityAndRiskPanel` appears on both **Suppliers** and **Risk Dashboard** — acceptable; differentiate copy/primary CTA if UX asks for it.
 
