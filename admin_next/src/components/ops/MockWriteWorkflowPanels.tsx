@@ -72,6 +72,14 @@ export function ApprovalWorkflowPanel() {
   useEffect(() => { load(); }, []);
 
   const runAction = async (kind: "approveListing" | "rejectListing" | "approveOrder" | "rejectOrder", id: string) => {
+    const prevListings = pendingListings;
+    const prevOrders = pendingOrders;
+    // Optimistic: remove row from pending queues immediately; rollback if write fails.
+    if (kind === "approveListing" || kind === "rejectListing") {
+      setPendingListings((prev) => prev.filter((x) => x.id !== id));
+    } else {
+      setPendingOrders((prev) => prev.filter((x) => x.id !== id));
+    }
     setLoading(true);
     setError(null);
     let ok = true;
@@ -93,7 +101,13 @@ export function ApprovalWorkflowPanel() {
       ok = res.ok;
       if (!res.ok) message = res.error.message;
     }
-    if (!ok) setError({ message });
+    if (!ok) {
+      setPendingListings(prevListings);
+      setPendingOrders(prevOrders);
+      setError({ message });
+      setLoading(false);
+      return;
+    }
     await load();
     setLoading(false);
   };
