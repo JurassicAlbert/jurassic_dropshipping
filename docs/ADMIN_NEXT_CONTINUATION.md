@@ -50,7 +50,7 @@ dart run tool/dashboard_api_server_dart_main.dart
 
 ### 1. UI polish — `ui-write-workflows` (incomplete)
 
-- **Auto-load:** Workflow panels in `MockWriteWorkflowPanels.tsx` do not `useEffect` on mount; users must click **Refresh**. Add initial load on mount (and keep manual refresh).
+- **Auto-load:** Implemented. Workflow panels call `load()` on mount via `useEffect` and keep manual **Refresh**. Coverage: `admin_next/src/components/ops/MockWriteWorkflowPanels.test.tsx`.
 - **Optimistic updates:** Current pattern is *action → await transport → reload*. Optional: optimistic row state with rollback on failure (aligns with original plan).
 - **Supplier detail (`/suppliers/[id]`):** Still `LiveDataTablePage` only. Consider transport-scoped policy edit or reliability actions for the **route `id`** (reuse patterns from `ReturnPoliciesWorkflowPanel` / `SupplierReliabilityAndRiskPanel`).
 - **Duplicate panel:** `SupplierReliabilityAndRiskPanel` appears on both **Suppliers** and **Risk Dashboard** — acceptable; differentiate copy/primary CTA if UX asks for it.
