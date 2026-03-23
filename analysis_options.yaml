@@ -13,6 +13,9 @@ analyzer:
   exclude:
     - "**/*.freezed.dart"
     - "**/*.g.dart"
+  errors:
+    # Generated files (freezed) can emit duplicate ignore pragmas under newer analyzer versions.
+    duplicate_ignore: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the
