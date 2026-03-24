@@ -63,7 +63,7 @@ Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
 - [x] Incidents process: animated transition state before success/error.
 - [x] Unit tests for transition behavior and failure outcomes: `MockWriteWorkflowPanels.test.tsx`.
 - [x] Extended transition-state pattern to capital adjustment, return policy save, and supplier reliability refresh actions (with unit tests).
-- [ ] Extend transition-state pattern to risk refresh actions (`listingHealth`, `customerMetrics`) and add tests.
+- [x] Extended transition-state pattern to risk refresh actions (`listingHealth`, `customerMetrics`) and added tests.
 
 ---
 

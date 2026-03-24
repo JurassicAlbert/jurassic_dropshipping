@@ -52,7 +52,7 @@ dart run tool/dashboard_api_server_dart_main.dart
 
 - **Auto-load:** Implemented. Workflow panels call `load()` on mount via `useEffect` and keep manual **Refresh**. Coverage: `admin_next/src/components/ops/MockWriteWorkflowPanels.test.tsx`.
 - **Transition-first write UX (recommended):** Implemented for approval, returns save, and incidents process — rows keep current status, show animated **Processing...** chip, then resolve to success/error after transport returns (no immediate status flip). Coverage: `MockWriteWorkflowPanels.test.tsx`.
-- **Transition pattern rollout status:** applied to capital adjustment, return policy save, and supplier reliability refresh; remaining optional extension is risk refresh buttons (`listing health`, `customer metrics`).
+- **Transition pattern rollout status:** applied to approval, returns save, incidents process, capital adjustment, return policy save, supplier reliability refresh, and risk refresh buttons (`listing health`, `customer metrics`).
 - **Supplier detail (`/suppliers/[id]`):** Still `LiveDataTablePage` only. Consider transport-scoped policy edit or reliability actions for the **route `id`** (reuse patterns from `ReturnPoliciesWorkflowPanel` / `SupplierReliabilityAndRiskPanel`).
 - **Duplicate panel:** `SupplierReliabilityAndRiskPanel` appears on both **Suppliers** and **Risk Dashboard** — acceptable; differentiate copy/primary CTA if UX asks for it.
 

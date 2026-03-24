@@ -319,6 +319,32 @@ describe("SupplierReliabilityAndRiskPanel", () => {
     resolveRefresh({ ok: true, requestId: "sup-1", updatedSuppliersCount: 2 });
     await waitFor(() => expect(suppliersRefreshReliabilityScores).toHaveBeenCalledTimes(1));
   });
+
+  it("shows transition label while refreshing listing health", async () => {
+    const user = userEvent.setup();
+    let resolveRefresh: (value: unknown) => void = () => {};
+    riskRefreshListingHealth.mockReturnValueOnce(new Promise((resolve) => (resolveRefresh = resolve)));
+
+    render(<SupplierReliabilityAndRiskPanel />);
+    await screen.findByText(/Suppliers:/);
+    await user.click(screen.getByRole("button", { name: "Refresh listing health" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Processing listing health..." })).toBeInTheDocument());
+    resolveRefresh({ ok: true, requestId: "risk-1", pausedListingsDelta: 1, metricsRefreshed: true });
+    await waitFor(() => expect(riskRefreshListingHealth).toHaveBeenCalledTimes(1));
+  });
+
+  it("shows transition label while refreshing customer metrics", async () => {
+    const user = userEvent.setup();
+    let resolveRefresh: (value: unknown) => void = () => {};
+    riskRefreshCustomerMetrics.mockReturnValueOnce(new Promise((resolve) => (resolveRefresh = resolve)));
+
+    render(<SupplierReliabilityAndRiskPanel />);
+    await screen.findByText(/Suppliers:/);
+    await user.click(screen.getByRole("button", { name: "Refresh customer metrics" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Processing customer metrics..." })).toBeInTheDocument());
+    resolveRefresh({ ok: true, requestId: "risk-2", abuseSignalsUpdated: 2, metricsRefreshed: true });
+    await waitFor(() => expect(riskRefreshCustomerMetrics).toHaveBeenCalledTimes(1));
+  });
 });
 
 describe("ReturnsWorkflowPanel", () => {

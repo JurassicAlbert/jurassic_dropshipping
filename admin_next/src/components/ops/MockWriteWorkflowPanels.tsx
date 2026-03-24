@@ -741,10 +741,10 @@ export function SupplierReliabilityAndRiskPanel() {
               {pendingSupplierRiskAction === "reliability" ? "Processing..." : "Refresh reliability scores"}
             </Button>
             <Button size="small" variant="outlined" onClick={() => refreshRisk("listingHealth")} disabled={loading}>
-              {pendingSupplierRiskAction === "listingHealth" ? "Processing..." : "Refresh listing health"}
+              {pendingSupplierRiskAction === "listingHealth" ? "Processing listing health..." : "Refresh listing health"}
             </Button>
             <Button size="small" variant="outlined" onClick={() => refreshRisk("customerMetrics")} disabled={loading}>
-              {pendingSupplierRiskAction === "customerMetrics" ? "Processing..." : "Refresh customer metrics"}
+              {pendingSupplierRiskAction === "customerMetrics" ? "Processing customer metrics..." : "Refresh customer metrics"}
             </Button>
           </Stack>
           {risk ? (
