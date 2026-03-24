@@ -604,9 +604,6 @@ export function ReturnPoliciesWorkflowPanel({ initialSupplierId }: { initialSupp
 
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []);
-  useEffect(() => {
-    if (initialSupplierId && initialSupplierId.trim()) setSupplierId(initialSupplierId);
-  }, [initialSupplierId]);
 
   const save = async () => {
     setPendingPolicyAction("save");
