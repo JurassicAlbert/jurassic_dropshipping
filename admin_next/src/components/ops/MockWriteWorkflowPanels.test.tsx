@@ -292,6 +292,12 @@ describe("CapitalWorkflowPanel", () => {
 });
 
 describe("ReturnPoliciesWorkflowPanel", () => {
+  it("prefills supplier id from route-scoped context", async () => {
+    render(<ReturnPoliciesWorkflowPanel initialSupplierId="sup-route-42" />);
+    await screen.findByText(/Policies:/);
+    expect(screen.getByLabelText("Supplier ID")).toHaveValue("sup-route-42");
+  });
+
   it("shows transition label while saving policy", async () => {
     const user = userEvent.setup();
     let resolveSave: (value: unknown) => void = () => {};

@@ -1,6 +1,15 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Mock write workflows transition states", () => {
+  test("Approval action disables immediate repeat click while pending", async ({ page }) => {
+    await page.goto("/approval");
+    const approve = page.getByRole("button", { name: "Approve" }).first();
+    await expect(approve).toBeEnabled();
+    await approve.click();
+    await expect(page.getByText("Processing...").first()).toBeVisible();
+    await expect(approve).toBeDisabled();
+  });
+
   test("Approval shows row transition while action is pending", async ({ page }) => {
     await page.goto("/approval");
     await expect(page.getByRole("button", { name: "Approve" }).first()).toBeEnabled();
@@ -22,8 +31,10 @@ test.describe("Mock write workflows transition states", () => {
     await page.goto("/risk-dashboard");
     await page.getByRole("button", { name: "Refresh listing health" }).click();
     await expect(page.getByRole("button", { name: "Processing listing health..." })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Processing listing health..." })).toBeDisabled();
     await page.getByRole("button", { name: "Refresh customer metrics" }).click();
     await expect(page.getByRole("button", { name: "Processing customer metrics..." })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Processing customer metrics..." })).toBeDisabled();
   });
 });
 

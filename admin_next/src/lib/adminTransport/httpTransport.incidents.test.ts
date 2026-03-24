@@ -54,4 +54,73 @@ describe("HttpTransport incidentsGetIncident", () => {
     expect(res.ok).toBe(true);
     if (res.ok) expect(res.incident).toBeNull();
   });
+
+  it("creates incident via POST /api/incidents", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              incident: {
+                id: 1234,
+                orderId: "ord-2",
+                incidentType: "damageClaim",
+                status: "open",
+                trigger: "manual",
+                createdAt: "2025-01-01T00:00:00.000Z",
+                resolvedAt: null,
+              },
+            }),
+        } as Response),
+      ),
+    );
+    const t = new HttpTransport();
+    const res = await t.incidentsCreateIncident("req-3", { orderId: "ord-2", incidentType: "damageClaim" });
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.incident.id).toBe(1234);
+      expect(res.incident.orderId).toBe("ord-2");
+      expect(res.incident.status).toBe("open");
+    }
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/incidents",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("processes incident via PATCH /api/incidents/:id", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              incident: {
+                id: 1234,
+                orderId: "ord-2",
+                incidentType: "damageClaim",
+                status: "resolved",
+                trigger: "manual",
+                createdAt: "2025-01-01T00:00:00.000Z",
+                resolvedAt: "2025-01-02T00:00:00.000Z",
+              },
+            }),
+        } as Response),
+      ),
+    );
+    const t = new HttpTransport();
+    const res = await t.incidentsProcessIncident("req-4", 1234);
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.incident.id).toBe(1234);
+      expect(res.incident.status).toBe("resolved");
+    }
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/incidents/1234",
+      expect.objectContaining({ method: "PATCH" }),
+    );
+  });
 });

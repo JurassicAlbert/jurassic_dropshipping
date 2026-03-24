@@ -583,12 +583,12 @@ type LedgerEntryView = {
   amount: number;
 };
 
-export function ReturnPoliciesWorkflowPanel() {
+export function ReturnPoliciesWorkflowPanel({ initialSupplierId }: { initialSupplierId?: string } = {}) {
   const transport = useMemo(() => getAdminTransport(), []);
   const [rows, setRows] = useState<SupplierReturnPolicy[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
-  const [supplierId, setSupplierId] = useState("sup_1");
+  const [supplierId, setSupplierId] = useState(initialSupplierId ?? "sup_1");
   const [policyType, setPolicyType] = useState<SupplierReturnPolicy["policyType"]>("returnWindow");
   const [windowDays, setWindowDays] = useState("14");
   const [pendingPolicyAction, setPendingPolicyAction] = useState<"save" | null>(null);
@@ -604,6 +604,9 @@ export function ReturnPoliciesWorkflowPanel() {
 
   // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (initialSupplierId && initialSupplierId.trim()) setSupplierId(initialSupplierId);
+  }, [initialSupplierId]);
 
   const save = async () => {
     setPendingPolicyAction("save");

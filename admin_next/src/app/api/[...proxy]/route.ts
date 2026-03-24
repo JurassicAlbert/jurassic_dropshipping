@@ -13,10 +13,33 @@ const allowed = new Set([
   "profit-dashboard",
   "how-it-works",
   "suppliers",
+  "risk",
 ]);
 
 export async function GET(
   _request: NextRequest,
+  context: { params: Promise<{ proxy: string[] }> },
+) {
+  return proxyRequest("GET", _request, context);
+}
+
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<{ proxy: string[] }> },
+) {
+  return proxyRequest("POST", request, context);
+}
+
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ proxy: string[] }> },
+) {
+  return proxyRequest("PATCH", request, context);
+}
+
+async function proxyRequest(
+  method: "GET" | "POST" | "PATCH",
+  request: NextRequest,
   context: { params: Promise<{ proxy: string[] }> },
 ) {
   const { proxy } = await context.params;
@@ -34,7 +57,17 @@ export async function GET(
   const url = `${dartBase}/${path}`;
 
   try {
-    const res = await fetch(url, { method: "GET", cache: "no-store" });
+    const init: RequestInit = method === "GET"
+      ? { method: "GET", cache: "no-store" }
+      : {
+          method,
+          cache: "no-store",
+          body: await request.text(),
+          headers: {
+            "content-type": request.headers.get("content-type") ?? "application/json",
+          },
+        };
+    const res = await fetch(url, init);
     if (!res.ok) {
       return NextResponse.json({ error: "dart_api_error", status: res.status }, { status: 502 });
     }

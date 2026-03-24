@@ -30,13 +30,13 @@ This document explains built-in protections against financial loss and how to co
 ## Marketplace Fees
 
 ### Allegro
-- ~10% commission (varies by category, 8-15%)
-- The system defaults to 10% (`PricingCalculator.marketplaceFeePercent`)
-- **Action:** Check your Allegro category fee schedule and adjust if needed
+- ~10% commission (varies by category, often 8-15%)
+- The calculator default is 10%, but effective fee can be overridden per platform in rules (`marketplaceFees`), with optional extra payment fees (`paymentFees`)
+- **Action:** keep per-platform fees in rules aligned with your current marketplace schedule
 
 ### Temu
-- Commission varies by category (typically 5-15%)
-- Currently uses the same 10% default
+- Commission varies by category
+- If no explicit platform fee is set in rules, the default calculator fee is used
 
 ## Return Policy (Polish Law — 14-day no-reason returns)
 
@@ -94,7 +94,7 @@ Use `PricingCalculator.estimateReturnCost` to preview worst-case scenarios:
 |----------|-----------|---------------|
 | Supplier raises price after listing | Price refresh service | Run regularly via Automation |
 | Product has high return rate | Blacklist product | Add to `blacklistedProductIds` |
-| Marketplace fee higher than estimated | Adjust `marketplaceFeePercent` | Currently hardcoded at 10% |
+| Marketplace fee higher than estimated | Adjust `marketplaceFees` and `paymentFees` in rules | Default fee is 10%, but rules override platform-specific totals |
 | Currency fluctuation | N/A | Manual monitoring required |
 | Shipping cost changes | Price refresh | Refresh offers regularly |
 | Listing at tiny profit | Absolute minimum 5 PLN floor | Automatic |

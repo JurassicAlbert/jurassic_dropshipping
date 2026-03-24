@@ -43,5 +43,20 @@ test.describe("Mock write workflows deterministic error paths", () => {
     await expect(page.getByText("Returned stock insert failed after return update")).toBeVisible();
     await expect(page.getByText("Processing...")).toHaveCount(0);
   });
+
+  test("Returns save failure re-enables Save button after transition clears", async ({ page }) => {
+    // returnedStockInsert fails for: returns-save-1700000000052-4fzyo8
+    await forceRequestId(page, 1700000000052);
+    await page.goto("/returns");
+    await page.getByRole("button", { name: "Edit" }).first().click();
+    await page.locator('[role="combobox"]').first().click();
+    await page.getByRole("option", { name: "received" }).click();
+    await page.getByRole("button", { name: "Add to returned stock on save" }).click();
+    const save = page.getByRole("button", { name: "Save", exact: true });
+    await save.click();
+    await expect(page.getByText("Returned stock insert failed after return update")).toBeVisible();
+    await expect(page.getByText("Processing...")).toHaveCount(0);
+    await expect(save).toBeEnabled();
+  });
 });
 

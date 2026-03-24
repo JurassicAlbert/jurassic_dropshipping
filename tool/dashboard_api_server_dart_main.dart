@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:jurassic_dropshipping/data/database/app_database.dart';
 import 'package:jurassic_dropshipping/data/models/order.dart';
+import 'package:jurassic_dropshipping/data/models/listing.dart';
+import 'package:jurassic_dropshipping/data/models/return_request.dart';
 import 'package:jurassic_dropshipping/data/repositories/background_job_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/decision_log_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/financial_ledger_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/incident_record_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/customer_metrics_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_health_metrics_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/listing_repository.dart';
 import 'package:jurassic_dropshipping/data/repositories/marketplace_account_repository.dart';
@@ -20,7 +23,13 @@ import 'package:jurassic_dropshipping/data/repositories/supplier_offer_repositor
 import 'package:jurassic_dropshipping/data/repositories/supplier_repository.dart';
 import 'package:jurassic_dropshipping/data/models/user_rules.dart';
 import 'package:jurassic_dropshipping/data/repositories/supplier_return_policy_repository.dart';
+import 'package:jurassic_dropshipping/data/repositories/supplier_reliability_score_repository.dart';
 import 'package:jurassic_dropshipping/domain/post_order/incident_record.dart';
+import 'package:jurassic_dropshipping/domain/customer_abuse/customer_abuse_scoring_service.dart';
+import 'package:jurassic_dropshipping/domain/listing_health/listing_health_scoring_service.dart';
+import 'package:jurassic_dropshipping/domain/post_order/return_routing.dart';
+import 'package:jurassic_dropshipping/domain/post_order/supplier_return_policy.dart';
+import 'package:jurassic_dropshipping/domain/supplier_reliability/supplier_reliability_scoring_service.dart';
 import 'package:jurassic_dropshipping/features/analytics/analytics_engine.dart';
 import 'package:jurassic_dropshipping/services/seed_service.dart';
 import 'package:path/path.dart' as p;
@@ -135,6 +144,26 @@ Future<void> main() async {
         continue;
       }
 
+      if (request.uri.path == '/suppliers/reliability/refresh' &&
+          request.method == 'POST') {
+        final service = SupplierReliabilityScoringService(
+          orderRepository: OrderRepository(database, tenantId: tenantId),
+          listingRepository: ListingRepository(database, tenantId: tenantId),
+          productRepository: ProductRepository(database, tenantId: tenantId),
+          incidentRecordRepository: IncidentRecordRepository(database, tenantId: tenantId),
+          scoreRepository: SupplierReliabilityScoreRepository(database, tenantId: tenantId),
+        );
+        final updated = await service.evaluateAll();
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'updatedSuppliersCount': updated,
+          }))
+          ..close();
+        continue;
+      }
+
       if (request.uri.path == '/marketplaces') {
         final payload = await _computeMarketplacesPayload(database: database, tenantId: tenantId);
         request.response
@@ -155,7 +184,126 @@ Future<void> main() async {
         continue;
       }
 
+      if (request.uri.pathSegments.length == 2 &&
+          request.uri.pathSegments[0] == 'returns' &&
+          request.method == 'PATCH') {
+        final returnId = request.uri.pathSegments[1];
+        final repo = ReturnRepository(database, tenantId: tenantId);
+        final rows = await repo.getAll();
+        ReturnRequest? existing;
+        for (final r in rows) {
+          if (r.id == returnId) {
+            existing = r;
+            break;
+          }
+        }
+        if (existing == null) {
+          request.response
+            ..statusCode = 404
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({'error': 'not_found'}))
+            ..close();
+          continue;
+        }
+        final current = existing;
+        final body = await utf8.decoder.bind(request).join();
+        final map = jsonDecode(body) as Map<String, dynamic>;
+        final patch = (map['patch'] as Map?)?.cast<String, dynamic>() ?? map;
+
+        ReturnStatus parseStatus(String? s) {
+          if (s == null) return current.status;
+          return ReturnStatus.values.firstWhere(
+            (e) => e.name == s,
+            orElse: () => current.status,
+          );
+        }
+
+        final updated = current.copyWith(
+          status: parseStatus(patch['status']?.toString()),
+          notes: patch.containsKey('notes') ? patch['notes']?.toString() : current.notes,
+          refundAmount: patch['refundAmount'] is num ? (patch['refundAmount'] as num).toDouble() : current.refundAmount,
+          returnShippingCost: patch['returnShippingCost'] is num
+              ? (patch['returnShippingCost'] as num).toDouble()
+              : current.returnShippingCost,
+          restockingFee: patch['restockingFee'] is num ? (patch['restockingFee'] as num).toDouble() : current.restockingFee,
+          resolvedAt: (patch['status']?.toString() == 'refunded' || patch['status']?.toString() == 'rejected')
+              ? (current.resolvedAt ?? DateTime.now())
+              : current.resolvedAt,
+        );
+        await repo.update(updated);
+
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'return': {
+              'id': updated.id,
+              'orderId': updated.orderId,
+              'status': _enumName(updated.status),
+              'reason': _enumName(updated.reason),
+              'notes': updated.notes,
+              'refundAmount': updated.refundAmount,
+              'returnShippingCost': updated.returnShippingCost,
+              'restockingFee': updated.restockingFee,
+              'returnRoutingDestination': updated.returnRoutingDestination?.toDbString(),
+              'supplierId': updated.supplierId,
+              'requestedAt': _toIso(updated.requestedAt),
+              'resolvedAt': _toIso(updated.resolvedAt),
+            },
+            'returnedStockCreated': {'created': false, 'rowsInserted': 0},
+          }))
+          ..close();
+        continue;
+      }
+
       if (request.uri.path == '/incidents') {
+        if (request.method == 'POST') {
+          final body = await utf8.decoder.bind(request).join();
+          final map = jsonDecode(body) as Map<String, dynamic>;
+          final orderId = (map['orderId'] ?? '').toString();
+          final incidentTypeRaw = (map['incidentType'] ?? 'customerReturn14d').toString();
+          final attachmentIdsRaw = map['attachmentIds'];
+          final attachmentIds = attachmentIdsRaw is List
+              ? attachmentIdsRaw.map((e) => e.toString()).toList()
+              : null;
+
+          final repo = IncidentRecordRepository(database, tenantId: tenantId);
+          final id = await repo.insert(IncidentRecord(
+            id: 0,
+            orderId: orderId,
+            incidentType: IncidentRecord.typeFromString(incidentTypeRaw),
+            status: IncidentStatus.open,
+            trigger: 'manual',
+            createdAt: DateTime.now(),
+            attachmentIds: attachmentIds,
+          ));
+          final created = await repo.getById(id);
+          request.response
+            ..statusCode = 200
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({
+              'incident': created == null
+                  ? null
+                  : {
+                      'id': created.id,
+                      'orderId': created.orderId,
+                      'incidentType': _enumName(created.incidentType),
+                      'status': _enumName(created.status),
+                      'trigger': created.trigger,
+                      'automaticDecision': created.automaticDecision,
+                      'supplierInteraction': created.supplierInteraction,
+                      'marketplaceInteraction': created.marketplaceInteraction,
+                      'refundAmount': created.refundAmount,
+                      'financialImpact': created.financialImpact,
+                      'decisionLogId': created.decisionLogId,
+                      'createdAt': _toIso(created.createdAt),
+                      'resolvedAt': _toIso(created.resolvedAt),
+                      'attachmentIds': created.attachmentIds,
+                    },
+            }))
+            ..close();
+          continue;
+        }
         final payload = await _computeIncidentsPayload(database: database, tenantId: tenantId);
         request.response
           ..statusCode = 200
@@ -163,6 +311,67 @@ Future<void> main() async {
           ..write(jsonEncode(payload))
           ..close();
         continue;
+      }
+
+      if (request.uri.pathSegments.length == 2 &&
+          request.uri.pathSegments[0] == 'incidents' &&
+          request.method == 'PATCH') {
+        final id = int.tryParse(request.uri.pathSegments[1]);
+        if (id != null) {
+          final repo = IncidentRecordRepository(database, tenantId: tenantId);
+          final existing = await repo.getById(id);
+          if (existing == null) {
+            request.response
+              ..statusCode = 404
+              ..headers.contentType = ContentType.json
+              ..write(jsonEncode({'error': 'not_found'}))
+              ..close();
+            continue;
+          }
+          final updated = IncidentRecord(
+            id: existing.id,
+            orderId: existing.orderId,
+            incidentType: existing.incidentType,
+            status: IncidentStatus.resolved,
+            trigger: existing.trigger,
+            automaticDecision: existing.automaticDecision,
+            supplierInteraction: existing.supplierInteraction,
+            marketplaceInteraction: existing.marketplaceInteraction,
+            refundAmount: existing.refundAmount,
+            financialImpact: existing.financialImpact,
+            decisionLogId: existing.decisionLogId,
+            createdAt: existing.createdAt,
+            resolvedAt: DateTime.now(),
+            attachmentIds: existing.attachmentIds,
+          );
+          await repo.update(updated);
+          final saved = await repo.getById(id);
+          request.response
+            ..statusCode = 200
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({
+              'incident': saved == null
+                  ? null
+                  : {
+                      'id': saved.id,
+                      'orderId': saved.orderId,
+                      'incidentType': _enumName(saved.incidentType),
+                      'status': _enumName(saved.status),
+                      'trigger': saved.trigger,
+                      'automaticDecision': saved.automaticDecision,
+                      'supplierInteraction': saved.supplierInteraction,
+                      'marketplaceInteraction': saved.marketplaceInteraction,
+                      'refundAmount': saved.refundAmount,
+                      'financialImpact': saved.financialImpact,
+                      'decisionLogId': saved.decisionLogId,
+                      'createdAt': _toIso(saved.createdAt),
+                      'resolvedAt': _toIso(saved.resolvedAt),
+                      'attachmentIds': saved.attachmentIds,
+                    },
+            }))
+            ..close();
+          continue;
+        }
       }
 
       if (request.uri.pathSegments.length == 2 &&
@@ -201,6 +410,56 @@ Future<void> main() async {
         continue;
       }
 
+      if (request.uri.path == '/risk/listing-health/refresh' &&
+          request.method == 'POST') {
+        final service = ListingHealthScoringService(
+          orderRepository: OrderRepository(database, tenantId: tenantId),
+          listingRepository: ListingRepository(database, tenantId: tenantId),
+          incidentRecordRepository: IncidentRecordRepository(database, tenantId: tenantId),
+          returnRepository: ReturnRepository(database, tenantId: tenantId),
+          metricsRepository: ListingHealthMetricsRepository(database, tenantId: tenantId),
+          rulesRepository: RulesRepository(database, tenantId: tenantId),
+          autoPausingService: null,
+        );
+        final before = await _computeRiskDashboardPayload(database: database, tenantId: tenantId);
+        await service.evaluateAll();
+        final after = await _computeRiskDashboardPayload(database: database, tenantId: tenantId);
+        final beforeSummary = (before['summary'] as Map<String, dynamic>? ?? const <String, dynamic>{});
+        final afterSummary = (after['summary'] as Map<String, dynamic>? ?? const <String, dynamic>{});
+        final beforePaused = beforeSummary['pausedListings'] is num ? (beforeSummary['pausedListings'] as num).toInt() : 0;
+        final afterPaused = afterSummary['pausedListings'] is num ? (afterSummary['pausedListings'] as num).toInt() : 0;
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'pausedListingsDelta': afterPaused - beforePaused,
+            'metricsRefreshed': true,
+          }))
+          ..close();
+        continue;
+      }
+
+      if (request.uri.path == '/risk/customer-metrics/refresh' &&
+          request.method == 'POST') {
+        final service = CustomerAbuseScoringService(
+          orderRepository: OrderRepository(database, tenantId: tenantId),
+          returnRepository: ReturnRepository(database, tenantId: tenantId),
+          incidentRecordRepository: IncidentRecordRepository(database, tenantId: tenantId),
+          metricsRepository: CustomerMetricsRepository(database, tenantId: tenantId),
+          rulesRepository: RulesRepository(database, tenantId: tenantId),
+        );
+        final updated = await service.evaluateAll();
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'abuseSignalsUpdated': updated,
+            'metricsRefreshed': true,
+          }))
+          ..close();
+        continue;
+      }
+
       if (request.uri.path == '/returned-stock') {
         final payload = await _computeReturnedStockPayload(database: database, tenantId: tenantId);
         request.response
@@ -221,12 +480,140 @@ Future<void> main() async {
         continue;
       }
 
+      if (request.uri.path == '/capital/adjust' && request.method == 'POST') {
+        final body = await utf8.decoder.bind(request).join();
+        final map = jsonDecode(body) as Map<String, dynamic>;
+        final amountRaw = map['amount'];
+        final amount = amountRaw is num ? amountRaw.toDouble() : 0.0;
+        final referenceId = map['referenceId']?.toString();
+        final currency = map['currency']?.toString() ?? 'PLN';
+        final ledgerRepo = FinancialLedgerRepository(database, tenantId: tenantId);
+        final ledgerEntryId = await ledgerRepo.append(
+          type: LedgerEntryType.adjustment.name,
+          amount: amount,
+          currency: currency,
+          referenceId: referenceId,
+        );
+        final balance = await ledgerRepo.getBalance();
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'balance': balance,
+            'ledgerEntryId': ledgerEntryId,
+          }))
+          ..close();
+        continue;
+      }
+
       if (request.uri.path == '/approval') {
         final payload = await _computeApprovalPayload(database: database, tenantId: tenantId);
         request.response
           ..statusCode = 200
           ..headers.contentType = ContentType.json
           ..write(jsonEncode(payload))
+          ..close();
+        continue;
+      }
+
+      if (request.uri.pathSegments.length == 4 &&
+          request.uri.pathSegments[0] == 'approval' &&
+          request.uri.pathSegments[1] == 'listings' &&
+          request.method == 'POST') {
+        final listingId = request.uri.pathSegments[2];
+        final action = request.uri.pathSegments[3];
+        final repo = ListingRepository(database, tenantId: tenantId);
+        final existing = await repo.getByLocalId(listingId);
+        if (existing == null) {
+          request.response
+            ..statusCode = 404
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({'error': 'not_found'}))
+            ..close();
+          continue;
+        }
+        if (action == 'approve') {
+          await repo.updateStatus(listingId, ListingStatus.active, publishedAt: DateTime.now());
+        } else if (action == 'reject') {
+          await repo.updateStatus(listingId, ListingStatus.draft);
+        } else {
+          request.response
+            ..statusCode = 404
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({'error': 'not_found'}))
+            ..close();
+          continue;
+        }
+        final saved = await repo.getByLocalId(listingId);
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'listing': saved == null
+                ? null
+                : {
+                    'id': saved.id,
+                    'status': _enumName(saved.status),
+                    'productId': saved.productId,
+                    'targetPlatformId': saved.targetPlatformId,
+                    'sellingPrice': saved.sellingPrice,
+                    'sourceCost': saved.sourceCost,
+                    'variantId': saved.variantId,
+                  },
+          }))
+          ..close();
+        continue;
+      }
+
+      if (request.uri.pathSegments.length == 4 &&
+          request.uri.pathSegments[0] == 'approval' &&
+          request.uri.pathSegments[1] == 'orders' &&
+          request.method == 'POST') {
+        final orderId = request.uri.pathSegments[2];
+        final action = request.uri.pathSegments[3];
+        final repo = OrderRepository(database, tenantId: tenantId);
+        final existing = await repo.getByLocalId(orderId);
+        if (existing == null) {
+          request.response
+            ..statusCode = 404
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({'error': 'not_found'}))
+            ..close();
+          continue;
+        }
+        if (action == 'approve') {
+          await repo.updateStatus(orderId, OrderStatus.sourceOrderPlaced, approvedAt: DateTime.now());
+        } else if (action == 'reject') {
+          await repo.updateStatus(orderId, OrderStatus.cancelled);
+        } else {
+          request.response
+            ..statusCode = 404
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({'error': 'not_found'}))
+            ..close();
+          continue;
+        }
+        final saved = await repo.getByLocalId(orderId);
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'order': saved == null
+                ? null
+                : {
+                    'id': saved.id,
+                    'targetOrderId': saved.targetOrderId,
+                    'platform': saved.targetPlatformId,
+                    'status': _enumName(saved.status),
+                    'quantity': saved.quantity,
+                    'sellingPrice': saved.sellingPrice,
+                    'sourceCost': saved.sourceCost,
+                    'profit': (saved.sellingPrice - saved.sourceCost) * saved.quantity,
+                    'riskScore': saved.riskScore ?? 0,
+                    'queuedForCapital': saved.queuedForCapital,
+                    'createdAt': _toIso(saved.createdAt),
+                  },
+          }))
           ..close();
         continue;
       }
@@ -242,6 +629,46 @@ Future<void> main() async {
       }
 
       if (request.uri.path == '/return-policies') {
+        if (request.method == 'POST') {
+          final body = await utf8.decoder.bind(request).join();
+          final map = jsonDecode(body) as Map<String, dynamic>;
+          final raw = (map['policy'] as Map?)?.cast<String, dynamic>() ?? map;
+          final policy = SupplierReturnPolicy(
+            id: 0,
+            supplierId: (raw['supplierId'] ?? '').toString(),
+            policyType: SupplierReturnPolicy.policyTypeFromString((raw['policyType'] ?? 'returnWindow').toString()),
+            returnWindowDays: raw['returnWindowDays'] is num ? (raw['returnWindowDays'] as num).toInt() : null,
+            restockingFeePercent: raw['restockingFeePercent'] is num ? (raw['restockingFeePercent'] as num).toDouble() : null,
+            returnShippingPaidBy: raw['returnShippingPaidBy'] == null
+                ? null
+                : SupplierReturnPolicy.returnShippingPaidByFromString(raw['returnShippingPaidBy'].toString()),
+            requiresRma: raw['requiresRma'] == true,
+            warehouseReturnSupported: raw['warehouseReturnSupported'] == true,
+            virtualRestockSupported: raw['virtualRestockSupported'] == true,
+          );
+          final repo = SupplierReturnPolicyRepository(database, tenantId: tenantId);
+          await repo.upsert(policy);
+          final saved = await repo.getBySupplierId(policy.supplierId);
+          request.response
+            ..statusCode = 200
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({
+              'policy': saved == null
+                  ? null
+                  : {
+                      'supplierId': saved.supplierId,
+                      'policyType': _enumName(saved.policyType),
+                      'returnWindowDays': saved.returnWindowDays,
+                      'restockingFeePercent': saved.restockingFeePercent,
+                      'returnShippingPaidBy': saved.returnShippingPaidBy != null ? _enumName(saved.returnShippingPaidBy!) : null,
+                      'requiresRma': saved.requiresRma,
+                      'warehouseReturnSupported': saved.warehouseReturnSupported,
+                      'virtualRestockSupported': saved.virtualRestockSupported,
+                    },
+            }))
+            ..close();
+          continue;
+        }
         final payload = await _computeReturnPoliciesPayload(database: database, tenantId: tenantId);
         request.response
           ..statusCode = 200

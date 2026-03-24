@@ -79,6 +79,20 @@ Source: `admin_next/src/app/**/page.tsx`
 
 **Done (baseline):** Next pages + nav for `marketplaces`, `returns`, `incidents`, `risk-dashboard`, `returned-stock`, `capital`, `approval`, `decision-log`, `return-policies`, `how-it-works`, `profit-dashboard`, `suppliers/[id]`; dynamic proxy `admin_next/src/app/api/[...proxy]/route.ts`; mock write panels (`MockWriteWorkflowPanels`) for transport-backed actions.
 
+**Done (write-path transition coverage):**
+
+- Transition-first UX covered in unit tests: `admin_next/src/components/ops/MockWriteWorkflowPanels.test.tsx`
+  - Approval actions (pending transition + error rollback-safe behavior)
+  - Returns save (pending transition + failure message behavior)
+  - Incidents process (pending transition + failure message behavior)
+  - Capital adjustment / return policies save / supplier reliability + risk refresh transitions
+- Playwright write-path transition and error coverage:
+  - `admin_next/tests/e2e/mock-write-workflows-transitions.spec.ts`
+  - `admin_next/tests/e2e/mock-write-workflows-errors.spec.ts`
+- Incident detail read-path parity coverage:
+  - Vitest route inventory: `admin_next/src/test/flutterParityRoutes.test.ts`
+  - Playwright direct route parity: `admin_next/tests/e2e/flutter-parity-routes.spec.ts`
+
 **Remaining:** See [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md) — HTTP write wiring, MSW expansion, Playwright write-path stress and failure permutations, and supplier-detail policy UX.
 
 1. Wire **real HTTP writes** where Dart API exposes them (currently many writes are mock-only or `mkFailExternal` in `httpTransport.ts`).
