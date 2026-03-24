@@ -27,6 +27,7 @@ Repo-wide follow-up (CI, p15 docs, p11/p13, p18): [`docs/CONTINUATION_PLAN.md`](
   - **One command:** `npm run test:e2e:full` — builds, then Playwright starts `next start` and runs tests (no separate terminal).
   - **Already built:** `npm run test:e2e` — skips the build step. If something already serves `http://127.0.0.1:3001`, Playwright **reuses** it; otherwise it starts `next start` on that port.
   - **Port 3001 busy / `EADDRINUSE`:** stop the other process, or run e.g. `PLAYWRIGHT_PORT=3002 PLAYWRIGHT_BASE_URL=http://127.0.0.1:3002 npm run test:e2e` (PowerShell: `$env:PLAYWRIGHT_PORT='3002'; $env:PLAYWRIGHT_BASE_URL='http://127.0.0.1:3002'; npm run test:e2e`).
+  - **HTTP transport write stubs (latency / 429):** separate build with `NEXT_PUBLIC_ADMIN_TRANSPORT=http` — `npm run test:e2e:http-writes` (runs only tagged `@httpWrites` tests; the default `test:e2e` / `test:e2e:full` excludes them).
 
 ## Learn More
 

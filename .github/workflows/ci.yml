@@ -118,3 +118,13 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
         run: npm run test:e2e
         working-directory: admin_next
+
+      - name: E2E HTTP write route stubs (http transport build)
+        env:
+          CI: "true"
+          NEXT_PUBLIC_ADMIN_TRANSPORT: http
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
+        run: |
+          npm run build
+          npx playwright test --grep "@httpWrites"
+        working-directory: admin_next

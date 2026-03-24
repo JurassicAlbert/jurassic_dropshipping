@@ -9,8 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "test:e2e:full": "npm run build && playwright test"
+    "test:e2e": "playwright test --grep-invert \"@httpWrites\"",
+    "test:e2e:full": "npm run build && playwright test --grep-invert \"@httpWrites\"",
+    "test:e2e:http-writes": "cross-env NEXT_PUBLIC_ADMIN_TRANSPORT=http npm run build && cross-env NEXT_PUBLIC_ADMIN_TRANSPORT=http playwright test --grep \"@httpWrites\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -32,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.7",
     "jsdom": "^29.0.0",

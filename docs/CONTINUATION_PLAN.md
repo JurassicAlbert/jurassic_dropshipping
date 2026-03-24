@@ -79,7 +79,7 @@ Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
 - [x] Add transition-state and deterministic error-path specs for write workflows.
 - [x] Add repeat-click/disabled-state coverage for pending write actions.
 - [x] Add failure-path assertion that transition clears and controls re-enable.
-- [ ] Add explicit route-stub latency/429 scenarios when HTTP write routes are introduced.
+- [x] Add explicit route-stub latency/429 scenarios when HTTP write routes are introduced (`tests/e2e/http-write-route-stubs.spec.ts`, `npm run test:e2e:http-writes`; CI rebuilds with `NEXT_PUBLIC_ADMIN_TRANSPORT=http`).
 
 ---
 

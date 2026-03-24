@@ -64,8 +64,8 @@ dart run tool/dashboard_api_server_dart_main.dart
 ### 3. Playwright — `playwright-route-stubs` (partial)
 
 - Existing: `user-risk.spec.ts` stubs dashboard API.
-- Add: **`page.route`** for write paths — latency, 429/500, concurrent clicks — and assert recovery messaging and final UI state.
-- Extend coverage when writes are exposed via HTTP or MSW.
+- **HTTP write paths:** `tests/e2e/http-write-route-stubs.spec.ts` (`@httpWrites`) — `page.route` latency + 429 on approval approve POST; requires `NEXT_PUBLIC_ADMIN_TRANSPORT=http` build (`npm run test:e2e:http-writes`; CI runs a second build + this grep).
+- Remaining: extend stubs to other POST/PATCH paths (returns, incidents, …) as needed; stress/retest loops still in backlog.
 
 ### 4. Stress / retest — `stress-retest-suite` (partial)
 

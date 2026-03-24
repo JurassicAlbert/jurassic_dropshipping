@@ -89,11 +89,12 @@ Source: `admin_next/src/app/**/page.tsx`
 - Playwright write-path transition and error coverage:
   - `admin_next/tests/e2e/mock-write-workflows-transitions.spec.ts`
   - `admin_next/tests/e2e/mock-write-workflows-errors.spec.ts`
+- Playwright HTTP transport write-path stubs (`NEXT_PUBLIC_ADMIN_TRANSPORT=http` build): `admin_next/tests/e2e/http-write-route-stubs.spec.ts` — `page.route` latency + `429` on `POST /api/approval/listings/.../approve` (`npm run test:e2e:http-writes`; CI runs after mock E2E).
 - Incident detail read-path parity coverage:
   - Vitest route inventory: `admin_next/src/test/flutterParityRoutes.test.ts`
   - Playwright direct route parity: `admin_next/tests/e2e/flutter-parity-routes.spec.ts`
 
-**Remaining:** See [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md) — HTTP write wiring, MSW expansion, Playwright write-path stress and failure permutations, and supplier-detail policy UX.
+**Remaining:** See [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md) — MSW expansion, Playwright write-path stress/retest loops, and any remaining HTTP write migrations not yet covered by Vitest + E2E.
 
 1. Wire **real HTTP writes** where Dart API exposes them (currently many writes are mock-only or `mkFailExternal` in `httpTransport.ts`).
 2. Keep read-only **placeholders** from Dart API where integration is not live (`placeholder: true` in payloads when applicable).
