@@ -56,6 +56,16 @@ Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
 
 ---
 
+## Step 6 — Transition-first write UX (clarity over instant flips)
+
+- [x] Approval actions: animated transition state (`Processing...`) before final success/error.
+- [x] Returns save: animated transition state with rollback-safe error handling.
+- [x] Incidents process: animated transition state before success/error.
+- [x] Unit tests for transition behavior and failure outcomes: `MockWriteWorkflowPanels.test.tsx`.
+- [ ] Extend the same pattern to capital, return policies, supplier reliability, and risk refresh actions.
+
+---
+
 ## Related
 
 - [`ADMIN_NEXT_CONTINUATION.md`](ADMIN_NEXT_CONTINUATION.md) — env, transport, commands.

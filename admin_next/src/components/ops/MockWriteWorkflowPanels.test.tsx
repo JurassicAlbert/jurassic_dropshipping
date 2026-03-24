@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ApprovalWorkflowPanel, ReturnsWorkflowPanel } from "./MockWriteWorkflowPanels";
+import { ApprovalWorkflowPanel, IncidentsWorkflowPanel, ReturnsWorkflowPanel } from "./MockWriteWorkflowPanels";
 
 const approvalGetPendingListings = vi.fn();
 const approvalGetPendingOrders = vi.fn();
@@ -11,6 +11,9 @@ const approvalRejectOrder = vi.fn();
 const returnsGetReturns = vi.fn();
 const returnsComputeRouting = vi.fn();
 const returnsUpdateReturn = vi.fn();
+const incidentsGetIncidents = vi.fn();
+const incidentsCreateIncident = vi.fn();
+const incidentsProcessIncident = vi.fn();
 
 vi.mock("@/lib/adminTransport", () => ({
   getAdminTransport: () => ({
@@ -23,6 +26,9 @@ vi.mock("@/lib/adminTransport", () => ({
     returnsGetReturns,
     returnsComputeRouting,
     returnsUpdateReturn,
+    incidentsGetIncidents,
+    incidentsCreateIncident,
+    incidentsProcessIncident,
   }),
 }));
 
@@ -37,6 +43,9 @@ describe("ApprovalWorkflowPanel", () => {
     returnsGetReturns.mockReset();
     returnsComputeRouting.mockReset();
     returnsUpdateReturn.mockReset();
+    incidentsGetIncidents.mockReset();
+    incidentsCreateIncident.mockReset();
+    incidentsProcessIncident.mockReset();
 
     approvalGetPendingListings.mockResolvedValue({
       ok: true,
@@ -98,6 +107,21 @@ describe("ApprovalWorkflowPanel", () => {
       },
       returnedStockCreated: { created: false, rowsInserted: 0 },
     });
+    incidentsGetIncidents.mockResolvedValue({
+      ok: true,
+      requestId: "r12",
+      rows: [{ id: 101, orderId: "ord-1", status: "open" }],
+    });
+    incidentsCreateIncident.mockResolvedValue({
+      ok: true,
+      requestId: "r13",
+      incident: { id: 101, orderId: "ord-1", status: "open" },
+    });
+    incidentsProcessIncident.mockResolvedValue({
+      ok: true,
+      requestId: "r14",
+      incident: { id: 101, orderId: "ord-1", status: "resolved" },
+    });
   });
 
   it("auto-loads on mount and shows initial counts", async () => {
@@ -128,7 +152,7 @@ describe("ApprovalWorkflowPanel", () => {
     });
   });
 
-  it("optimistically removes listing on approve before API resolves", async () => {
+  it("shows processing transition while approve is in flight", async () => {
     const user = userEvent.setup();
     let resolveApprove: (value: unknown) => void = () => {};
     const approvePromise = new Promise((resolve) => {
@@ -141,7 +165,8 @@ describe("ApprovalWorkflowPanel", () => {
 
     await user.click(screen.getByRole("button", { name: "Approve" }));
 
-    await waitFor(() => expect(screen.queryByText("lst-1")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("lst-1")).toBeInTheDocument());
+    expect(screen.getByText("Processing...")).toBeInTheDocument();
 
     resolveApprove({
       ok: true,
@@ -151,7 +176,7 @@ describe("ApprovalWorkflowPanel", () => {
     await waitFor(() => expect(approvalApproveListing).toHaveBeenCalledTimes(1));
   });
 
-  it("rolls back optimistic removal when approve fails", async () => {
+  it("keeps row and shows error when approve fails", async () => {
     const user = userEvent.setup();
     approvalApproveListing.mockResolvedValueOnce({
       ok: false,
@@ -196,13 +221,13 @@ describe("ReturnsWorkflowPanel", () => {
     });
   });
 
-  it("optimistically updates status and rolls back when save fails", async () => {
+  it("shows transition and keeps previous status when save fails", async () => {
     const user = userEvent.setup();
-    returnsUpdateReturn.mockResolvedValueOnce({
-      ok: false,
-      requestId: "rr-3",
-      error: { code: "conflict", message: "save failed" },
+    let resolveSave: (value: unknown) => void = () => {};
+    const savePromise = new Promise((resolve) => {
+      resolveSave = resolve;
     });
+    returnsUpdateReturn.mockReturnValueOnce(savePromise);
 
     render(<ReturnsWorkflowPanel />);
     await screen.findByText("ret-1");
@@ -213,8 +238,71 @@ describe("ReturnsWorkflowPanel", () => {
     await user.click(screen.getByRole("option", { name: "approved" }));
     await user.click(screen.getByRole("button", { name: "Save" }));
 
+    await waitFor(() => expect(screen.getByText("Processing...")).toBeInTheDocument());
+    resolveSave({
+      ok: false,
+      requestId: "rr-3",
+      error: { code: "conflict", message: "save failed" },
+    });
     await waitFor(() => expect(screen.getByText("requested")).toBeInTheDocument());
     expect(screen.getByText("save failed")).toBeInTheDocument();
+  });
+});
+
+describe("IncidentsWorkflowPanel", () => {
+  beforeEach(() => {
+    incidentsGetIncidents.mockReset();
+    incidentsCreateIncident.mockReset();
+    incidentsProcessIncident.mockReset();
+    incidentsGetIncidents.mockResolvedValue({
+      ok: true,
+      requestId: "ir-1",
+      rows: [{ id: 101, orderId: "ord-1", status: "open" }],
+    });
+    incidentsProcessIncident.mockResolvedValue({
+      ok: true,
+      requestId: "ir-2",
+      incident: { id: 101, orderId: "ord-1", status: "resolved" },
+    });
+  });
+
+  it("shows processing transition while incident process is in flight", async () => {
+    const user = userEvent.setup();
+    let resolveProcess: (value: unknown) => void = () => {};
+    const processPromise = new Promise((resolve) => {
+      resolveProcess = resolve;
+    });
+    incidentsProcessIncident.mockReturnValueOnce(processPromise);
+
+    render(<IncidentsWorkflowPanel />);
+    await screen.findByText("ord-1");
+
+    await user.click(screen.getByRole("button", { name: "Process" }));
+    await waitFor(() => expect(screen.getByText("Processing...")).toBeInTheDocument());
+
+    resolveProcess({
+      ok: true,
+      requestId: "ir-3",
+      incident: { id: 101, orderId: "ord-1", status: "resolved" },
+    });
+
+    await waitFor(() => expect(incidentsProcessIncident).toHaveBeenCalledTimes(1));
+  });
+
+  it("keeps row and shows error when process fails", async () => {
+    const user = userEvent.setup();
+    incidentsProcessIncident.mockResolvedValueOnce({
+      ok: false,
+      requestId: "ir-4",
+      error: { code: "conflict", message: "process failed" },
+    });
+
+    render(<IncidentsWorkflowPanel />);
+    await screen.findByText("ord-1");
+    await user.click(screen.getByRole("button", { name: "Process" }));
+
+    await waitFor(() => expect(screen.getByText("ord-1")).toBeInTheDocument());
+    expect(screen.getByText("process failed")).toBeInTheDocument();
   });
 });
 

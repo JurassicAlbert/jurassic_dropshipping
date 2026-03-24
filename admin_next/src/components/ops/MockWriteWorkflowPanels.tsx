@@ -47,12 +47,26 @@ function toMessage(error: ApiError | null): string | null {
   return error?.message ?? null;
 }
 
+const transitionRowSx = {
+  opacity: 0.7,
+  transition: "opacity 220ms ease, background-color 220ms ease",
+  backgroundColor: "rgba(25, 118, 210, 0.06)",
+  animation: "jurasic-pending-pulse 1.2s ease-in-out infinite",
+  "@keyframes jurasic-pending-pulse": {
+    "0%": { opacity: 0.55 },
+    "50%": { opacity: 0.9 },
+    "100%": { opacity: 0.55 },
+  },
+} as const;
+
 export function ApprovalWorkflowPanel() {
   const transport = useMemo(() => getAdminTransport(), []);
   const [pendingListings, setPendingListings] = useState<ApprovalListing[]>([]);
   const [pendingOrders, setPendingOrders] = useState<ApprovalOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const [pendingListingActionId, setPendingListingActionId] = useState<string | null>(null);
+  const [pendingOrderActionId, setPendingOrderActionId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -72,13 +86,10 @@ export function ApprovalWorkflowPanel() {
   useEffect(() => { load(); }, []);
 
   const runAction = async (kind: "approveListing" | "rejectListing" | "approveOrder" | "rejectOrder", id: string) => {
-    const prevListings = pendingListings;
-    const prevOrders = pendingOrders;
-    // Optimistic: remove row from pending queues immediately; rollback if write fails.
     if (kind === "approveListing" || kind === "rejectListing") {
-      setPendingListings((prev) => prev.filter((x) => x.id !== id));
+      setPendingListingActionId(id);
     } else {
-      setPendingOrders((prev) => prev.filter((x) => x.id !== id));
+      setPendingOrderActionId(id);
     }
     setLoading(true);
     setError(null);
@@ -102,13 +113,15 @@ export function ApprovalWorkflowPanel() {
       if (!res.ok) message = res.error.message;
     }
     if (!ok) {
-      setPendingListings(prevListings);
-      setPendingOrders(prevOrders);
       setError({ message });
+      setPendingListingActionId(null);
+      setPendingOrderActionId(null);
       setLoading(false);
       return;
     }
     await load();
+    setPendingListingActionId(null);
+    setPendingOrderActionId(null);
     setLoading(false);
   };
 
@@ -138,14 +151,19 @@ export function ApprovalWorkflowPanel() {
               </TableHead>
               <TableBody>
                 {pendingListings.slice(0, 10).map((r) => (
-                  <TableRow key={r.id}>
+                  <TableRow key={r.id} sx={pendingListingActionId === r.id ? transitionRowSx : undefined}>
                     <TableCell>{r.id}</TableCell>
-                    <TableCell>{r.status}</TableCell>
+                    <TableCell>
+                      {r.status}
+                      {pendingListingActionId === r.id ? (
+                        <Chip size="small" label="Processing..." sx={{ ml: 1 }} color="info" />
+                      ) : null}
+                    </TableCell>
                     <TableCell align="right">
-                      <Button size="small" onClick={() => runAction("approveListing", r.id)} disabled={loading}>
+                      <Button size="small" onClick={() => runAction("approveListing", r.id)} disabled={loading || pendingListingActionId === r.id}>
                         Approve
                       </Button>
-                      <Button size="small" color="error" onClick={() => runAction("rejectListing", r.id)} disabled={loading}>
+                      <Button size="small" color="error" onClick={() => runAction("rejectListing", r.id)} disabled={loading || pendingListingActionId === r.id}>
                         Reject
                       </Button>
                     </TableCell>
@@ -167,14 +185,19 @@ export function ApprovalWorkflowPanel() {
               </TableHead>
               <TableBody>
                 {pendingOrders.slice(0, 10).map((r) => (
-                  <TableRow key={r.id}>
+                  <TableRow key={r.id} sx={pendingOrderActionId === r.id ? transitionRowSx : undefined}>
                     <TableCell>{r.targetOrderId}</TableCell>
-                    <TableCell>{r.status}</TableCell>
+                    <TableCell>
+                      {r.status}
+                      {pendingOrderActionId === r.id ? (
+                        <Chip size="small" label="Processing..." sx={{ ml: 1 }} color="info" />
+                      ) : null}
+                    </TableCell>
                     <TableCell align="right">
-                      <Button size="small" onClick={() => runAction("approveOrder", r.id)} disabled={loading}>
+                      <Button size="small" onClick={() => runAction("approveOrder", r.id)} disabled={loading || pendingOrderActionId === r.id}>
                         Approve & Fulfill
                       </Button>
-                      <Button size="small" color="error" onClick={() => runAction("rejectOrder", r.id)} disabled={loading}>
+                      <Button size="small" color="error" onClick={() => runAction("rejectOrder", r.id)} disabled={loading || pendingOrderActionId === r.id}>
                         Reject
                       </Button>
                     </TableCell>
@@ -199,6 +222,7 @@ export function ReturnsWorkflowPanel() {
   const [notes, setNotes] = useState("");
   const [refundAmount, setRefundAmount] = useState("");
   const [addToReturnedStock, setAddToReturnedStock] = useState(false);
+  const [pendingReturnActionId, setPendingReturnActionId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -229,20 +253,7 @@ export function ReturnsWorkflowPanel() {
   const save = async () => {
     if (!selected) return;
     const selectedId = selected.id;
-    const prevRows = rows;
-    // Optimistic: reflect edited status/fields in list immediately; rollback on failure.
-    setRows((prev) =>
-      prev.map((r) =>
-        r.id === selectedId
-          ? {
-              ...r,
-              status,
-              notes: notes.trim() || null,
-              refundAmount: refundAmount.trim() ? Number(refundAmount) : null,
-            }
-          : r,
-      ),
-    );
+    setPendingReturnActionId(selectedId);
     setLoading(true);
     setError(null);
     const res = await transport.returnsUpdateReturn(
@@ -256,13 +267,14 @@ export function ReturnsWorkflowPanel() {
       addToReturnedStock,
     );
     if (!res.ok) {
-      setRows(prevRows);
       setError({ message: res.error.message });
+      setPendingReturnActionId(null);
       setLoading(false);
       return;
     }
     setSelected(null);
     await load();
+    setPendingReturnActionId(null);
     setLoading(false);
   };
 
@@ -290,12 +302,17 @@ export function ReturnsWorkflowPanel() {
               </TableHead>
               <TableBody>
                 {rows.slice(0, 10).map((r) => (
-                  <TableRow key={r.id}>
+                  <TableRow key={r.id} sx={pendingReturnActionId === r.id ? transitionRowSx : undefined}>
                     <TableCell>{r.id}</TableCell>
                     <TableCell>{r.orderId}</TableCell>
-                    <TableCell>{r.status}</TableCell>
+                    <TableCell>
+                      {r.status}
+                      {pendingReturnActionId === r.id ? (
+                        <Chip size="small" label="Processing..." sx={{ ml: 1 }} color="info" />
+                      ) : null}
+                    </TableCell>
                     <TableCell align="right">
-                      <Button size="small" onClick={() => openEdit(r)}>
+                      <Button size="small" onClick={() => openEdit(r)} disabled={pendingReturnActionId === r.id || loading}>
                         Edit
                       </Button>
                     </TableCell>
@@ -355,6 +372,7 @@ export function IncidentsWorkflowPanel() {
   const [incidentType, setIncidentType] = useState("customerReturn14d");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const [pendingIncidentActionId, setPendingIncidentActionId] = useState<number | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -378,11 +396,18 @@ export function IncidentsWorkflowPanel() {
   };
 
   const processIncident = async (id: number) => {
+    setPendingIncidentActionId(id);
     setLoading(true);
     setError(null);
     const res = await transport.incidentsProcessIncident(reqId("inc-process"), id);
-    if (!res.ok) setError({ message: res.error.message });
+    if (!res.ok) {
+      setError({ message: res.error.message });
+      setPendingIncidentActionId(null);
+      setLoading(false);
+      return;
+    }
     await load();
+    setPendingIncidentActionId(null);
     setLoading(false);
   };
 
@@ -419,12 +444,17 @@ export function IncidentsWorkflowPanel() {
               </TableHead>
               <TableBody>
                 {rows.slice(0, 10).map((r) => (
-                  <TableRow key={r.id}>
+                  <TableRow key={r.id} sx={pendingIncidentActionId === r.id ? transitionRowSx : undefined}>
                     <TableCell>{r.id}</TableCell>
                     <TableCell>{r.orderId}</TableCell>
-                    <TableCell>{r.status}</TableCell>
+                    <TableCell>
+                      {r.status}
+                      {pendingIncidentActionId === r.id ? (
+                        <Chip size="small" label="Processing..." sx={{ ml: 1 }} color="info" />
+                      ) : null}
+                    </TableCell>
                     <TableCell align="right">
-                      <Button size="small" onClick={() => processIncident(r.id)} disabled={loading || r.status === "resolved"}>
+                      <Button size="small" onClick={() => processIncident(r.id)} disabled={loading || r.status === "resolved" || pendingIncidentActionId === r.id}>
                         Process
                       </Button>
                     </TableCell>
