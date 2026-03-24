@@ -117,6 +117,15 @@ Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
 
 ---
 
+## Step 10 — Stress / retest (mock transport, Vitest)
+
+- [x] Concurrent approval writes (listings + mixed listing/order) complete without hang; idempotent parallel requestIds converge.
+- [x] Second wave of approvals on non-pending rows returns deterministic conflicts (no deadlock).
+- [x] Long sequential return updates keep row state consistent.
+- [x] After `returnedStockInsert` partial failure, retry with a new requestId that passes `shouldFail` can insert returned stock (`mockWriteStress.test.ts`).
+
+---
+
 ## Related
 
 - [`ADMIN_NEXT_CONTINUATION.md`](ADMIN_NEXT_CONTINUATION.md) — env, transport, commands.

@@ -70,7 +70,7 @@ dart run tool/dashboard_api_server_dart_main.dart
 ### 4. Stress / retest — `stress-retest-suite` (partial)
 
 - `admin_next/src/perf/loadShapes.test.ts` covers client-side table ops at scale.
-- Add: repeated **approve/reject / save** loops against **mock transport** (and optional failure injection) to verify no deadlock and stable state after partial failures (`shouldFail` paths in `mockTransportFixed.ts`).
+- **Mock transport writes:** `admin_next/src/lib/adminTransport/mockWriteStress.test.ts` — concurrent approvals, idempotent duplicate requestIds, mixed listing+order bursts, conflict-only second wave, long return-update loop, and `returnedStockInsert` fail → retry success (aligned with `shouldFail` in `mockTransportFixed.ts`).
 
 ### 5. CI — `ci-enablement` (verify)
 

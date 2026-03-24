@@ -90,6 +90,7 @@ Source: `admin_next/src/app/**/page.tsx`
   - `admin_next/tests/e2e/mock-write-workflows-transitions.spec.ts`
   - `admin_next/tests/e2e/mock-write-workflows-errors.spec.ts`
 - Playwright HTTP transport write-path stubs (`NEXT_PUBLIC_ADMIN_TRANSPORT=http` build): `admin_next/tests/e2e/http-write-route-stubs.spec.ts` — `page.route` latency + `429` on `POST /api/approval/listings/.../approve` (`npm run test:e2e:http-writes`; CI runs after mock E2E).
+- Vitest mock transport stress / retest: `admin_next/src/lib/adminTransport/mockWriteStress.test.ts` (concurrent writes, idempotency, partial-failure retry).
 - Incident detail read-path parity coverage:
   - Vitest route inventory: `admin_next/src/test/flutterParityRoutes.test.ts`
   - Playwright direct route parity: `admin_next/tests/e2e/flutter-parity-routes.spec.ts`
