@@ -47,6 +47,13 @@ function toMessage(error: ApiError | null): string | null {
   return error?.message ?? null;
 }
 
+const MIN_TRANSITION_MS = 260;
+
+async function withMinTransition<T>(promise: Promise<T>, ms: number = MIN_TRANSITION_MS): Promise<T> {
+  const [result] = await Promise.all([promise, new Promise((resolve) => setTimeout(resolve, ms))]);
+  return result as T;
+}
+
 const transitionRowSx = {
   opacity: 0.7,
   transition: "opacity 220ms ease, background-color 220ms ease",
@@ -96,19 +103,19 @@ export function ApprovalWorkflowPanel() {
     let ok = true;
     let message = "";
     if (kind === "approveListing") {
-      const res = await transport.approvalApproveListing(id, reqId("approval-approve-listing"));
+      const res = await withMinTransition(transport.approvalApproveListing(id, reqId("approval-approve-listing")));
       ok = res.ok;
       if (!res.ok) message = res.error.message;
     } else if (kind === "rejectListing") {
-      const res = await transport.approvalRejectListing(id, reqId("approval-reject-listing"));
+      const res = await withMinTransition(transport.approvalRejectListing(id, reqId("approval-reject-listing")));
       ok = res.ok;
       if (!res.ok) message = res.error.message;
     } else if (kind === "approveOrder") {
-      const res = await transport.approvalApproveAndFulfillOrder(id, reqId("approval-approve-order"));
+      const res = await withMinTransition(transport.approvalApproveAndFulfillOrder(id, reqId("approval-approve-order")));
       ok = res.ok;
       if (!res.ok) message = res.error.message;
     } else {
-      const res = await transport.approvalRejectOrder(id, reqId("approval-reject-order"), "mock reject");
+      const res = await withMinTransition(transport.approvalRejectOrder(id, reqId("approval-reject-order"), "mock reject"));
       ok = res.ok;
       if (!res.ok) message = res.error.message;
     }
@@ -256,7 +263,7 @@ export function ReturnsWorkflowPanel() {
     setPendingReturnActionId(selectedId);
     setLoading(true);
     setError(null);
-    const res = await transport.returnsUpdateReturn(
+    const res = await withMinTransition(transport.returnsUpdateReturn(
       reqId("returns-save"),
       selectedId,
       {
@@ -265,7 +272,7 @@ export function ReturnsWorkflowPanel() {
         refundAmount: refundAmount.trim() ? Number(refundAmount) : null,
       },
       addToReturnedStock,
-    );
+    ));
     if (!res.ok) {
       setError({ message: res.error.message });
       setPendingReturnActionId(null);
@@ -389,7 +396,7 @@ export function IncidentsWorkflowPanel() {
   const createIncident = async () => {
     setLoading(true);
     setError(null);
-    const res = await transport.incidentsCreateIncident(reqId("inc-create"), { orderId, incidentType });
+    const res = await withMinTransition(transport.incidentsCreateIncident(reqId("inc-create"), { orderId, incidentType }));
     if (!res.ok) setError({ message: res.error.message });
     await load();
     setLoading(false);
@@ -399,7 +406,7 @@ export function IncidentsWorkflowPanel() {
     setPendingIncidentActionId(id);
     setLoading(true);
     setError(null);
-    const res = await transport.incidentsProcessIncident(reqId("inc-process"), id);
+    const res = await withMinTransition(transport.incidentsProcessIncident(reqId("inc-process"), id));
     if (!res.ok) {
       setError({ message: res.error.message });
       setPendingIncidentActionId(null);
@@ -508,11 +515,11 @@ export function CapitalWorkflowPanel() {
     setPendingCapitalAction("record");
     setLoading(true);
     setError(null);
-    const res = await transport.capitalRecordAdjustment(reqId("capital-adjust"), {
+    const res = await withMinTransition(transport.capitalRecordAdjustment(reqId("capital-adjust"), {
       amount: parsed,
       referenceId: note.trim() || null,
       currency: "PLN",
-    });
+    }));
     if (!res.ok) {
       setError({ message: res.error.message });
       setPendingCapitalAction(null);
@@ -602,7 +609,7 @@ export function ReturnPoliciesWorkflowPanel() {
     setPendingPolicyAction("save");
     setLoading(true);
     setError(null);
-    const res = await transport.policiesUpsert(reqId("policies-upsert"), {
+    const res = await withMinTransition(transport.policiesUpsert(reqId("policies-upsert"), {
       policy: {
         supplierId,
         policyType,
@@ -613,7 +620,7 @@ export function ReturnPoliciesWorkflowPanel() {
         warehouseReturnSupported: true,
         virtualRestockSupported: false,
       },
-    });
+    }));
     if (!res.ok) {
       setError({ message: res.error.message });
       setPendingPolicyAction(null);
@@ -693,7 +700,7 @@ export function SupplierReliabilityAndRiskPanel() {
     setPendingSupplierRiskAction("reliability");
     setLoading(true);
     setError(null);
-    const res = await transport.suppliersRefreshReliabilityScores(reqId("suppliers-refresh"), { windowDays: 90 });
+    const res = await withMinTransition(transport.suppliersRefreshReliabilityScores(reqId("suppliers-refresh"), { windowDays: 90 }));
     if (!res.ok) {
       setError({ message: res.error.message });
       setPendingSupplierRiskAction(null);
@@ -709,10 +716,12 @@ export function SupplierReliabilityAndRiskPanel() {
     setPendingSupplierRiskAction(kind);
     setLoading(true);
     setError(null);
-    const res =
+    const [res] = await Promise.all([
       kind === "listingHealth"
-        ? await transport.riskRefreshListingHealth(reqId("risk-health"), { windowDays: 90 })
-        : await transport.riskRefreshCustomerMetrics(reqId("risk-customer"), { windowDays: 90 });
+        ? transport.riskRefreshListingHealth(reqId("risk-health"), { windowDays: 90 })
+        : transport.riskRefreshCustomerMetrics(reqId("risk-customer"), { windowDays: 90 }),
+      new Promise((resolve) => setTimeout(resolve, MIN_TRANSITION_MS)),
+    ]);
     if (!res.ok) {
       setError({ message: res.error.message });
       setPendingSupplierRiskAction(null);

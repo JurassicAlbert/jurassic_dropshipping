@@ -9,9 +9,9 @@ Date: 2026-03-04 (agent run)
 | Flutter (full) | `flutter test` | Pass |
 | Dart analyze (API server) | `dart analyze tool/dashboard_api_server_dart_main.dart` | Pass |
 | Admin lint | `npm run lint` (in `admin_next`) | Pass |
-| Admin unit/component | `npm run test` (Vitest) | Pass (35+ tests; includes `useClientMounted`, `/api/rules`, logic availability) |
+| Admin unit/component | `npm run test` (Vitest) | Pass (72 tests) |
 | Admin build | `npm run build` | Pass |
-| Admin E2E | `npm run test:e2e` (Playwright) | Pass |
+| Admin E2E | `CI=true PLAYWRIGHT_PORT=3002 PLAYWRIGHT_BASE_URL=http://127.0.0.1:3002 npm run test:e2e` (Playwright) | Pass (37 tests) |
 
 ## New / notable assets
 
@@ -19,6 +19,7 @@ Date: 2026-03-04 (agent run)
 - Flutter white-box expansion: `test/data/repositories/advanced_repositories_test.dart`
 - Admin Vitest: `src/components/ops/LiveDataTablePage.test.tsx`, `src/app/api/[...proxy]/route.test.ts`, `route.risk.test.ts`, `src/test/logicAvailability.test.ts`, `src/perf/loadShapes.test.ts`, `src/lib/refreshPolicy.test.ts`
 - Playwright: `tests/e2e/admin-functionality.spec.ts`, `orders-interactions.spec.ts`, `user-risk.spec.ts`, `navigation.spec.ts`
+- Playwright: `tests/e2e/mock-write-workflows-transitions.spec.ts`, `mock-write-workflows-errors.spec.ts`, `flutter-parity-routes.spec.ts`
 - Integration placeholder: `test/integration/warehouse_api_placeholder_test.dart` (skipped)
 
 ## Residual gaps (explicit)

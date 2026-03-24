@@ -10,6 +10,7 @@
 
 - [ ] Push / open PR to `main` and confirm workflow **admin-next-tests** passes (`lint` → `test` → `build` → Playwright `test:e2e`).
 - [ ] If E2E fails: ensure `CI=true` in job (starts `next start` via Playwright `webServer`); fix port conflicts only on self-hosted runners.
+- [x] Local CI-parity verification completed on 2026-03-04: `npm run lint`, `npm run test`, `npm run build`, and Playwright E2E (37 passed) with `PLAYWRIGHT_PORT=3002` due to occupied `3001`.
 
 **Local equivalent (before every PR touching `admin_next/`):**
 

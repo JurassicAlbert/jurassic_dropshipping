@@ -272,7 +272,7 @@ describe("ApprovalWorkflowPanel", () => {
     await user.click(screen.getByRole("button", { name: "Approve" }));
 
     await waitFor(() => expect(screen.getByText("lst-1")).toBeInTheDocument());
-    expect(screen.getByText("approve failed")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("approve failed")).toBeInTheDocument());
   });
 });
 
@@ -398,7 +398,7 @@ describe("ReturnsWorkflowPanel", () => {
       error: { code: "conflict", message: "save failed" },
     });
     await waitFor(() => expect(screen.getByText("requested")).toBeInTheDocument());
-    expect(screen.getByText("save failed")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("save failed")).toBeInTheDocument());
   });
 });
 
@@ -455,7 +455,7 @@ describe("IncidentsWorkflowPanel", () => {
     await user.click(screen.getByRole("button", { name: "Process" }));
 
     await waitFor(() => expect(screen.getByText("ord-1")).toBeInTheDocument());
-    expect(screen.getByText("process failed")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("process failed")).toBeInTheDocument());
   });
 });
 

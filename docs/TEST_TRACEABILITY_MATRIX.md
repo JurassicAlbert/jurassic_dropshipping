@@ -79,7 +79,7 @@ Source: `admin_next/src/app/**/page.tsx`
 
 **Done (baseline):** Next pages + nav for `marketplaces`, `returns`, `incidents`, `risk-dashboard`, `returned-stock`, `capital`, `approval`, `decision-log`, `return-policies`, `how-it-works`, `profit-dashboard`, `suppliers/[id]`; dynamic proxy `admin_next/src/app/api/[...proxy]/route.ts`; mock write panels (`MockWriteWorkflowPanels`) for transport-backed actions.
 
-**Remaining:** See [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md) — HTTP write wiring, MSW, Playwright write stubs, stress loops, supplier-detail policy UX, auto-load on workflow panels.
+**Remaining:** See [ADMIN_NEXT_CONTINUATION.md](./ADMIN_NEXT_CONTINUATION.md) — HTTP write wiring, MSW expansion, Playwright write-path stress and failure permutations, and supplier-detail policy UX.
 
 1. Wire **real HTTP writes** where Dart API exposes them (currently many writes are mock-only or `mkFailExternal` in `httpTransport.ts`).
 2. Keep read-only **placeholders** from Dart API where integration is not live (`placeholder: true` in payloads when applicable).
