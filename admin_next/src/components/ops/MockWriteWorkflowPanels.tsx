@@ -477,6 +477,7 @@ export function CapitalWorkflowPanel() {
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const [pendingCapitalAction, setPendingCapitalAction] = useState<"record" | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -504,6 +505,7 @@ export function CapitalWorkflowPanel() {
       setError({ message: "Amount must be non-zero" });
       return;
     }
+    setPendingCapitalAction("record");
     setLoading(true);
     setError(null);
     const res = await transport.capitalRecordAdjustment(reqId("capital-adjust"), {
@@ -511,8 +513,14 @@ export function CapitalWorkflowPanel() {
       referenceId: note.trim() || null,
       currency: "PLN",
     });
-    if (!res.ok) setError({ message: res.error.message });
+    if (!res.ok) {
+      setError({ message: res.error.message });
+      setPendingCapitalAction(null);
+      setLoading(false);
+      return;
+    }
     await load();
+    setPendingCapitalAction(null);
     setLoading(false);
   };
 
@@ -532,7 +540,7 @@ export function CapitalWorkflowPanel() {
             <TextField size="small" label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
             <TextField size="small" label="Note" value={note} onChange={(e) => setNote(e.target.value)} />
             <Button size="small" variant="contained" onClick={record} disabled={loading}>
-              Record adjustment
+              {pendingCapitalAction === "record" ? "Processing..." : "Record adjustment"}
             </Button>
           </Stack>
           <Typography variant="subtitle2">Recent ledger entries</Typography>
@@ -576,6 +584,7 @@ export function ReturnPoliciesWorkflowPanel() {
   const [supplierId, setSupplierId] = useState("sup_1");
   const [policyType, setPolicyType] = useState<SupplierReturnPolicy["policyType"]>("returnWindow");
   const [windowDays, setWindowDays] = useState("14");
+  const [pendingPolicyAction, setPendingPolicyAction] = useState<"save" | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -590,6 +599,7 @@ export function ReturnPoliciesWorkflowPanel() {
   useEffect(() => { load(); }, []);
 
   const save = async () => {
+    setPendingPolicyAction("save");
     setLoading(true);
     setError(null);
     const res = await transport.policiesUpsert(reqId("policies-upsert"), {
@@ -604,8 +614,14 @@ export function ReturnPoliciesWorkflowPanel() {
         virtualRestockSupported: false,
       },
     });
-    if (!res.ok) setError({ message: res.error.message });
+    if (!res.ok) {
+      setError({ message: res.error.message });
+      setPendingPolicyAction(null);
+      setLoading(false);
+      return;
+    }
     await load();
+    setPendingPolicyAction(null);
     setLoading(false);
   };
 
@@ -639,7 +655,7 @@ export function ReturnPoliciesWorkflowPanel() {
             </FormControl>
             <TextField size="small" label="Window days" value={windowDays} onChange={(e) => setWindowDays(e.target.value)} />
             <Button size="small" variant="contained" onClick={save} disabled={loading}>
-              Save policy
+              {pendingPolicyAction === "save" ? "Processing..." : "Save policy"}
             </Button>
           </Stack>
         </Stack>
@@ -654,6 +670,7 @@ export function SupplierReliabilityAndRiskPanel() {
   const [risk, setRisk] = useState<RiskDashboardSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const [pendingSupplierRiskAction, setPendingSupplierRiskAction] = useState<"reliability" | "listingHealth" | "customerMetrics" | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -673,23 +690,37 @@ export function SupplierReliabilityAndRiskPanel() {
   useEffect(() => { load(); }, []);
 
   const refreshReliability = async () => {
+    setPendingSupplierRiskAction("reliability");
     setLoading(true);
     setError(null);
     const res = await transport.suppliersRefreshReliabilityScores(reqId("suppliers-refresh"), { windowDays: 90 });
-    if (!res.ok) setError({ message: res.error.message });
+    if (!res.ok) {
+      setError({ message: res.error.message });
+      setPendingSupplierRiskAction(null);
+      setLoading(false);
+      return;
+    }
     await load();
+    setPendingSupplierRiskAction(null);
     setLoading(false);
   };
 
   const refreshRisk = async (kind: "listingHealth" | "customerMetrics") => {
+    setPendingSupplierRiskAction(kind);
     setLoading(true);
     setError(null);
     const res =
       kind === "listingHealth"
         ? await transport.riskRefreshListingHealth(reqId("risk-health"), { windowDays: 90 })
         : await transport.riskRefreshCustomerMetrics(reqId("risk-customer"), { windowDays: 90 });
-    if (!res.ok) setError({ message: res.error.message });
+    if (!res.ok) {
+      setError({ message: res.error.message });
+      setPendingSupplierRiskAction(null);
+      setLoading(false);
+      return;
+    }
     await load();
+    setPendingSupplierRiskAction(null);
     setLoading(false);
   };
 
@@ -707,13 +738,13 @@ export function SupplierReliabilityAndRiskPanel() {
           {error ? <Alert severity="warning">{toMessage(error)}</Alert> : null}
           <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
             <Button size="small" variant="contained" onClick={refreshReliability} disabled={loading}>
-              Refresh reliability scores
+              {pendingSupplierRiskAction === "reliability" ? "Processing..." : "Refresh reliability scores"}
             </Button>
             <Button size="small" variant="outlined" onClick={() => refreshRisk("listingHealth")} disabled={loading}>
-              Refresh listing health
+              {pendingSupplierRiskAction === "listingHealth" ? "Processing..." : "Refresh listing health"}
             </Button>
             <Button size="small" variant="outlined" onClick={() => refreshRisk("customerMetrics")} disabled={loading}>
-              Refresh customer metrics
+              {pendingSupplierRiskAction === "customerMetrics" ? "Processing..." : "Refresh customer metrics"}
             </Button>
           </Stack>
           {risk ? (

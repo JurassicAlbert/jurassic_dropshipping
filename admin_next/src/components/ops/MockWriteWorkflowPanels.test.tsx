@@ -1,6 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ApprovalWorkflowPanel, IncidentsWorkflowPanel, ReturnsWorkflowPanel } from "./MockWriteWorkflowPanels";
+import {
+  ApprovalWorkflowPanel,
+  CapitalWorkflowPanel,
+  IncidentsWorkflowPanel,
+  ReturnPoliciesWorkflowPanel,
+  ReturnsWorkflowPanel,
+  SupplierReliabilityAndRiskPanel,
+} from "./MockWriteWorkflowPanels";
 
 const approvalGetPendingListings = vi.fn();
 const approvalGetPendingOrders = vi.fn();
@@ -14,6 +21,15 @@ const returnsUpdateReturn = vi.fn();
 const incidentsGetIncidents = vi.fn();
 const incidentsCreateIncident = vi.fn();
 const incidentsProcessIncident = vi.fn();
+const capitalGetSnapshot = vi.fn();
+const capitalRecordAdjustment = vi.fn();
+const policiesGetAll = vi.fn();
+const policiesUpsert = vi.fn();
+const suppliersGetSuppliers = vi.fn();
+const suppliersRefreshReliabilityScores = vi.fn();
+const riskGetDashboardSnapshot = vi.fn();
+const riskRefreshListingHealth = vi.fn();
+const riskRefreshCustomerMetrics = vi.fn();
 
 vi.mock("@/lib/adminTransport", () => ({
   getAdminTransport: () => ({
@@ -29,6 +45,15 @@ vi.mock("@/lib/adminTransport", () => ({
     incidentsGetIncidents,
     incidentsCreateIncident,
     incidentsProcessIncident,
+    capitalGetSnapshot,
+    capitalRecordAdjustment,
+    policiesGetAll,
+    policiesUpsert,
+    suppliersGetSuppliers,
+    suppliersRefreshReliabilityScores,
+    riskGetDashboardSnapshot,
+    riskRefreshListingHealth,
+    riskRefreshCustomerMetrics,
   }),
 }));
 
@@ -46,6 +71,15 @@ describe("ApprovalWorkflowPanel", () => {
     incidentsGetIncidents.mockReset();
     incidentsCreateIncident.mockReset();
     incidentsProcessIncident.mockReset();
+    capitalGetSnapshot.mockReset();
+    capitalRecordAdjustment.mockReset();
+    policiesGetAll.mockReset();
+    policiesUpsert.mockReset();
+    suppliersGetSuppliers.mockReset();
+    suppliersRefreshReliabilityScores.mockReset();
+    riskGetDashboardSnapshot.mockReset();
+    riskRefreshListingHealth.mockReset();
+    riskRefreshCustomerMetrics.mockReset();
 
     approvalGetPendingListings.mockResolvedValue({
       ok: true,
@@ -122,6 +156,54 @@ describe("ApprovalWorkflowPanel", () => {
       requestId: "r14",
       incident: { id: 101, orderId: "ord-1", status: "resolved" },
     });
+    capitalGetSnapshot.mockResolvedValue({
+      ok: true,
+      requestId: "r15",
+      snapshot: { balance: 100, entriesRecent: [], queuedOrders: [] },
+    });
+    capitalRecordAdjustment.mockResolvedValue({
+      ok: true,
+      requestId: "r16",
+      balance: 110,
+      ledgerEntryId: 1,
+    });
+    policiesGetAll.mockResolvedValue({
+      ok: true,
+      requestId: "r17",
+      rows: [],
+    });
+    policiesUpsert.mockResolvedValue({
+      ok: true,
+      requestId: "r18",
+      policy: { supplierId: "sup_1", policyType: "returnWindow" },
+    });
+    suppliersGetSuppliers.mockResolvedValue({
+      ok: true,
+      requestId: "r19",
+      rows: [],
+    });
+    suppliersRefreshReliabilityScores.mockResolvedValue({
+      ok: true,
+      requestId: "r20",
+      updatedSuppliersCount: 1,
+    });
+    riskGetDashboardSnapshot.mockResolvedValue({
+      ok: true,
+      requestId: "r21",
+      snapshot: { negativeMarginListings: 0, pausedListings: 0, listingHealthAlerts: 0 },
+    });
+    riskRefreshListingHealth.mockResolvedValue({
+      ok: true,
+      requestId: "r22",
+      pausedListingsDelta: 0,
+      metricsRefreshed: true,
+    });
+    riskRefreshCustomerMetrics.mockResolvedValue({
+      ok: true,
+      requestId: "r23",
+      abuseSignalsUpdated: 0,
+      metricsRefreshed: true,
+    });
   });
 
   it("auto-loads on mount and shows initial counts", async () => {
@@ -191,6 +273,51 @@ describe("ApprovalWorkflowPanel", () => {
 
     await waitFor(() => expect(screen.getByText("lst-1")).toBeInTheDocument());
     expect(screen.getByText("approve failed")).toBeInTheDocument();
+  });
+});
+
+describe("CapitalWorkflowPanel", () => {
+  it("shows transition label while recording adjustment", async () => {
+    const user = userEvent.setup();
+    let resolveAdjust: (value: unknown) => void = () => {};
+    capitalRecordAdjustment.mockReturnValueOnce(new Promise((resolve) => (resolveAdjust = resolve)));
+
+    render(<CapitalWorkflowPanel />);
+    await screen.findByText(/Balance:/);
+    await user.click(screen.getByRole("button", { name: "Record adjustment" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Processing..." })).toBeInTheDocument());
+    resolveAdjust({ ok: true, requestId: "cap-1", balance: 120, ledgerEntryId: 2 });
+    await waitFor(() => expect(capitalRecordAdjustment).toHaveBeenCalledTimes(1));
+  });
+});
+
+describe("ReturnPoliciesWorkflowPanel", () => {
+  it("shows transition label while saving policy", async () => {
+    const user = userEvent.setup();
+    let resolveSave: (value: unknown) => void = () => {};
+    policiesUpsert.mockReturnValueOnce(new Promise((resolve) => (resolveSave = resolve)));
+
+    render(<ReturnPoliciesWorkflowPanel />);
+    await screen.findByText(/Policies:/);
+    await user.click(screen.getByRole("button", { name: "Save policy" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Processing..." })).toBeInTheDocument());
+    resolveSave({ ok: true, requestId: "pol-1", policy: { supplierId: "sup_1", policyType: "returnWindow" } });
+    await waitFor(() => expect(policiesUpsert).toHaveBeenCalledTimes(1));
+  });
+});
+
+describe("SupplierReliabilityAndRiskPanel", () => {
+  it("shows transition label while refreshing reliability", async () => {
+    const user = userEvent.setup();
+    let resolveRefresh: (value: unknown) => void = () => {};
+    suppliersRefreshReliabilityScores.mockReturnValueOnce(new Promise((resolve) => (resolveRefresh = resolve)));
+
+    render(<SupplierReliabilityAndRiskPanel />);
+    await screen.findByText(/Suppliers:/);
+    await user.click(screen.getByRole("button", { name: "Refresh reliability scores" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Processing..." })).toBeInTheDocument());
+    resolveRefresh({ ok: true, requestId: "sup-1", updatedSuppliersCount: 2 });
+    await waitFor(() => expect(suppliersRefreshReliabilityScores).toHaveBeenCalledTimes(1));
   });
 });
 
