@@ -56,13 +56,36 @@ export const handlers = [
   // Incidents: create
   http.post(`${BASE}/incidents`, async ({ request }) => {
     const body = jsonRecord(await request.json());
-    return HttpResponse.json({ id: "inc_new", ...body }, { status: 201 });
+    const orderId = String(body.orderId ?? "ord_1");
+    const incidentType = String(body.incidentType ?? "customerReturn14d");
+    return HttpResponse.json({
+      incident: {
+        id: 1001,
+        orderId,
+        incidentType,
+        status: "open",
+        trigger: "manual",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        resolvedAt: null,
+      },
+    });
   }),
 
   // Incidents: process
   http.patch(`${BASE}/incidents/:id`, async ({ params, request }) => {
-    const body = jsonRecord(await request.json());
-    return HttpResponse.json({ id: params.id, ...body });
+    void request;
+    const id = Number(params.id);
+    return HttpResponse.json({
+      incident: {
+        id: Number.isFinite(id) ? id : 0,
+        orderId: "ord_1",
+        incidentType: "customerReturn14d",
+        status: "resolved",
+        trigger: "manual",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        resolvedAt: "2026-01-02T00:00:00.000Z",
+      },
+    });
   }),
 
   // Capital: adjust

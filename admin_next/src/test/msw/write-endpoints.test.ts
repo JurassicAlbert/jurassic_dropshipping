@@ -23,11 +23,12 @@ describe('MSW write endpoint handlers', () => {
     const res = await fetch('/api/incidents', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId: 'ord_1', type: 'damaged' }),
+      body: JSON.stringify({ orderId: 'ord_1', incidentType: 'customerReturn14d' }),
     });
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data.orderId).toBe('ord_1');
+    expect(data.incident.orderId).toBe('ord_1');
+    expect(data.incident.status).toBe('open');
   });
 
   it('handles 429 rate limit', async () => {
