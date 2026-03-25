@@ -19,8 +19,38 @@ export const handlers = [
 
   // Returns: update status
   http.patch(`${BASE}/returns/:id`, async ({ params, request }) => {
+    // HttpTransport calls:
+    //   PATCH /api/returns/:id
+    //   { patch: { status, notes, refundAmount, ... }, addToReturnedStock: boolean }
     const body = jsonRecord(await request.json());
-    return HttpResponse.json({ id: params.id, ...body });
+    const patch = jsonRecord(body.patch);
+    const addToReturnedStock = Boolean(body.addToReturnedStock);
+
+    const status = String(patch.status ?? "requested");
+    const created = status === "received" && addToReturnedStock;
+
+    const resolvedAt =
+      status === "received" || status === "refunded" || status === "rejected"
+        ? "2026-01-02T00:00:00.000Z"
+        : null;
+
+    return HttpResponse.json({
+      return: {
+        id: params.id,
+        orderId: "ord_1",
+        status,
+        reason: "noReason",
+        notes: patch.notes ?? null,
+        refundAmount: typeof patch.refundAmount === "number" ? patch.refundAmount : null,
+        returnShippingCost: null,
+        restockingFee: null,
+        returnRoutingDestination: null,
+        supplierId: "sup_1",
+        requestedAt: "2026-01-01T00:00:00.000Z",
+        resolvedAt,
+      },
+      returnedStockCreated: { created, rowsInserted: created ? 1 : 0 },
+    });
   }),
 
   // Incidents: create
