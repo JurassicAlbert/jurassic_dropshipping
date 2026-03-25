@@ -9,14 +9,15 @@ describe('MSW write endpoint handlers', () => {
   it('approves an order', async () => {
     const res = await fetch('/api/approval/orders/ord_1/approve', { method: 'POST' });
     const data = await res.json();
-    expect(data.id).toBe('ord_1');
-    expect(data.status).toBe('approved');
+    expect(data.order.id).toBe('ord_1');
+    expect(data.order.status).toBe('sourceOrderPlaced');
   });
 
   it('rejects an order', async () => {
     const res = await fetch('/api/approval/orders/ord_1/reject', { method: 'POST' });
     const data = await res.json();
-    expect(data.status).toBe('rejected');
+    expect(data.order.id).toBe('ord_1');
+    expect(data.order.status).toBe('cancelled');
   });
 
   it('creates an incident', async () => {

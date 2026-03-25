@@ -7,14 +7,100 @@ function jsonRecord(v: unknown): Record<string, unknown> {
 }
 
 export const handlers = [
-  // Approval: approve order
-  http.post(`${BASE}/approval/orders/:id/approve`, async ({ params }) => {
-    return HttpResponse.json({ id: params.id, status: 'approved' });
+  // Approval queue: list
+  http.get(`${BASE}/approval`, async () => {
+    return HttpResponse.json({
+      pendingListings: [
+        {
+          id: "list_1",
+          status: "pendingApproval",
+          productId: "prod_1",
+          targetPlatformId: "allegro",
+          sellingPrice: 100,
+          sourceCost: 80,
+          variantId: null,
+        },
+      ],
+      pendingOrders: [
+        {
+          id: "ord_1",
+          targetOrderId: "tord_1",
+          platform: "Allegro",
+          status: "pendingApproval",
+          quantity: 1,
+          sellingPrice: 100,
+          sourceCost: 80,
+          profit: 20,
+          riskScore: 10,
+          queuedForCapital: false,
+          createdAt: "2026-01-01T00:00:00.000Z",
+        },
+      ],
+    });
   }),
 
-  // Approval: reject order
+  // Approval: approve/reject listing
+  http.post(`${BASE}/approval/listings/:id/approve`, async ({ params }) => {
+    return HttpResponse.json({
+      listing: {
+        id: params.id,
+        status: "active",
+        productId: "prod_1",
+        targetPlatformId: "allegro",
+        sellingPrice: 100,
+        sourceCost: 80,
+        variantId: null,
+      },
+    });
+  }),
+  http.post(`${BASE}/approval/listings/:id/reject`, async ({ params }) => {
+    return HttpResponse.json({
+      listing: {
+        id: params.id,
+        status: "draft",
+        productId: "prod_1",
+        targetPlatformId: "allegro",
+        sellingPrice: 100,
+        sourceCost: 80,
+        variantId: null,
+      },
+    });
+  }),
+
+  // Approval: approve/reject order
+  http.post(`${BASE}/approval/orders/:id/approve`, async ({ params }) => {
+    return HttpResponse.json({
+      order: {
+        id: params.id,
+        targetOrderId: "tord_1",
+        platform: "Allegro",
+        status: "sourceOrderPlaced",
+        quantity: 1,
+        sellingPrice: 100,
+        sourceCost: 80,
+        profit: 20,
+        riskScore: 10,
+        queuedForCapital: false,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    });
+  }),
   http.post(`${BASE}/approval/orders/:id/reject`, async ({ params }) => {
-    return HttpResponse.json({ id: params.id, status: 'rejected' });
+    return HttpResponse.json({
+      order: {
+        id: params.id,
+        targetOrderId: "tord_1",
+        platform: "Allegro",
+        status: "cancelled",
+        quantity: 1,
+        sellingPrice: 100,
+        sourceCost: 80,
+        profit: 20,
+        riskScore: 10,
+        queuedForCapital: false,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    });
   }),
 
   // Returns: update status
