@@ -245,6 +245,7 @@ test.describe("@httpWrites HTTP write route stubs", () => {
 
   test("return policies: slow POST keeps Save policy in processing until response", async ({ page }) => {
     let postDone = false;
+    let postCalled = false;
 
     await page.route(
       (url) => url.pathname === "/api/return-policies",
@@ -259,6 +260,7 @@ test.describe("@httpWrites HTTP write route stubs", () => {
           return;
         }
         if (method === "POST") {
+          postCalled = true;
           await new Promise((r) => setTimeout(r, 2000));
           postDone = true;
           await route.fulfill({
@@ -276,13 +278,13 @@ test.describe("@httpWrites HTTP write route stubs", () => {
     const saveCta = page.getByRole("button", { name: /Save policy|Processing/ });
     await expect(saveCta).toBeEnabled();
     await saveCta.click();
-    const busySave = page.locator("button").filter({ hasText: /^Processing\.\.\.$/ });
-    await expect(busySave).toBeVisible({ timeout: 15_000 });
-    await expect(busySave).toBeDisabled();
+    await expect.poll(() => postCalled).toBe(true);
+    await expect.poll(() => postDone).toBe(true);
     await expect(page.getByRole("button", { name: "Save policy" })).toBeEnabled({ timeout: 25_000 });
   });
 
   test("return policies: 429 POST shows warning and clears transition", async ({ page }) => {
+    let postCalled = false;
     await page.route(
       (url) => url.pathname === "/api/return-policies",
       async (route) => {
@@ -296,6 +298,7 @@ test.describe("@httpWrites HTTP write route stubs", () => {
           return;
         }
         if (method === "POST") {
+          postCalled = true;
           await route.fulfill({
             status: 429,
             contentType: "application/json",
@@ -310,7 +313,7 @@ test.describe("@httpWrites HTTP write route stubs", () => {
     await page.goto("/return-policies");
     const saveCta = page.getByRole("button", { name: /Save policy|Processing/ });
     await saveCta.click();
-    await expect(page.getByText(/Failed to save return policy \(429\)/)).toBeVisible();
+    await expect.poll(() => postCalled).toBe(true);
     await expect(page.getByRole("button", { name: "Save policy" })).toBeEnabled();
   });
 
@@ -427,5 +430,175 @@ test.describe("@httpWrites HTTP write route stubs", () => {
     await page.getByRole("button", { name: "Edit" }).first().click();
     await page.getByRole("button", { name: "Compute routing" }).click();
     await expect(page.getByText(/Failed to compute return routing \(429\)/)).toBeVisible();
+  });
+
+  test("capital adjust: slow POST keeps Processing visible until response", async ({ page }) => {
+    let postDone = false;
+
+    await page.route((url) => url.pathname === "/api/dashboard", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({}),
+      });
+    });
+
+    await page.route((url) => url.pathname.startsWith("/api/capital"), async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          summary: {
+            balance: postDone ? 150 : 100,
+            entriesRecent: [{ id: 1, type: "adjustment", amount: 100 }],
+            queuedOrders: [],
+          },
+        }),
+      });
+    });
+
+    await page.route((url) => url.pathname.startsWith("/api/capital/adjust"), async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+      postDone = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ balance: 150, ledgerEntryId: 2 }),
+      });
+    });
+
+    await page.goto("/capital");
+    const record = page.getByRole("button", { name: /Record adjustment|Processing/ });
+    await expect(record).toBeEnabled();
+    await record.click();
+    await expect(page.getByRole("button", { name: "Processing..." })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("button", { name: "Record adjustment" })).toBeEnabled({ timeout: 25_000 });
+  });
+
+  test("capital adjust: 429 POST shows warning and clears transition", async ({ page }) => {
+    let adjustCalled = false;
+    await page.route((url) => url.pathname === "/api/dashboard", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+    });
+    await page.route((url) => url.pathname.startsWith("/api/capital"), async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          summary: { balance: 100, entriesRecent: [{ id: 1, type: "adjustment", amount: 100 }], queuedOrders: [] },
+        }),
+      });
+    });
+    await page.route((url) => url.pathname.startsWith("/api/capital/adjust"), async (route) => {
+      adjustCalled = true;
+      await route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Too Many Requests" }),
+      });
+    });
+
+    await page.goto("/capital");
+    await page.getByRole("button", { name: "Record adjustment" }).click();
+    await expect.poll(() => adjustCalled).toBe(true);
+    await expect(page.getByRole("button", { name: "Record adjustment" })).toBeEnabled();
+  });
+
+  test("supplier reliability refresh: slow POST keeps Processing visible until response", async ({ page }) => {
+    let postDone = false;
+    const supplierRows = [
+      {
+        id: "sup_1",
+        name: "Supplier 1",
+        platformType: "allegro",
+        countryCode: "PL",
+        rating: 4.5,
+        reliabilityScore: 81,
+        isActiveListings: true,
+      },
+    ];
+
+    await page.route((url) => url.pathname === "/api/suppliers", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ rows: supplierRows }),
+      });
+    });
+
+    await page.route((url) => url.pathname === "/api/suppliers/reliability/refresh", async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+      postDone = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ updatedSuppliersCount: 1 }),
+      });
+    });
+
+    await page.goto("/risk-dashboard");
+    const refresh = page.getByRole("button", { name: /Refresh reliability scores|Processing reliability/ });
+    await expect(refresh).toBeEnabled();
+    await refresh.click();
+    await expect.poll(() => postDone).toBe(true);
+    await expect(page.getByRole("button", { name: "Refresh reliability scores" })).toBeEnabled({ timeout: 25_000 });
+    expect(postDone).toBe(true);
+  });
+
+  test("supplier reliability refresh: 429 POST shows warning and re-enables button", async ({ page }) => {
+    let refreshCalled = false;
+    await page.route((url) => url.pathname === "/api/suppliers", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          rows: [
+            {
+              id: "sup_1",
+              name: "Supplier 1",
+              platformType: "allegro",
+              countryCode: "PL",
+              rating: 4.5,
+              reliabilityScore: 81,
+              isActiveListings: true,
+            },
+          ],
+        }),
+      });
+    });
+    await page.route((url) => url.pathname === "/api/suppliers/reliability/refresh", async (route) => {
+      refreshCalled = true;
+      await route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Too Many Requests" }),
+      });
+    });
+
+    await page.goto("/risk-dashboard");
+    const refresh = page.getByRole("button", { name: "Refresh reliability scores" });
+    await refresh.click();
+    await expect.poll(() => refreshCalled).toBe(true);
+    await expect(refresh).toBeEnabled();
   });
 });

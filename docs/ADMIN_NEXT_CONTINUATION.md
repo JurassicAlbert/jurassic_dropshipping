@@ -64,7 +64,7 @@ dart run tool/dashboard_api_server_dart_main.dart
 ### 3. Playwright — `playwright-route-stubs` (partial)
 
 - Existing: `user-risk.spec.ts` stubs dashboard API.
-- **HTTP write paths:** `tests/e2e/http-write-route-stubs.spec.ts` (`@httpWrites`) — `page.route` latency + 429 on approval POST, incidents `PATCH`, return-policies POST, returns `PATCH` save + `POST .../compute-routing`; requires `NEXT_PUBLIC_ADMIN_TRANSPORT=http` build (`npm run test:e2e:http-writes`; CI runs a second build + this grep).
+- **HTTP write paths:** `tests/e2e/http-write-route-stubs.spec.ts` (`@httpWrites`) — `page.route` latency + 429 on approval POST, incidents `PATCH`, return-policies POST, returns `PATCH` save + `POST .../compute-routing`, capital adjust POST, supplier reliability refresh POST; requires `NEXT_PUBLIC_ADMIN_TRANSPORT=http` build (`npm run test:e2e:http-writes`; CI runs a second build + this grep).
 - Remaining: optional Playwright mock approval loops for full-stack repetition tests; extend MSW/Vitest when new HTTP surfaces appear.
 
 ### 4. Stress / retest — `stress-retest-suite` (partial)
@@ -98,3 +98,4 @@ npm run test:e2e   # requires build + next start, see playwright.config / CI
 
 - `NEXT_PUBLIC_ADMIN_TRANSPORT` — use mock fixed transport vs HTTP (see `getAdminTransport.ts`).
 - `DART_API_BASE_URL` — base URL for Dart dashboard API when using HTTP reads / proxy.
+
