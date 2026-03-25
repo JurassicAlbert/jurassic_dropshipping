@@ -127,6 +127,21 @@ Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
 
 ---
 
+## Checkpoint list (execute top → bottom)
+
+MSW + HTTP write E2E hardening batch (cp11–cp16); all completed 2026-03-25.
+
+- [x] **cp11-msw-incidents** — MSW `POST/PATCH /api/incidents` aligned with `HttpTransport` + `httpTransport.msw.incidents.test.ts`. Verify: `cd admin_next && npm run test`.
+- [x] **cp12-msw-capital** — MSW `POST /api/capital/adjust` returns `balance` + `ledgerEntryId` + `httpTransport.msw.capital.test.ts`. Verify: `cd admin_next && npm run test`.
+- [x] **cp13-msw-approval** — MSW approval queue + listing/order approve/reject + `httpTransport.msw.approval.test.ts`. Verify: `cd admin_next && npm run test`.
+- [x] **cp14-msw-policies** — MSW `POST /api/return-policies` + `httpTransport.msw.policies.test.ts`. Verify: `cd admin_next && npm run test`.
+- [x] **cp15-lint-warnings** — `void _reason` in `approvalRejectOrder` (`httpTransport.ts`, `mockTransportFixed.ts`). Verify: `cd admin_next && npm run lint`.
+- [x] **cp16-httpwrites-risk** — `@httpWrites` stubs for `POST /api/risk/listing-health/refresh` and `POST /api/risk/customer-metrics/refresh` (latency + 429; matchers use `pathname.startsWith` for trailing slash). Verify: `cd admin_next && npm run test:e2e:http-writes`.
+
+**Next suggested slices (not yet checklisted here):** [`JURASIC_BACKLOG_CHECKLIST.md`](JURASIC_BACKLOG_CHECKLIST.md) — **p15** doc polish where still Partial, **p11/p13** placeholder follow-ups when feeds exist, **p18** incremental matrix + E2E as new APIs ship.
+
+---
+
 ## Related
 
 - [`ADMIN_NEXT_CONTINUATION.md`](ADMIN_NEXT_CONTINUATION.md) — env, transport, commands.
