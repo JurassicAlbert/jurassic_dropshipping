@@ -181,9 +181,10 @@ export const handlers = [
   }),
 
   // Return policies: upsert
-  http.put(`${BASE}/return-policies/:id`, async ({ params, request }) => {
+  http.post(`${BASE}/return-policies`, async ({ request }) => {
     const body = jsonRecord(await request.json());
-    return HttpResponse.json({ id: params.id, ...body });
+    const policy = (body.policy ?? body.row ?? {}) as Record<string, unknown>;
+    return HttpResponse.json({ policy });
   }),
 
   // Supplier reliability: refresh
