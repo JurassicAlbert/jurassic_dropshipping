@@ -277,6 +277,7 @@ export class MockTransportFixed implements AdminTransport {
 
   async approvalRejectOrder(orderId: string, requestId: string, _reason: string): Promise<TransportResponse<{ order: ApprovalOrder }>> {
     return this.idempotent(requestId, async () => {
+      void _reason;
       const order = this.state.orders[orderId];
       if (!order) return mkFail(requestId, "not_found", "Order not found");
       if (order.status !== "pendingApproval") return mkFail(requestId, "conflict", "Order is not pendingApproval");

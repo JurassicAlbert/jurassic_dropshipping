@@ -208,6 +208,7 @@ export class HttpTransport implements AdminTransport {
     requestId: string,
     _reason: string,
   ): Promise<TransportResponse<{ order: ApprovalOrder }>> {
+    void _reason;
     const res = await postJson(requestId, `${this.base()}/api/approval/orders/${encodeURIComponent(orderId)}/reject`, {});
     if (!res.ok) return mkFailExternal(requestId, "external_integration_required", `Failed to reject order (${res.status})`);
     const d = jsonBody(res.data);
