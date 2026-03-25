@@ -90,8 +90,8 @@ export const handlers = [
 
   // Capital: adjust
   http.post(`${BASE}/capital/adjust`, async ({ request }) => {
-    const body = jsonRecord(await request.json());
-    return HttpResponse.json({ success: true, ...body });
+    void request;
+    return HttpResponse.json({ balance: 123.45, ledgerEntryId: 9001 });
   }),
 
   // Return policies: upsert
