@@ -218,6 +218,8 @@ Mock behavior:
 Method:
 - `returns.computeRouting(returnId)`
 
+**HTTP (Dart dashboard API + Next proxy):** `POST /returns/{returnId}/compute-routing` with empty JSON body; response `{ "returnId": "...", "routing": { "destination": "sellerAddress|supplierWarehouse|returnCenter|disposal" } }` (destination uses Dart enum `.name`). Next admin: `HttpTransport.returnsComputeRouting` → `POST /api/returns/{id}/compute-routing`.
+
 Request
 ```json
 {

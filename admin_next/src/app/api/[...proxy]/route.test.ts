@@ -48,6 +48,29 @@ describe("proxy route", () => {
     );
   });
 
+  it("proxies POST for returns compute-routing subpath", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ returnId: "ret_1", routing: { destination: "sellerAddress" } }),
+    })) as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(
+      new Request("http://localhost:3001/api/returns/ret_1/compute-routing", {
+        method: "POST",
+        body: "{}",
+        headers: { "content-type": "application/json" },
+      }) as never,
+      { params: Promise.resolve({ proxy: ["returns", "ret_1", "compute-routing"] }) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://127.0.0.1:4000/returns/ret_1/compute-routing",
+      expect.objectContaining({ method: "POST", body: "{}" }),
+    );
+  });
+
   it("proxies POST for nested supplier refresh route", async () => {
     const fetchMock = vi.fn(async () => ({
       ok: true,

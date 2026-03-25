@@ -23,6 +23,35 @@ const listingApproved = {
   status: "active",
 };
 
+const returnRowRequested = {
+  id: "ret_st_1",
+  orderId: "ord_1",
+  status: "requested",
+  reason: "noReason",
+  notes: null as string | null,
+  refundAmount: null as number | null,
+  returnShippingCost: null as number | null,
+  restockingFee: null as number | null,
+  returnRoutingDestination: null as string | null,
+  supplierId: "sup_1",
+  requestedAt: "2026-01-01T00:00:00.000Z",
+  resolvedAt: null as string | null,
+};
+
+const returnRowApproved = {
+  ...returnRowRequested,
+  status: "approved",
+};
+
+function matchesReturnsApi(url: URL): boolean {
+  const p = url.pathname;
+  return (
+    p === "/api/returns" ||
+    /^\/api\/returns\/[^/]+\/compute-routing$/.test(p) ||
+    /^\/api\/returns\/[^/]+$/.test(p)
+  );
+}
+
 test.describe("@httpWrites HTTP write route stubs", () => {
   test.describe.configure({ timeout: 60_000 });
 
@@ -283,5 +312,120 @@ test.describe("@httpWrites HTTP write route stubs", () => {
     await saveCta.click();
     await expect(page.getByText(/Failed to save return policy \(429\)/)).toBeVisible();
     await expect(page.getByRole("button", { name: "Save policy" })).toBeEnabled();
+  });
+
+  test("returns save: slow PATCH keeps Processing visible until response", async ({ page }) => {
+    let patchDone = false;
+
+    await page.route(matchesReturnsApi, async (route) => {
+      const url = new URL(route.request().url());
+      const path = url.pathname;
+      const method = route.request().method();
+
+      if (method === "GET" && path === "/api/returns") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            rows: patchDone ? [returnRowApproved] : [returnRowRequested],
+          }),
+        });
+        return;
+      }
+
+      if (method === "PATCH" && path === "/api/returns/ret_st_1") {
+        await new Promise((r) => setTimeout(r, 2000));
+        patchDone = true;
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            return: returnRowApproved,
+            returnedStockCreated: { created: false, rowsInserted: 0 },
+          }),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.goto("/returns");
+    await page.getByRole("button", { name: "Edit" }).first().click();
+    await page.locator('[role="combobox"]').first().click();
+    await page.getByRole("option", { name: "approved" }).click();
+    const save = page.getByRole("button", { name: "Save", exact: true });
+    await save.click();
+    await expect(page.getByText("Processing...").first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Processing...")).toHaveCount(0, { timeout: 25_000 });
+  });
+
+  test("returns save: 429 PATCH shows warning and clears transition", async ({ page }) => {
+    await page.route(matchesReturnsApi, async (route) => {
+      const url = new URL(route.request().url());
+      const path = url.pathname;
+      const method = route.request().method();
+
+      if (method === "GET" && path === "/api/returns") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ rows: [returnRowRequested] }),
+        });
+        return;
+      }
+
+      if (method === "PATCH" && path === "/api/returns/ret_st_1") {
+        await route.fulfill({
+          status: 429,
+          contentType: "application/json",
+          body: JSON.stringify({ error: "Too Many Requests" }),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.goto("/returns");
+    await page.getByRole("button", { name: "Edit" }).first().click();
+    await page.locator('[role="combobox"]').first().click();
+    await page.getByRole("option", { name: "approved" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText(/Failed to update return \(429\)/)).toBeVisible();
+    await expect(page.getByText("Processing...")).toHaveCount(0);
+  });
+
+  test("returns compute routing: 429 POST shows warning", async ({ page }) => {
+    await page.route(matchesReturnsApi, async (route) => {
+      const url = new URL(route.request().url());
+      const path = url.pathname;
+      const method = route.request().method();
+
+      if (method === "GET" && path === "/api/returns") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ rows: [returnRowRequested] }),
+        });
+        return;
+      }
+
+      if (method === "POST" && path === "/api/returns/ret_st_1/compute-routing") {
+        await route.fulfill({
+          status: 429,
+          contentType: "application/json",
+          body: JSON.stringify({ error: "Too Many Requests" }),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.goto("/returns");
+    await page.getByRole("button", { name: "Edit" }).first().click();
+    await page.getByRole("button", { name: "Compute routing" }).click();
+    await expect(page.getByText(/Failed to compute return routing \(429\)/)).toBeVisible();
   });
 });

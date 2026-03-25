@@ -51,3 +51,39 @@ describe("HttpTransport returnsUpdateReturn", () => {
   });
 });
 
+describe("HttpTransport returnsComputeRouting", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              returnId: "ret-1",
+              routing: { destination: "supplierWarehouse" },
+            }),
+        } as Response),
+      ),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("POSTs compute-routing and maps destination", async () => {
+    const t = new HttpTransport();
+    const res = await t.returnsComputeRouting("req-route-1", "ret-1");
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.returnId).toBe("ret-1");
+      expect(res.routing.destination).toBe("supplierWarehouse");
+    }
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/returns/ret-1/compute-routing",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+});
+

@@ -236,15 +236,40 @@ export class HttpTransport implements AdminTransport {
   }
 
   async returnsComputeRouting(
-    _returnId: string,
     requestId: string,
+    returnId: string,
   ): Promise<
     TransportResponse<{
       returnId: string;
       routing: { destination: ReturnRow["returnRoutingDestination"] };
     }>
   > {
-    return mkFailExternal(requestId, "external_integration_required", "compute routing not wired to HTTP mode yet");
+    const res = await postJson(
+      requestId,
+      `${this.base()}/api/returns/${encodeURIComponent(returnId)}/compute-routing`,
+      {},
+    );
+    if (!res.ok) {
+      return mkFailExternal(
+        requestId,
+        "external_integration_required",
+        `Failed to compute return routing (${res.status})`,
+      );
+    }
+    const d = jsonBody(res.data);
+    const rid = String(d.returnId ?? returnId);
+    const routing = jsonBody(d.routing);
+    const raw = String(routing.destination ?? "sellerAddress");
+    const allowed: ReturnRow["returnRoutingDestination"][] = [
+      "sellerAddress",
+      "supplierWarehouse",
+      "returnCenter",
+      "disposal",
+    ];
+    const destination = (
+      allowed.includes(raw as ReturnRow["returnRoutingDestination"]) ? raw : "sellerAddress"
+    ) as ReturnRow["returnRoutingDestination"];
+    return mkOk(requestId, { returnId: rid, routing: { destination } });
   }
 
   async returnsUpdateReturn(

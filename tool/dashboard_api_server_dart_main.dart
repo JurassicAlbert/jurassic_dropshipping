@@ -27,7 +27,9 @@ import 'package:jurassic_dropshipping/data/repositories/supplier_reliability_sco
 import 'package:jurassic_dropshipping/domain/post_order/incident_record.dart';
 import 'package:jurassic_dropshipping/domain/customer_abuse/customer_abuse_scoring_service.dart';
 import 'package:jurassic_dropshipping/domain/listing_health/listing_health_scoring_service.dart';
+import 'package:jurassic_dropshipping/data/models/supplier.dart';
 import 'package:jurassic_dropshipping/domain/post_order/return_routing.dart';
+import 'package:jurassic_dropshipping/domain/post_order/return_routing_service.dart';
 import 'package:jurassic_dropshipping/domain/post_order/supplier_return_policy.dart';
 import 'package:jurassic_dropshipping/domain/supplier_reliability/supplier_reliability_scoring_service.dart';
 import 'package:jurassic_dropshipping/features/analytics/analytics_engine.dart';
@@ -180,6 +182,51 @@ Future<void> main() async {
           ..statusCode = 200
           ..headers.contentType = ContentType.json
           ..write(jsonEncode(payload))
+          ..close();
+        continue;
+      }
+
+      if (request.uri.pathSegments.length == 3 &&
+          request.uri.pathSegments[0] == 'returns' &&
+          request.uri.pathSegments[2] == 'compute-routing' &&
+          request.method == 'POST') {
+        final returnId = request.uri.pathSegments[1];
+        final returnRepo = ReturnRepository(database, tenantId: tenantId);
+        final rows = await returnRepo.getAll();
+        ReturnRequest? found;
+        for (final r in rows) {
+          if (r.id == returnId) {
+            found = r;
+            break;
+          }
+        }
+        if (found == null) {
+          request.response
+            ..statusCode = 404
+            ..headers.contentType = ContentType.json
+            ..write(jsonEncode({'error': 'not_found'}))
+            ..close();
+          continue;
+        }
+        final policyRepo = SupplierReturnPolicyRepository(database, tenantId: tenantId);
+        final supplierRepo = SupplierRepository(database, tenantId: tenantId);
+        final SupplierReturnPolicy? policy = found.supplierId != null
+            ? await policyRepo.getBySupplierId(found.supplierId!)
+            : null;
+        final Supplier? supplier =
+            found.supplierId != null ? await supplierRepo.getById(found.supplierId!) : null;
+        final destination = ReturnRoutingService().routeReturn(
+          found,
+          supplier: supplier,
+          policy: policy,
+        );
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'returnId': returnId,
+            'routing': {'destination': destination.name},
+          }))
           ..close();
         continue;
       }

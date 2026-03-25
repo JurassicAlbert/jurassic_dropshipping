@@ -79,7 +79,7 @@ Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
 - [x] Add transition-state and deterministic error-path specs for write workflows.
 - [x] Add repeat-click/disabled-state coverage for pending write actions.
 - [x] Add failure-path assertion that transition clears and controls re-enable.
-- [x] Add explicit route-stub latency/429 scenarios when HTTP write routes are introduced (`tests/e2e/http-write-route-stubs.spec.ts` — approval POST, incidents PATCH, return-policies POST; `npm run test:e2e:http-writes`; CI rebuilds with `NEXT_PUBLIC_ADMIN_TRANSPORT=http`).
+- [x] Add explicit route-stub latency/429 scenarios when HTTP write routes are introduced (`tests/e2e/http-write-route-stubs.spec.ts` — approval POST, incidents PATCH, return-policies POST, returns PATCH + `POST .../compute-routing`; `npm run test:e2e:http-writes`; CI rebuilds with `NEXT_PUBLIC_ADMIN_TRANSPORT=http`).
 
 ---
 
@@ -103,6 +103,7 @@ Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
 - [x] Wire `HttpTransport.incidentsProcessIncident` to `PATCH /api/incidents/:id` with Vitest coverage.
 - [x] Add proxy `PATCH` support and Dart dashboard API write handler for incident resolve (`PATCH /incidents/:id`).
 - [x] Wire `HttpTransport.returnsUpdateReturn` to `PATCH /api/returns/:id` with Vitest coverage.
+- [x] Wire `HttpTransport.returnsComputeRouting` to `POST /api/returns/:id/compute-routing` (Vitest + Dart `POST /returns/{id}/compute-routing` using `ReturnRoutingService`).
 - [x] Add Dart dashboard API write handler for return updates (`PATCH /returns/:id`) returning updated row shape.
 - [x] Wire `HttpTransport.capitalRecordAdjustment` to `POST /api/capital/adjust` with Vitest coverage.
 - [x] Add Dart dashboard API write handler for capital adjustments (`POST /capital/adjust`) returning balance + ledger entry id.
