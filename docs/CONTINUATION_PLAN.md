@@ -33,16 +33,17 @@ npm run test:e2e:full
 
 ## Step 2 — p15 Doc audit (9 docs)
 
-Tracked in [`P15_DOC_AUDIT_CHECKLIST.md`](P15_DOC_AUDIT_CHECKLIST.md). Reconcile each with current `lib/` + `admin_next/`; update [`TEST_TRACEABILITY_MATRIX.md`](TEST_TRACEABILITY_MATRIX.md) rows when APIs/routes change.
+- [x] Tracked in [`P15_DOC_AUDIT_CHECKLIST.md`](P15_DOC_AUDIT_CHECKLIST.md). Reconcile each with current `lib/` + `admin_next/`; update [`TEST_TRACEABILITY_MATRIX.md`](TEST_TRACEABILITY_MATRIX.md) rows when APIs/routes change.
+- [x] **Closed 2026-03-25** — nine-doc audit complete; [`JURASIC_BACKLOG_CHECKLIST.md`](JURASIC_BACKLOG_CHECKLIST.md) **p15** → Done.
 
 ---
 
 ## Step 3 — p11 / p13 (Customer messaging & Market / listing KPIs)
 
-- [x] **p11** — Placeholder card + `data-testid="analytics-p11-customer-messaging"`; full metrics when messaging feeds exist (`customerMessaging.hasData` / notes).
-- [x] **p13** — Placeholder card + `data-testid="analytics-p13-market-listing"`; competitiveness/conversion when marketplace feeds exist.
+- [x] **p11** — Card + `data-testid="analytics-p11-customer-messaging"` + `data-p11-state` (`deferred` | `ready`); deferred copy or API `note` when `hasData` false; ready copy when `hasData` true.
+- [x] **p13** — Card + `data-testid="analytics-p13-market-listing"` + `data-p13-state` (`deferred` | `metrics`); metrics layout when `priceCompetitivenessIndex` or `listingConversionRate` is non-null.
 
-Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
+Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`) and Vitest `KpiExtendedDashboard.test.tsx`.
 
 ---
 
@@ -58,8 +59,9 @@ Covered in Playwright `dashboard-payload.spec.ts` (stubbed `/api/dashboard`).
 ## Step 5 — p18 Tests & matrix
 
 - [x] Vitest: Flutter→Next route file parity (`flutterParityRoutes.test.ts`).
+- [x] Vitest: KPI extended p11/p13 cards (`KpiExtendedDashboard.test.tsx`).
 - [x] Playwright: `flutter-parity-routes.spec.ts`, `admin-functionality.spec.ts`, `dashboard-payload.spec.ts`.
-- [x] Extend E2E when new API routes or write paths ship; keep [`TEST_TRACEABILITY_MATRIX.md`](TEST_TRACEABILITY_MATRIX.md) in sync (transition-state + deterministic error specs added).
+- [x] Extend E2E when new API routes or write paths ship; keep [`TEST_TRACEABILITY_MATRIX.md`](TEST_TRACEABILITY_MATRIX.md) in sync (transition-state + deterministic error specs added; p11/p13 Vitest row).
 
 ---
 
@@ -138,7 +140,7 @@ MSW + HTTP write E2E hardening batch (cp11–cp16); all completed 2026-03-25.
 - [x] **cp15-lint-warnings** — `void _reason` in `approvalRejectOrder` (`httpTransport.ts`, `mockTransportFixed.ts`). Verify: `cd admin_next && npm run lint`.
 - [x] **cp16-httpwrites-risk** — `@httpWrites` stubs for `POST /api/risk/listing-health/refresh` and `POST /api/risk/customer-metrics/refresh` (latency + 429; matchers use `pathname.startsWith` for trailing slash). Verify: `cd admin_next && npm run test:e2e:http-writes`.
 
-**Next suggested slices (not yet checklisted here):** [`JURASIC_BACKLOG_CHECKLIST.md`](JURASIC_BACKLOG_CHECKLIST.md) — **p15** doc polish where still Partial, **p11/p13** placeholder follow-ups when feeds exist, **p18** incremental matrix + E2E as new APIs ship.
+**Next suggested slices (not yet checklisted here):** [`JURASIC_BACKLOG_CHECKLIST.md`](JURASIC_BACKLOG_CHECKLIST.md) — **p18** incremental matrix + E2E as new APIs ship; wire Dart `customerMessaging.hasData` / `marketListing` metrics from DB when feeds exist.
 
 ---
 

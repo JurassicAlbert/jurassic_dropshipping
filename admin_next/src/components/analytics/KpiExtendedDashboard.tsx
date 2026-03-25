@@ -307,36 +307,86 @@ export function TopRiskListingsTable({ view }: { view: DashboardApiPayload }) {
 
 export function CustomerMessagingPlaceholder({ view }: { view: DashboardApiPayload }) {
   const cm = view.customerMessaging;
+  const ready = cm?.hasData === true;
   return (
-    <Card variant="outlined" data-testid="analytics-p11-customer-messaging">
+    <Card
+      variant="outlined"
+      data-testid="analytics-p11-customer-messaging"
+      data-p11-state={ready ? "ready" : "deferred"}
+    >
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
           Customer / messages
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {cm?.note ??
-            "p11 — Messaging KPIs deferred until conversation/return-intent feeds are stored or aggregated. Dashboard payload field: customerMessaging."}
-        </Typography>
+        {ready ? (
+          <>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              Messaging aggregates are present in the dashboard payload (customerMessaging.hasData).
+            </Typography>
+            {cm?.note ? (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {cm.note}
+              </Typography>
+            ) : null}
+          </>
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {cm?.note ??
+              "p11 — Messaging KPIs deferred until conversation/return-intent feeds are stored or aggregated. Dashboard payload field: customerMessaging."}
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
 }
 
+function formatListingConversion(rate: number | null | undefined): string {
+  if (rate == null) return "—";
+  return `${(rate * 100).toFixed(1)}%`;
+}
+
 export function MarketListingPlaceholder({ view }: { view: DashboardApiPayload }) {
   const m = view.marketListing;
+  const hasMetrics =
+    m != null && (m.priceCompetitivenessIndex != null || m.listingConversionRate != null);
   return (
-    <Card variant="outlined" data-testid="analytics-p13-market-listing">
+    <Card
+      variant="outlined"
+      data-testid="analytics-p13-market-listing"
+      data-p13-state={hasMetrics ? "metrics" : "deferred"}
+    >
       <CardContent>
         <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
           Market / listings
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {m?.note ??
-            "p13 — Competitiveness and listing conversion need marketplace impression/click feeds or stored competitor samples (see dashboard payload marketListing)."}
-        </Typography>
-        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-          Competitiveness index: {m?.priceCompetitivenessIndex ?? "—"} · Conversion: {m?.listingConversionRate ?? "—"}
-        </Typography>
+        {hasMetrics ? (
+          <Box sx={{ mt: 1 }}>
+            <Typography variant="body2">
+              Competitiveness index:{" "}
+              <strong>
+                {m!.priceCompetitivenessIndex != null ? m!.priceCompetitivenessIndex.toFixed(2) : "—"}
+              </strong>
+            </Typography>
+            <Typography variant="body2">
+              Listing conversion: <strong>{formatListingConversion(m!.listingConversionRate)}</strong>
+            </Typography>
+            {m?.note ? (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {m.note}
+              </Typography>
+            ) : null}
+          </Box>
+        ) : (
+          <>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              {m?.note ??
+                "p13 — Competitiveness and listing conversion need marketplace impression/click feeds or stored competitor samples (see dashboard payload marketListing)."}
+            </Typography>
+            <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+              Competitiveness index: — · Conversion: —
+            </Typography>
+          </>
+        )}
       </CardContent>
     </Card>
   );

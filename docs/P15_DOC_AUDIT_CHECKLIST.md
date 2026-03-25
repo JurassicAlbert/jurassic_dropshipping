@@ -15,3 +15,5 @@ Reconcile each document with **current** code paths (`lib/`, `admin_next/`, `too
 | 9 | [`NO_API_WRITE_WORKFLOW_CONTRACTS.md`](NO_API_WRITE_WORKFLOW_CONTRACTS.md) | Method names vs `adminTransport` | ☑ |
 
 **Cloud audit reference:** [`JURASIC_BACKLOG_CHECKLIST.md`](JURASIC_BACKLOG_CHECKLIST.md) — section *Doc audit (2026-03)*.
+
+**Backlog closure (2026-03-25):** All nine targets reviewed; **p15** marked **Done** in [`JURASIC_BACKLOG_CHECKLIST.md`](JURASIC_BACKLOG_CHECKLIST.md). Re-run this checklist when adding major `lib/` or `admin_next/` surfaces.

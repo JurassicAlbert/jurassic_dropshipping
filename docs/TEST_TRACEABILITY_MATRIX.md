@@ -54,6 +54,8 @@ Source: `admin_next/src/app/**/page.tsx`
 
 **KPI extended payload (p7–p14):** Dart `GET /dashboard` (`tool/dashboard_api_server_dart_main.dart`) returns `dashboardPayloadVersion: 2` with risk, capital, operations, supplier, health, jobs. Consumed by `admin_next/src/lib/dashboardApi.ts`. Flutter unit tests: `test/features/analytics/analytics_engine_kpi_test.dart`.
 
+**p11 / p13 Analytics cards (Vitest):** `admin_next/src/components/analytics/KpiExtendedDashboard.test.tsx` — `CustomerMessagingPlaceholder` (`customerMessaging.hasData` deferred vs ready), `MarketListingPlaceholder` (deferred vs `priceCompetitivenessIndex` / `listingConversionRate` metrics). Maps to TP-B/TP-D for dashboard payload surfacing.
+
 ## Business logic -> UI/API/Test traceability
 
 | Domain area | Key implementation files | Flutter route(s) | Next route(s) | Next API route(s) | TP-A white-box | TP-B admin UI | TP-C risk | TP-D logic availability | Status |

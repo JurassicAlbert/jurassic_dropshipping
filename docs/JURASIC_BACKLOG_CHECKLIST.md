@@ -16,14 +16,14 @@
 | **p8** | KPI: Operations (5) | Done (MVP) | Funnel, fulfillment stats, failed-order rate (30d) on Analytics |
 | **p9** | KPI: Supplier (4) | Done (MVP) | `supplierKpis` table (return rate by supplier) on Analytics |
 | **p10** | KPI: Product Quality (4) | Done (MVP) | `listingHealthHistogram`, `topRiskListings`, `blockedListingsCount` |
-| **p11** | KPI: Customer / Message (4) | Partial | Explicit placeholder card until messaging metrics exist |
+| **p11** | KPI: Customer / Message (4) | Done (MVP) | Analytics card: deferred copy when `hasData` false; ready copy when `hasData` true + optional `note` (`KpiExtendedDashboard.tsx`); Vitest `KpiExtendedDashboard.test.tsx` |
 | **p12** | KPI: Capital / Cashflow (4) — critical | Done (MVP) | `capital` object (ledger + locked + reserve); [`capital/page.tsx`](../admin_next/src/app/capital/page.tsx) + [`CapitalSnapshotCards.tsx`](../admin_next/src/components/analytics/CapitalSnapshotCards.tsx) |
-| **p13** | KPI: Market / Listing (4) | Partial | Placeholder card; competitiveness/conversion need marketplace feeds |
+| **p13** | KPI: Market / Listing (4) | Done (MVP) | Analytics card: deferred when both metrics null; metrics layout when either index or conversion set (`KpiExtendedDashboard.tsx`); Vitest `KpiExtendedDashboard.test.tsx` |
 | **p14** | KPI: System Performance (4) | Done (MVP) | `systemJobs` from `BackgroundJobRepository` on Analytics |
-| **p15** | Refresh **9 docs** (architecture, decision logic, marketplace, money safety, deployment, post-order plan, admin continuation, traceability matrix, no-api contracts) | Partial | Several titles/branding/admin sections updated; finish service/repo inventory per [cloud audit](#doc-audit-2026-03) |
+| **p15** | Refresh **9 docs** (architecture, decision logic, marketplace, money safety, deployment, post-order plan, admin continuation, traceability matrix, no-api contracts) | Done | Nine targets in [`P15_DOC_AUDIT_CHECKLIST.md`](P15_DOC_AUDIT_CHECKLIST.md) reviewed; rolling docs (`ADMIN_NEXT_CONTINUATION`, `TEST_TRACEABILITY_MATRIX`, `NO_API_WRITE_WORKFLOW_CONTRACTS`) kept in sync with admin transport + E2E; closed 2026-03-25 |
 | **p16** | README: **warehouse-first** sourcing, CJ/API2Cart secondary | Done | [README.md](../README.md) |
 | **p17** | **`FEATURE_MAP.md`** (feature → function → nav → UI) | Done | [`FEATURE_MAP.md`](FEATURE_MAP.md) — expand rows over time |
-| **p18** | Full coverage tests (APIs, nav, services/repos) | Partial | Vitest + Playwright; extend E2E + matrix as KPIs and APIs grow |
+| **p18** | Full coverage tests (APIs, nav, services/repos) | Partial | Vitest + Playwright; `KpiExtendedDashboard.test.tsx` for p11/p13; extend E2E + matrix as KPIs and APIs grow |
 
 ## Suggested execution order (same as plan)
 
