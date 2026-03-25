@@ -601,4 +601,194 @@ test.describe("@httpWrites HTTP write route stubs", () => {
     await expect.poll(() => refreshCalled).toBe(true);
     await expect(refresh).toBeEnabled();
   });
+
+  test("risk refresh listing health: slow POST keeps Processing visible until response", async ({ page }) => {
+    let postDone = false;
+    const supplierRows = [
+      {
+        id: "sup_1",
+        name: "Supplier 1",
+        platformType: "allegro",
+        countryCode: "PL",
+        rating: 4.5,
+        reliabilityScore: 81,
+        isActiveListings: true,
+      },
+    ];
+
+    await page.route((url) => url.pathname === "/api/suppliers", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ rows: supplierRows }),
+      });
+    });
+
+    await page.route((url) => url.pathname.startsWith("/api/risk/listing-health/refresh"), async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+      postDone = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ pausedListingsDelta: 2, metricsRefreshed: true }),
+      });
+    });
+
+    await page.goto("/risk-dashboard");
+    const refresh = page.getByRole("button", { name: /Refresh listing health|Processing listing health/ });
+    await expect(refresh).toBeEnabled();
+    await refresh.click();
+    await expect.poll(() => postDone, { timeout: 20_000 }).toBe(true);
+    await expect(page.getByRole("button", { name: "Refresh listing health" })).toBeEnabled({ timeout: 25_000 });
+  });
+
+  test("risk refresh listing health: 429 POST re-enables button", async ({ page }) => {
+    let refreshCalled = false;
+    const supplierRows = [
+      {
+        id: "sup_1",
+        name: "Supplier 1",
+        platformType: "allegro",
+        countryCode: "PL",
+        rating: 4.5,
+        reliabilityScore: 81,
+        isActiveListings: true,
+      },
+    ];
+
+    await page.route((url) => url.pathname === "/api/suppliers", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ rows: supplierRows }),
+      });
+    });
+
+    await page.route((url) => url.pathname.startsWith("/api/risk/listing-health/refresh"), async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      refreshCalled = true;
+      await route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Too Many Requests" }),
+      });
+    });
+
+    await page.goto("/risk-dashboard");
+    const refresh = page.getByRole("button", { name: "Refresh listing health" });
+    await expect(refresh).toBeEnabled();
+    await refresh.click();
+    await expect.poll(() => refreshCalled, { timeout: 20_000 }).toBe(true);
+    await expect(refresh).toBeEnabled();
+  });
+
+  test("risk refresh customer metrics: slow POST keeps Processing visible until response", async ({ page }) => {
+    let postDone = false;
+    const supplierRows = [
+      {
+        id: "sup_1",
+        name: "Supplier 1",
+        platformType: "allegro",
+        countryCode: "PL",
+        rating: 4.5,
+        reliabilityScore: 81,
+        isActiveListings: true,
+      },
+    ];
+
+    await page.route((url) => url.pathname === "/api/suppliers", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ rows: supplierRows }),
+      });
+    });
+
+    await page.route((url) => url.pathname.startsWith("/api/risk/customer-metrics/refresh"), async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+      postDone = true;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ abuseSignalsUpdated: 3, metricsRefreshed: true }),
+      });
+    });
+
+    await page.goto("/risk-dashboard");
+    const refresh = page.getByRole("button", { name: /Refresh customer metrics|Processing customer metrics/ });
+    await expect(refresh).toBeEnabled();
+    await refresh.click();
+    await expect.poll(() => postDone, { timeout: 20_000 }).toBe(true);
+    await expect(page.getByRole("button", { name: "Refresh customer metrics" })).toBeEnabled({ timeout: 25_000 });
+  });
+
+  test("risk refresh customer metrics: 429 POST re-enables button", async ({ page }) => {
+    let refreshCalled = false;
+    const supplierRows = [
+      {
+        id: "sup_1",
+        name: "Supplier 1",
+        platformType: "allegro",
+        countryCode: "PL",
+        rating: 4.5,
+        reliabilityScore: 81,
+        isActiveListings: true,
+      },
+    ];
+
+    await page.route((url) => url.pathname === "/api/suppliers", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ rows: supplierRows }),
+      });
+    });
+
+    await page.route((url) => url.pathname.startsWith("/api/risk/customer-metrics/refresh"), async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      refreshCalled = true;
+      await route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Too Many Requests" }),
+      });
+    });
+
+    await page.goto("/risk-dashboard");
+    const refresh = page.getByRole("button", { name: "Refresh customer metrics" });
+    await expect(refresh).toBeEnabled();
+    await refresh.click();
+    await expect.poll(() => refreshCalled, { timeout: 20_000 }).toBe(true);
+    await expect(refresh).toBeEnabled();
+  });
 });
